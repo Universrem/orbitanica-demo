@@ -1,0 +1,161 @@
+[
+  {
+    "category_en": "planet",
+    "category_ua": "Планета",
+    "category_es": "Planeta",
+    "name_en": "Earth",
+    "name_ua": "Земля",
+    "name_es": "Tierra",
+    "description_en": "Our home planet, the third planet from the Sun.",
+    "description_ua": "Наша рідна планета, третя за віддаленістю від Сонця.",
+    "description_es": "Nuestro planeta natal, el tercero desde el Sol.",
+    "diameter": { "value": 12742,    "unit": "km" },
+    "mass":     { "value": 5.972e24,  "unit": "kg" },
+    "luminosity": null,
+    "distance_to_earth": { "value": 0,        "unit": "km" }
+  },
+  {
+    "category_en": "star",
+    "category_ua": "Зірка",
+    "category_es": "Estrella",
+    "name_en": "Sun",
+    "name_ua": "Сонце",
+    "name_es": "Sol",
+    "description_en": "The star at the center of our Solar System.",
+    "description_ua": "Зірка в центрі нашої Сонячної системи.",
+    "description_es": "La estrella en el centro de nuestro Sistema Solar.",
+    "diameter": { "value": 1392700, "unit": "km" },
+    "mass":     { "value": 1.989e30, "unit": "kg" },
+    "luminosity": { "value": 1,       "unit": "L☉" },
+    "distance_to_earth": { "value": 149600000, "unit": "km" }
+  },
+  {
+    "category_en": "black_hole",
+    "category_ua": "Чорна діра",
+    "category_es": "Agujero negro",
+    "name_en": "Sagittarius A*",
+    "name_ua": "Sagittarius A*",
+    "name_es": "Sagitario A*",
+    "description_en": "The supermassive black hole at the center of the Milky Way galaxy.",
+    "description_ua": "Супермасивна чорна діра в центрі галактики Чумацький Шлях.",
+    "description_es": "El agujero negro supermasivo en el centro de la galaxia Vía Láctea.",
+    "diameter": null,
+    "mass":     { "value": 4.3e6,    "unit": "M☉" },
+    "luminosity": null,
+    "distance_to_earth": { "value": 2.52e17, "unit": "km" }
+  },
+  {
+    "category_en": "star",
+    "category_ua": "Зірка",
+    "category_es": "Estrella",
+    "name_en": "Stephenson 2-18",
+    "name_ua": "Stephenson 2-18",
+    "name_es": "Stephenson 2-18",
+    "description_en": "The largest known star by radius, a red supergiant in the Stephenson 2 cluster.",
+    "description_ua": "Найбільша відома зірка за радіусом, червоний надгігант в скупченні Stephenson 2.",
+    "description_es": "La estrella más grande conocida por radio, un supergigante rojo en el cúmulo Stephenson 2.",
+    "diameter": { "value": 2.5e9,   "unit": "km" },
+    "mass":     { "value": 1.47e31, "unit": "kg" },
+    "luminosity": { "value": 340000, "unit": "L☉" },
+    "distance_to_earth": { "value": 7.1e16,  "unit": "km" }
+  },
+  {
+    "category_en": "universe_edge",
+    "category_ua": "Край видимого всесвіту",
+    "category_es": "Borde del universo observable",
+    "name_en": "Edge of Observable Universe",
+    "name_ua": "Край видимого всесвіту",
+    "name_es": "Borde del universo observable",
+    "description_en": "The maximum distance from which light has had time to reach us since the Big Bang.",
+    "description_ua": "Найбільша відстань, з якої світло встигло дійти до нас від Великого Вибуху.",
+    "description_es": "La mayor distancia desde la cual la luz ha tenido tiempo de llegarnos desde el Big Bang.",
+    "diameter": { "value": 8.8e23,  "unit": "km" },
+    "mass":     null,
+    "luminosity": null,
+    "distance_to_earth": { "value": 4.4e23,  "unit": "km" }
+  },
+  {
+    "category_en": "star",
+    "category_ua": "Зірка",
+    "category_es": "Estrella",
+    "name_en": "Proxima Centauri",
+    "name_ua": "Проксіма Центавра",
+    "name_es": "Próxima Centauri",
+    "description_en": "The closest star to Earth after the Sun.",
+    "description_ua": "Найближча до Землі зірка після Сонця.",
+    "description_es": "La estrella más cercana a la Tierra después del Sol.",
+    "diameter": { "value": 214000,  "unit": "km" },
+    "mass":     { "value": 2.43e29, "unit": "kg" },
+    "luminosity": { "value": 0.0017,  "unit": "L☉" },
+    "distance_to_earth": { "value": 4.02e13, "unit": "km" }
+  },
+{
+  "category_en": "galaxy",
+  "category_ua": "Галактика",
+  "category_es": "Galaxia",
+
+  "name_en": "Milky Way",
+  "name_ua": "Чумацький Шлях",
+  "name_es": "Vía Láctea",
+
+  "description_en": "Our home spiral galaxy containing the Solar System.",
+  "description_ua": "Наша рідна спіральна галактика, що містить Сонячну систему.",
+  "description_es": "Nuestra galaxia espiral que contiene el Sistema Solar.",
+
+  "diameter": { "value": 105,    "unit": "kly" },    
+  "mass":     { "value": 1.5e12, "unit": "M☉" },    
+  "luminosity": { "value": 4e10, "unit": "L☉" }, 
+
+  "distance_to_earth": { "value": 0, "unit": "km" }
+},  
+{
+  "category_en": "planetary_system",
+  "category_ua": "Планетарна система",
+  "category_es": "Sistema Planetario",
+
+  "name_en": "Solar System",
+  "name_ua": "Сонячна система",
+  "name_es": "Sistema Solar",
+
+  "description_en": "The planetary system of our star, the Sun, comprising eight major planets and numerous smaller bodies.",
+  "description_ua": "Планетарна система нашої зорі — Сонця, що складається з восьми планет і численних малих тіл.",
+  "description_es": "El sistema planetario de nuestra estrella, el Sol, que incluye ocho planetas principales y numerosos cuerpos menores.",
+
+  "diameter":   { "value": 2,       "unit": "ly"  },
+  "mass":       { "value": 1.0014,  "unit": "M☉" },
+  "luminosity": { "value": 1,       "unit": "L☉" },
+
+  "distance_to_earth": { "value": 0, "unit": "km" }
+},
+{
+  "category_en": "planet",
+  "category_ua": "Планета",
+  "category_es": "Planeta",
+  "name_en": "Moon",
+  "name_ua": "Місяць",
+  "name_es": "Luna",
+  "description_en": "Earth's only natural satellite.",
+  "description_ua": "Єдиний природний супутник Землі.",
+  "description_es": "El único satélite natural de la Tierra.",
+  "diameter": { "value": 3474.8, "unit": "km" },
+  "mass":     { "value": 7.342e22, "unit": "kg" },
+  "luminosity": null,
+  "distance_to_earth": { "value": 384400, "unit": "km" }
+},
+{
+  "category_en": "planet",
+  "category_ua": "Планета",
+  "category_es": "Planeta",
+  "name_en": "Pluto",
+  "name_ua": "Плутон",
+  "name_es": "Plutón",
+  "description_en": "A dwarf planet in the Kuiper belt.",
+  "description_ua": "Карликова планета в поясі Койпера.",
+  "description_es": "Un planeta enano en el cinturón de Kuiper.",
+  "diameter": { "value": 2376.6, "unit": "km" },
+  "mass":     { "value": 1.309e22, "unit": "kg" },
+  "luminosity": null,
+  "distance_to_earth": { "value": 5.9e9, "unit": "km" }
+}
+
+]

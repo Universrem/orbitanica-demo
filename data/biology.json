@@ -1,0 +1,33 @@
+[
+  {
+    "category_en": "Biology",
+    "category_ua": "Біологія",
+    "category_es": "Biología",
+
+    "name_en": "Mosquito",
+    "name_ua": "Комар",
+    "name_es": "Mosquito",
+
+    "description_en": "Adult mosquito with an average body length of about 4 mm.",
+    "description_ua": "Дорослий комар зі середньою довжиною тіла близько 4 мм.",
+    "description_es": "Mosquito adulto con una longitud corporal media de aproximadamente 4 mm.",
+
+    "size": { "value": 4, "unit": "mm" }
+  },
+  {
+    "category_en": "Biology",
+    "category_ua": "Біологія",
+    "category_es": "Biología",
+
+    "name_en": "Blue Whale",
+    "name_ua": "Синій кит",
+    "name_es": "Ballena azul",
+
+    "description_en": "Largest known animal on Earth, with an average length of around 24 m (24 000 mm).",
+    "description_ua": "Найбільша відома тварина на Землі, з середньою довжиною близько 24 м (24 000 мм).",
+    "description_es": "El animal más grande conocido en la Tierra, con una longitud media de unos 24 m (24 000 mm).",
+
+    "size": { "value": 24000, "unit": "mm" }
+  }
+]
+

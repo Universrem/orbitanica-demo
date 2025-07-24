@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbitanica</title>
+  <link rel="stylesheet" href="./style/style.css">
+</head>
+<body>
+
+  <!-- Блок 1: Вступ з фоновим зображенням -->
+  <section id="intro">
+    <div id="lang-switch">
+        <span class="lang-option active" data-lang="ua">UA</span>
+        <span class="lang-option" data-lang="en">EN</span>
+        <span class="lang-option" data-lang="es">ES</span>
+      </div>
+    <div class="intro-overlay">
+      <h1 data-i18n-key="intro_title"></h1>
+      <p data-i18n-key="intro_subtitle"></p>
+    </div>
+  </section>
+
+  <!-- Блок 2: Інструкція -->
+  <section id="howto">
+    <h2 data-i18n-key="howto_title"></h2>
+    <ul class="howto-steps">
+      <li data-i18n-key="howto_step1"></li>
+      <li data-i18n-key="howto_step2"></li>
+      <li data-i18n-key="howto_step3"></li>
+    </ul>
+  </section>
+
+  <!-- Блок 3: Інтерактивна демо-зона -->
+  <section id="demo">
+    <div id="sidebar">
+  <div id="category-list">
+    <!-- Категорії і пари вставляються динамічно через JS -->
+  </div>
+</div>
+
+    <div id="content">
+      <div id="globus"></div>
+      <div id="info-panel" class="hidden"></div>
+    </div>
+    
+  </section>
+
+  <!-- Блок 4: Що буде у повній версії -->
+  <section id="features">
+    <h2 data-i18n-key="features_title"></h2>
+    <ul class="features-list">
+      <li data-i18n-key="features_1"></li>
+      <li data-i18n-key="features_2"></li>
+      <li data-i18n-key="features_3"></li>
+      <li data-i18n-key="features_4"></li>
+      <li data-i18n-key="features_5"></li>
+    </ul>
+  </section>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
+
+
+
