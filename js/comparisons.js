@@ -189,9 +189,9 @@ export const comparisons = [
     obj3    : 'Invention of the Wheel',
     type    : 'time',
     circle1 : 10000,
-    marker1 : { src: '../res/marker.png', size: [32,48], offset: [0,24] },
-    marker2 : { src: '../res/marker.png', size: [32,48], offset: [0,24] },
-    marker3 : { src: '../res/marker.png', size: [32,48], offset: [0,24] }
+    marker1 : { src: '../res/First Flight.png', size: [32,48], offset: [0,24] },
+    marker2 : { src: '../res/First Automobile.png', size: [32,48], offset: [0,24] },
+    marker3 : { src: '../res/First Wheel.png', size: [32,48], offset: [0,24] }
   }
     ]
   },  

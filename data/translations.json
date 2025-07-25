@@ -219,9 +219,9 @@
 },
 
 "intro_subtitle": {
-  "ua": "Якщо Земля — 1 метр, де Сонце?\nЯкщо ваш вік — 1 метр, як давно жили динозаври?\nЯкщо мільйон — 1 метр, скільки тоді мільярд?\nOrbitanica дає новий спосіб пізнання.",
-  "en": "If Earth is 1 meter, where is the Sun?\nIf your age is 1 meter, how long ago did dinosaurs live?\nIf a million is 1 meter, how big is a billion?\nOrbitanica offers a new way of understanding.",
-  "es": "Si la Tierra mide 1 metro, ¿dónde está el Sol?\nSi tu edad mide 1 metro, ¿cuándo vivieron los dinosaurios?\nSi un millón mide 1 metro, ¿cuánto es un billón?\nOrbitanica ofrece una nueva forma de entender."
+  "ua": "Якщо Земля розміром з тенісний м’яч, де Сонце?\nЯкщо сторіччя - один крок, як далеко жили динозаври?\nЯкщо мільйон розміром з монету, який тоді мільярд?\n\nOrbitanica перетворює числа на просторовий досвід і дає тобі не просто знання, а відчуття масштабу, якого бракує світу цифр.",
+  "en": "If Earth were the size of a tennis ball, where is the Sun?\nIf a century is a single step, how far back did dinosaurs live?\nIf a million is the size of a coin, how big is a billion?\n\nOrbitanica transforms numbers into spatial experience and gives you not just knowledge, but a sense of scale that the world of digits is missing.",
+  "es": "Si la Tierra tuviera el tamaño de una pelota de tenis, ¿dónde está el Sol?\nSi un siglo es un solo paso, ¿qué tan lejos vivieron los dinosaurios?\nSi un millón tiene el tamaño de una moneda, ¿cuánto es un billón?\n\nOrbitanica transforma los números en experiencia espacial y te ofrece no solo conocimiento, sino una sensación de escala que le falta al mundo de las cifras."
 },
 
   "howto_title": {
@@ -250,29 +250,109 @@
     "es": "Qué habrá en la versión completa"
   },
   "features_1": {
-    "ua": "Створення власних об’єктів",
-    "en": "Create your own objects",
-    "es": "Crea tus propios objetos"
-  },
-  "features_2": {
-    "ua": "Генерація візуалізацій для соцмереж",
-    "en": "Generate visualizations for social media",
-    "es": "Genera visualizaciones para redes sociales"
-  },
+  "ua": "Вибір об'єктів із тематичних бібліотек",
+  "en": "Choose objects from thematic libraries",
+  "es": "Elige objetos de bibliotecas temáticas"
+},
+"features_1_desc": {
+  "ua": "Користувач зможе створювати свої порівняння, обираючи об’єкти з готових бібліотек.",
+  "en": "Users will be able to create comparisons by choosing objects from ready-made libraries.",
+  "es": "Los usuarios podrán crear comparaciones eligiendo objetos de bibliotecas ya preparadas."
+},
+
+"features_2": {
+  "ua": "Створення власних об'єктів для порівнянь",
+  "en": "Create your own comparison objects",
+  "es": "Crea tus propios objetos para comparar"
+},
+"features_2_desc": {
+  "ua": "Кожен зможе створювати свої об’єкти, давати їм назви, опис, значення параметра та одиниці виміру.",
+  "en": "Everyone will be able to create their own objects by assigning names, descriptions, parameter values, and units.",
+  "es": "Cualquiera podrá crear sus propios objetos asignando nombres, descripciones, valores de parámetros y unidades."
+},
   "features_3": {
-    "ua": "Навчальні сценарії для вчителів",
-    "en": "Educational scenarios for teachers",
-    "es": "Escenarios educativos para docentes"
-  },
-  "features_4": {
-    "ua": "Збереження особистих бібліотек",
-    "en": "Save personal libraries",
-    "es": "Guardar bibliotecas personales"
-  },
+  "ua": "Задавання масштабу",
+  "en": "Custom scale setting",
+  "es": "Definir escala personalizada"
+},
+"features_3_desc": {
+  "ua": "Користувач задає базовий масштаб, відносно якого буде створюватися візуалізація на глобусі.",
+  "en": "The user sets a reference scale that determines how all other objects will be visualized on the globe.",
+  "es": "El usuario define una escala base que determina cómo se visualizarán los demás objetos en el globo."
+},
+
+"features_4": {
+  "ua": "Багатомовність",
+  "en": "Multilingual interface",
+  "es": "Interfaz multilingüe"
+},
+"features_4_desc": {
+  "ua": "Інтерфейс Orbitanica буде доступний більш ніж 10 мовами, включно з українською, англійською та іспанською.",
+  "en": "The Orbitanica interface will support 10+ languages, including Ukrainian, English, and Spanish.",
+  "es": "La interfaz de Orbitanica estará disponible en más de 10 idiomas, incluidos el ucraniano, el inglés y el español."
+},
   "features_5": {
-    "ua": "Мобільна версія та застосунки",
-    "en": "Mobile version and apps",
-    "es": "Versión móvil y aplicaciones"
-  }
+  "ua": "Розширення бібліотек",
+  "en": "Expanding libraries",
+  "es": "Ampliación de bibliotecas"
+},
+"features_5_desc": {
+  "ua": "Поступове наповнення бібліотек десятками тисяч об'єктів для порівняння — від історичних фактів до наукових величин.",
+  "en": "Continuous expansion of libraries with tens of thousands of comparison objects — from historical facts to scientific quantities.",
+  "es": "Ampliación continua de las bibliotecas con decenas de miles de objetos para comparar — desde hechos históricos hasta magnitudes científicas."
+},
+
+"features_6": {
+  "ua": "Генерація візуалізацій для соціальних мереж",
+  "en": "Generate visualizations for social media",
+  "es": "Generar visualizaciones para redes sociales"
+},
+"features_6_desc": {
+  "ua": "Користувач зможе створити зображення свого порівняння у форматі, зручному для публікації в соціальних мережах.",
+  "en": "Users will be able to generate images of their comparisons in formats optimized for sharing on social media.",
+  "es": "Los usuarios podrán generar imágenes de sus comparaciones en formatos optimizados para compartir en redes sociales."
+},
+"features_7": {
+  "ua": "Збереження персональних бібліотек",
+  "en": "Save personal libraries",
+  "es": "Guardar bibliotecas personales"
+},
+"features_7_desc": {
+  "ua": "Можливість зберігати свої обʼєкти, масштабні сценарії та візуалізації, щоб повертатися до них у будь-який момент.",
+  "en": "Ability to save your objects, scale scenarios, and visualizations to revisit them anytime.",
+  "es": "Posibilidad de guardar tus objetos, escenarios de escala y visualizaciones para volver a ellos en cualquier momento."
+},
+
+"features_8": {
+  "ua": "Підтримка навчальних сценаріїв",
+  "en": "Support for educational scenarios",
+  "es": "Soporte para escenarios educativos"
+},
+"features_8_desc": {
+  "ua": "Платформа дозволяє створювати тематичні сценарії для уроків — з фіксованими порівняннями, текстовим супроводом та гідами для вчителів.",
+  "en": "The platform enables creating thematic lesson scenarios — with predefined comparisons, supporting texts, and guides for teachers.",
+  "es": "La plataforma permite crear escenarios temáticos para clases — con comparaciones predefinidas, textos de apoyo y guías para docentes."
+},
+"features_9": {
+  "ua": "Інтеграція з освітніми платформами",
+  "en": "Integration with educational platforms",
+  "es": "Integración con plataformas educativas"
+},
+"features_9_desc": {
+  "ua": "Можливість вбудовуватись у дистанційні курси, освітні портали, Google Classroom або Moodle для прямого використання викладачами.",
+  "en": "Ability to embed into online courses, educational portals, Google Classroom or Moodle for direct use by teachers.",
+  "es": "Capacidad para integrarse en cursos a distancia, portales educativos, Google Classroom o Moodle para uso directo de los docentes."
+},
+
+"features_10": {
+  "ua": "Масштабування до 20 об'єктів одночасно",
+  "en": "Scale up to 20 objects simultaneously",
+  "es": "Escala hasta 20 objetos simultáneamente"
+},
+"features_10_desc": {
+  "ua": "У Pro-версії можна буде порівнювати не два чи три, а до двадцяти об’єктів — для масштабного аналізу об’єктів, явищ або історичних процесів.",
+  "en": "In the Pro version, you’ll be able to compare not two or three, but up to twenty objects — for large-scale analysis of objects, phenomena, or historical processes.",
+  "es": "En la versión Pro, podrás comparar no solo dos o tres, sino hasta veinte objetos — para un análisis a gran escala de objetos, fenómenos o procesos históricos."
+}
 }
 

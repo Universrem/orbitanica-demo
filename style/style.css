@@ -174,25 +174,46 @@ body {
 }
 
 /* ==== Блок 1: Фонова секція intro ==== */
+/* Блок #intro з фоновим зображенням */
 #intro {
   height: 80vh;
   background: url('../res/orbitanica.png') center center / cover no-repeat;
   position: relative;
   color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
 }
 
-.intro-overlay {
-  background: rgba(0, 0, 0, 0.35);
-  padding: 2.5rem 3rem;
-  border-radius: 16px;
-  max-width: 900px;
-  margin-top: -100px;     /* ← Піднято ще вище */
+/* Центруємо .intro-notice і .intro-overlay вертикально */
+.intro-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2em;
   text-align: center;
+  padding: 0 1em;
 }
+
+/* Темна рамка для повідомлення */
+.intro-notice {
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 1.5em 2em;
+  border-radius: 10px;
+  max-width: 600px;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+/* Прозорий опис */
+.intro-overlay {
+  max-width: 800px;
+  font-size: 1.2em;
+  line-height: 1.6em;
+  color: #fff;
+}
+
 
 #intro h1 {
   font-size: 2rem;
@@ -247,30 +268,45 @@ body {
 }
 
 /* ==== Блок 4: Можливості features ==== */
+/* ==== Блок 4: Можливості features ==== */
 #features {
   padding: 3rem 1rem;
-  background: #fff;
+  background: #f0f0f0;
   text-align: center;
 }
 
 #features h2 {
   font-size: 1.8rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
-.features-list {
-  list-style: none;
-  padding: 0;
+/* Контейнер для двох колонок */
+.features-columns {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  max-width: 1200px;
   margin: 0 auto;
-  max-width: 600px;
   text-align: left;
 }
 
+/* Кожен стовпчик */
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1 1 45%;
+  max-width: 500px;
+}
+
+/* Заголовок функції */
 .features-list li {
   font-size: 1.1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.25rem;
   position: relative;
   padding-left: 1.5rem;
+  font-weight: bold;
 }
 
 .features-list li::before {
@@ -278,7 +314,29 @@ body {
   position: absolute;
   left: 0;
   color: #f39c12;
-  font-weight: bold;
+}
+
+/* Опис функції */
+.features-desc {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0 0 1.25rem 1.5rem;
+  line-height: 1.5;
+  font-weight: 400;
+  max-width: 42ch;
+}
+
+/* Мобільна адаптація: один стовпчик */
+@media (max-width: 768px) {
+  .features-columns {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .features-list {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
 }
 
 /* ==== Загальна адаптивність для секцій ==== */

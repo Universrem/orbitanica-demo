@@ -243,16 +243,16 @@ const renderButtons = () => {
     catDiv.appendChild(catTitle);
 
     const list = document.createElement('ul');
-    list.className = 'comparison-sublist hidden';
+    list.className = 'comparison-sublist';
 
     category.items.forEach(pair => {
       const li = createButton(pair);
       list.appendChild(li);
     });
 
-    catTitle.addEventListener('click', () => {
-      list.classList.toggle('hidden');
-    });
+    //catTitle.addEventListener('click', () => {
+    //  list.classList.toggle('hidden');
+    //});
 
     catDiv.appendChild(list);
     wrapper.appendChild(catDiv);

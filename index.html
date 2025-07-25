@@ -10,16 +10,24 @@
 
   <!-- Блок 1: Вступ з фоновим зображенням -->
   <section id="intro">
-    <div id="lang-switch">
-        <span class="lang-option active" data-lang="ua">UA</span>
-        <span class="lang-option" data-lang="en">EN</span>
-        <span class="lang-option" data-lang="es">ES</span>
-      </div>
-    <div class="intro-overlay">
+  <!-- 🔹 Перемикач мови залишається зверху -->
+  <div id="lang-switch">
+    <span class="lang-option active" data-lang="ua">UA</span>
+    <span class="lang-option" data-lang="en">EN</span>
+    <span class="lang-option" data-lang="es">ES</span>
+  </div>
+
+  <!-- 🔸 Центрований контент -->
+  <div class="intro-center">
+    <div class="intro-notice">
       <h1 data-i18n-key="intro_title"></h1>
+    </div>
+
+    <div class="intro-overlay">
       <p data-i18n-key="intro_subtitle"></p>
     </div>
-  </section>
+  </div>
+</section>
 
   <!-- Блок 2: Інструкція -->
   <section id="howto">
@@ -47,16 +55,58 @@
   </section>
 
   <!-- Блок 4: Що буде у повній версії -->
-  <section id="features">
-    <h2 data-i18n-key="features_title"></h2>
+  <!-- Блок 4: Що буде у повній версії -->
+<section id="features">
+  <h2 data-i18n-key="features_title"></h2>
+  <div class="features-columns">
     <ul class="features-list">
-      <li data-i18n-key="features_1"></li>
-      <li data-i18n-key="features_2"></li>
-      <li data-i18n-key="features_3"></li>
-      <li data-i18n-key="features_4"></li>
-      <li data-i18n-key="features_5"></li>
+      <li>
+        <span data-i18n-key="features_1"></span>
+        <div class="features-desc" data-i18n-key="features_1_desc"></div>
+      </li>
+      <li>
+        <span data-i18n-key="features_2"></span>
+        <div class="features-desc" data-i18n-key="features_2_desc"></div>
+      </li>
+      <li>
+        <span data-i18n-key="features_3"></span>
+        <div class="features-desc" data-i18n-key="features_3_desc"></div>
+      </li>
+      <li>
+        <span data-i18n-key="features_4"></span>
+        <div class="features-desc" data-i18n-key="features_4_desc"></div>
+      </li>
+      <li>
+        <span data-i18n-key="features_5"></span>
+        <div class="features-desc" data-i18n-key="features_5_desc"></div>
+      </li>
     </ul>
-  </section>
+    <ul class="features-list">
+      <li>
+        <span data-i18n-key="features_6"></span>
+        <div class="features-desc" data-i18n-key="features_6_desc"></div>
+      </li>
+      <li>
+        <span data-i18n-key="features_7"></span>
+        <div class="features-desc" data-i18n-key="features_7_desc"></div>
+      </li>
+      <li>
+        <span data-i18n-key="features_8"></span>
+        <div class="features-desc" data-i18n-key="features_8_desc"></div>
+      </li>
+      <li>
+        <span data-i18n-key="features_9"></span>
+        <div class="features-desc" data-i18n-key="features_9_desc"></div>
+      </li>
+      <li>
+        <span data-i18n-key="features_10"></span>
+        <div class="features-desc" data-i18n-key="features_10_desc"></div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+
 
   <script type="module" src="./main.js"></script>
 </body>
