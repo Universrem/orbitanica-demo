@@ -17,7 +17,7 @@ const osm = new XYZ("OpenStreetMap", {
 const markerEntity = new Entity({
   name     : "Львів",
   lonlat   : new LonLat(centerLonDeg, centerLatDeg),
-  billboard: { src: "../res/marker.png", size: [16, 24], offset: [0, 12] }
+  billboard: { src: "./res/marker.png", size: [16, 24], offset: [0, 12] }
 });
 export const markerLayer = new Vector("markerLayer", { entities: [markerEntity] });
 
@@ -26,8 +26,8 @@ export const globus = new Globe({
   target      : "globus",
   name        : "Earth",
   layers      : [osm, markerLayer],
-  resourcesSrc: "../res",
-  fontsSrc    : "../res/fonts",
+  resourcesSrc: "./res",
+  fontsSrc    : "./res/fonts",
   view        : { lat: centerLatDeg, lon: centerLonDeg, range: 10_000_000, tilt: 0, heading: 0 }
 });
 
@@ -185,7 +185,7 @@ if (globus.planet && globus.planet.renderer && globus.planet.renderer.events) {
     const newMarker = new Entity({
       name: 'Marker',
       lonlat: new LonLat(lonLat.lon, lonLat.lat),
-      billboard: { src: '../res/marker.png', size: [16,24], offset: [0,12] }
+      billboard: { src: './res/marker.png', size: [16,24], offset: [0,12] }
     });
     markerLayer.add(newMarker);
 

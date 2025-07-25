@@ -13,7 +13,7 @@ initI18n();
 
 async function initI18n() {
   try {
-    translations = await fetch('../data/translations.json')
+    translations = await fetch('./data/translations.json')
                            .then(r => r.json());
 
     // Читаємо вибір із localStorage
