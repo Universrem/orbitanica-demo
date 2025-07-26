@@ -110,12 +110,10 @@ body {
   z-index: 10;
 
   display: flex;
-  gap: 12px;
-
-  background: transparent;
-  padding: 6px 10px;
-  border-radius: 6px;
+  align-items: center;
+  gap: 15px;
 }
+
 
 .lang-option {
   color: white;
@@ -131,7 +129,7 @@ body {
 }
 
 .lang-option.active {
-  color: #aaa; /* синій */
+  color: #127def; /* синій */
 }
 
 
@@ -401,6 +399,35 @@ section {
 .category-title.active {
   color: #3998f1;
   font-weight: bold;
+}
+
+/* ==== Верхня панель з кнопкою і мовами ==== */
+#top-bar {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 10;
+}
+
+/* Кнопка "До функцій" */
+.scroll-button {
+  margin-right: 32px;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  font-weight: normal;     /* бо в описі subtitle не жирний */
+  font-size: 1.1rem;       /* такий самий як в #intro p */
+  line-height: 1.6;        /* для відповідності */
+  user-select: none;
+  transition: color 0.2s;
+}
+
+
+.scroll-button:hover {
+  color: #aaa;
 }
 
 

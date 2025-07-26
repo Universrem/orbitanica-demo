@@ -213,9 +213,9 @@
     "es": "USD"
   },
   "intro_title": {
-  "ua": "Демонстраційна версія:\nобмежений функціонал",
-  "en": "Demo version:\nwith limited functionality.",
-  "es": "Versión de demostración:\ncon funcionalidad limitada."
+  "ua": "Демонстраційна версія.\nВізуальна презентація.",
+  "en": "Demo version.\nVisual presentation.",
+  "es": "Versión de demostración.\nPresentación visual."
 },
 
 "intro_subtitle": {
@@ -245,10 +245,15 @@
     "es": "3. Explora las escalas mediante la visualización"
   },
   "features_title": {
-    "ua": "Що буде у повній версії",
-    "en": "What's coming in the full version",
-    "es": "Qué habrá en la versión completa"
+    "ua": "Що буде у повноцінній версії?",
+    "en": "What's coming in the full version?",
+    "es": "¿Qué habrá en la versión completa?"
   },
+"scroll_to_features": {
+  "ua": "Що буде у повноцінній версії?",
+  "en": "What's coming in the full version?",
+  "es": "¿Qué habrá en la versión completa?"
+},
   "features_1": {
   "ua": "Вибір об'єктів із тематичних бібліотек",
   "en": "Choose objects from thematic libraries",

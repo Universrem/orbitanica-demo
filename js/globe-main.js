@@ -1,6 +1,6 @@
 'use strict';
 
-import { Globe, LonLat, Vector, Entity, XYZ } from "../lib/og.es.js";
+import { Globe, LonLat, Vector, Entity, XYZ, Vec3 } from "../lib/og.es.js";
 
 // --- Центр глобуса: Львів
 const centerLatDeg = 49.8419;
@@ -30,6 +30,7 @@ export const globus = new Globe({
   fontsSrc    : "./res/fonts",
   view        : { lat: centerLatDeg, lon: centerLonDeg, range: 10_000_000, tilt: 0, heading: 0 }
 });
+updateCameraView({ type: 'initial' });
 
 // --- Камера
 const zoomDistance = 3_000_000;
@@ -42,11 +43,7 @@ if (cam) {
 } else {
   console.warn('[globe-main.js] Камера не знайдена.');
 }
-{
-  const ell = globus.planet.ellipsoid;
-  const startCart = ell.lonLatToCartesian(markerEntity.getLonLat());
-  cam.flyDistance(startCart, zoomDistance);
-}
+
 
 // --- Стан
 let circleLayer = null;
@@ -156,6 +153,9 @@ export function drawTwoCircles(r1_m, r2_m, marker1, marker2) {
   const centerLL = markerLayer.getEntities().slice(-1)[0].getLonLat();
   addEdgeMarker(centerLL, r1_m,  45, marker1);
   addEdgeMarker(centerLL, r2_m, -45, marker2);
+
+  updateCameraView({ type: 'drawTwo', radii: [r1_m, r2_m] });
+
 }
 
 // --- Три кола
@@ -172,6 +172,52 @@ export function drawThreeCircles(r1_m, r2_m, r3_m, marker1, marker2, marker3) {
   addEdgeMarker(centerLL, r1_m,   135, marker1);
   addEdgeMarker(centerLL, r2_m,  -45, marker2);
   addEdgeMarker(centerLL, r3_m,  135, marker3);
+
+  updateCameraView({ type: 'drawThree', radii: [r1_m, r2_m, r3_m] });
+
+}
+
+function updateCameraView(context) {
+  const cam = globus.planet.camera;
+  const ellipsoid = globus.planet.ellipsoid;
+  const centerLL = markerLayer.getEntities().slice(-1)[0].getLonLat();
+  const centerCart = ellipsoid.lonLatToCartesian(centerLL);
+
+  switch (context?.type) {
+    case 'initial':
+      cam._numFrames = 120; // 2–3 секунди
+      cam.flyDistance(centerCart, 3_000_000);
+      break;
+
+    case 'drawTwo':
+case 'drawThree': {
+  const radii = context.radii || [];
+  const maxR = Math.max(...radii);
+
+  // FOV і aspect беремо правильно
+  const canvas = globus.planet.renderer.handler.canvas;
+  const aspect = canvas.width / canvas.height;
+  const vFov = cam._viewAngle * Math.PI / 180;
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect);
+  const minFov = Math.min(vFov, hFov);
+  const margin = 1.2;
+  const R = maxR * margin;
+  const distance = R / Math.sin(minFov / 2);
+
+    cam._numFrames = 120;
+    cam.flyDistance(centerCart, distance);
+
+
+  break;
+}
+
+    case 'markerMoved':
+      // Не рухаємо камеру
+      break;
+
+    default:
+      console.warn('[globe-main] Невідомий тип контексту для updateCameraView');
+  }
 }
 
 // --- Клік по глобусу
@@ -189,9 +235,7 @@ if (globus.planet && globus.planet.renderer && globus.planet.renderer.events) {
     });
     markerLayer.add(newMarker);
 
-    const ell = globus.planet.ellipsoid;
-    const cart = ell.lonLatToCartesian(newMarker.getLonLat());
-    cam.flyDistance(cart, zoomDistance);
+    updateCameraView({ type: 'markerMoved' });
 
     if (lastRadius3 !== null) {
       drawThreeCircles(lastRadius1, lastRadius2, lastRadius3, lastSrc1, lastSrc2, lastSrc3);

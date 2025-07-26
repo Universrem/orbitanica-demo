@@ -42,6 +42,16 @@ highlightActive(getCurrentLang());
 document.addEventListener('languageChanged', e => {
   highlightActive(e.detail);                  // e.detail містить код мови
 });
+// 3. Прокрутка до блоку "features"
+const scrollBtn = document.getElementById('scroll-to-features');
+if (scrollBtn) {
+  scrollBtn.addEventListener('click', () => {
+    const target = document.getElementById('features');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+}
 
 
 
