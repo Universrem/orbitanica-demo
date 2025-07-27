@@ -137,6 +137,11 @@
     "en": "people",
     "es": "personas"
   },
+  "field.quantity": {
+  "ua": "кількість",
+  "en": "quantity",
+  "es": "cantidad"
+},
   "unit.mm": {
     "ua": "мм",
     "en": "mm",
@@ -157,8 +162,13 @@
     "en": "km",
     "es": "km"
   },
+  "unit.km²": {
+  "ua": "км²",
+  "en": "km²",
+  "es": "km²"
+},
   "unit.thousand_km": {
-    "ua": "тис.км",
+    "ua": "тис. км",
     "en": "thousand km",
     "es": "mil km"
   },

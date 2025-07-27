@@ -89,18 +89,21 @@ export function showInfo({
   key = 'info.time';
 
   } else if (type === 'value') {
-    vars = {
-      obj1Name, obj2Name,
-      field, unit,
-      'v1.val': v1.val,
-      'v2.val': v2.val,
-      's1.val': s1.val,
-      's1.unit': s1.unit || unit,
-      's2.val': s2.val,
-      's2.unit': s2.unit || unit
-    };
-    key = 'info.value';
-  } else {
+  vars = {
+    obj1Name, obj2Name,
+    field, 
+    unit: t(unit),
+    'v1.val': v1.val,
+    'v1.unit': t(v1.unit),
+    'v2.val': v2.val,
+    'v2.unit': t(v2.unit),
+    's1.val': s1.val,
+    's1.unit': t(s1.unit || unit),
+    's2.val': s2.val,
+    's2.unit': t(s2.unit || unit)
+  };
+  key = 'info.value';
+}else {
     const R1 = formatNice(real1_m);
     const R2 = formatNice(real2_m);
     const S1 = formatNice(scaled1_m);

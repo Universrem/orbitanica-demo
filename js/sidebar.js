@@ -23,11 +23,13 @@ const fmtNice = m => {                        // { val, unitKey } → { val, uni
   return { val: f.val, unit: t(f.unitKey) };
 };
 
-const fmtVal = n =>                           // 1 234 567 → «1.23 млн»
-  (n >= 1e9) ? (n / 1e9).toFixed(2) + ' млрд' :
-  (n >= 1e6) ? (n / 1e6).toFixed(2) + ' млн'  :
-  (n >= 1e3) ? (n / 1e3).toFixed(2) + ' тис.' :
-               n.toString();
+const fmtVal = n => {
+  if (n >= 1e9) return { val: (n / 1e9).toFixed(2), unitKey: 'unit.billion' };
+  if (n >= 1e6) return { val: (n / 1e6).toFixed(2), unitKey: 'unit.million' };
+  if (n >= 1e3) return { val: (n / 1e3).toFixed(2), unitKey: 'unit.thousand' };
+  return { val: n.toString(), unitKey: '' };
+};
+
 
 /*──────────────── Ініціалізація ───────────────────────────*/
 let activeId = null;
@@ -170,15 +172,21 @@ export async function initSidebar() {
 
       drawTwoCircles(r1_m, r2_m, cfg.marker1, cfg.marker2);
 
-      info = {
-        type : 'value',
-        field: t('field.' + f),
-        unit : t('unit.' + u1),
-        v1   : { val: fmtVal(v1) },
-        v2   : { val: fmtVal(v2) },
-        s1   : fmtNice(r1_m * 2),
-        s2   : fmtNice(r2_m * 2)
-      };
+      const V1 = fmtVal(v1);
+const V2 = fmtVal(v2);
+const S1 = formatNice(r1_m * 2);
+const S2 = formatNice(r2_m * 2);
+
+info = {
+  type : 'value',
+  field: t('field.' + f),
+  unit : t('unit.' + u1),
+  v1   : { val: V1.val, unit: V1.unitKey },
+  v2   : { val: V2.val, unit: V2.unitKey },
+  s1   : { val: S1.val, unit: S1.unitKey },
+  s2   : { val: S2.val, unit: S2.unitKey }
+};
+
     }
 
     /*────── time ───────────────────────────────────*/
@@ -197,15 +205,20 @@ export async function initSidebar() {
 
       drawThreeCircles(r1_m, r2_m, r3_m, cfg.marker1, cfg.marker2, cfg.marker3);
 
-      info = {
-        type      : 'time',
-        real1_yr  : fmtVal(years1),
-        real2_yr  : fmtVal(years2),
-        real3_yr  : fmtVal(years3),
-        scaled1_m : r1_m,
-        scaled2_m : r2_m,
-        scaled3_m : r3_m
-      };
+      const Y1 = fmtVal(years1);
+const Y2 = fmtVal(years2);
+const Y3 = fmtVal(years3);
+
+info = {
+  type      : 'time',
+  real1_yr  : `${Y1.val} ${t(Y1.unitKey)}`,
+  real2_yr  : `${Y2.val} ${t(Y2.unitKey)}`,
+  real3_yr  : `${Y3.val} ${t(Y3.unitKey)}`,
+  scaled1_m : r1_m,
+  scaled2_m : r2_m,
+  scaled3_m : r3_m
+};
+
     }
 
     showInfo({
