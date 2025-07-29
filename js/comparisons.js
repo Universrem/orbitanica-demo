@@ -21,6 +21,26 @@ export const comparisons = [
     marker2 : { src: '../res/Sun.png', size: [32,48], offset: [0,24] }
   },
   {
+  id     : 'solar_vs_milkyway',
+  key    : 'sidebar.ss_vs_mw',
+  obj1   : 'Solar System',
+  obj2   : 'Milky Way',
+  type   : 'diameter',
+  circle1: 0.02, // км
+  marker1: { src: '../res/Solar System.png', size: [32,48], offset: [0,24] },
+  marker2: { src: '../res/Milky Way.png', size: [32,48], offset: [0,24] }
+},
+{
+  id     : 'orbitpluto_vs_mw',
+  key    : 'sidebar.orbitpluto_vs_mw',
+  obj1   : 'Orbit of Pluto',
+  obj2   : 'Milky Way',
+  type   : 'diameter',
+  circle1: 0.02, // км
+  marker1: { src: '../res/Orbit of Pluto.png', size: [32,48], offset: [0,24] },
+  marker2: { src: '../res/Milky Way.png', size: [32,48], offset: [0,24] }
+},
+  {
     id      : '2',
     key     : 'sidebar.2',
     obj1    : 'Solar System',
@@ -208,7 +228,7 @@ export const comparisons = [
       obj2    : "Blue Whale",
       type    : "value",
       field   : "size",
-      circle1 : 0.04,
+      circle1 : 1,
       marker1 : { src: "../res/Mosquito.png", size: [32,48], offset: [0,24] },
       marker2 : { src: "../res/Blue Whale.png", size: [32,48], offset: [0,24] }
     }

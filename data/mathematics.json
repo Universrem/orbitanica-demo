@@ -12,7 +12,7 @@
     "description_ua": "Ціле число, яке складається з 1 та шести нулів.",
     "description_es": "El número entero representado por el dígito 1 seguido de seis ceros.",
 
-    "quantity": { "value": 1000000, "unit": "" }
+    "quantity": { "value": 1, "unit": "million" }
   },
   {
     "category_en": "Mathematics",
@@ -27,6 +27,6 @@
     "description_ua": "Ціле число, яке складається з 1 та дев’яти нулів.",
     "description_es": "El número entero representado por el dígito 1 seguido de nueve ceros.",
 
-    "quantity": { "value": 1000000000, "unit": "" }
+    "quantity": { "value": 1000, "unit": "million" }
   }
 ]

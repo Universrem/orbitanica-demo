@@ -23,6 +23,14 @@ const fmtNice = m => {                        // { val, unitKey } → { val, uni
   return { val: f.val, unit: t(f.unitKey) };
 };
 
+const formatRawNumber = (val, unitKey) => {
+  return {
+    val    : val.toLocaleString('uk-UA'),
+    unitKey: 'unit.' + unitKey
+  };
+};
+
+
 const fmtVal = n => {
   if (n >= 1e9) return { val: (n / 1e9).toFixed(2), unitKey: 'unit.billion' };
   if (n >= 1e6) return { val: (n / 1e6).toFixed(2), unitKey: 'unit.million' };
@@ -157,37 +165,44 @@ export async function initSidebar() {
 
     /*────── value (населення, площа, …) ────────────*/
     else if (cfg.type === 'value') {
-      const f  = cfg.field;
-      const v1 = o1[f].value;
-      const v2 = o2[f].value;
-      const u1 = o1[f].unit;
-      const u2 = o2[f].unit;
-      if (u1 !== u2) {
-        console.warn('[sidebar] Різні одиниці – відхилено');
-        return;
-      }
+  const f  = cfg.field;
+  const v1 = o1[f].value;
+  const v2 = o2[f].value;
+  const u1 = o1[f].unit;
+  const u2 = o2[f].unit;
+  if (u1 !== u2) {
+    console.warn('[sidebar] Різні одиниці – відхилено');
+    return;
+  }
 
-      r1_m = cfg.circle1 / 2;
-      r2_m = r1_m * (v2 / v1);
+  r1_m = cfg.circle1 / 2;
 
-      drawTwoCircles(r1_m, r2_m, cfg.marker1, cfg.marker2);
+// 🔧 Площа масштабування для кількості, грошей, населення, площі
+if (f === 'money' || f === 'population' || f === 'quantity' || f === 'area') {
+  r2_m = r1_m * Math.sqrt(v2 / v1);
+} else {
+  r2_m = r1_m * (v2 / v1); // звичайне лінійне масштабування
+}
 
-      const V1 = fmtVal(v1);
-const V2 = fmtVal(v2);
-const S1 = formatNice(r1_m * 2);
-const S2 = formatNice(r2_m * 2);
 
-info = {
-  type : 'value',
-  field: t('field.' + f),
-  unit : t('unit.' + u1),
-  v1   : { val: V1.val, unit: V1.unitKey },
-  v2   : { val: V2.val, unit: V2.unitKey },
-  s1   : { val: S1.val, unit: S1.unitKey },
-  s2   : { val: S2.val, unit: S2.unitKey }
-};
+  drawTwoCircles(r1_m, r2_m, cfg.marker1, cfg.marker2);
 
-    }
+  const V1 = formatRawNumber(v1, u1);
+  const V2 = formatRawNumber(v2, u2);
+  const S1 = formatNice(r1_m * 2);
+  const S2 = formatNice(r2_m * 2);
+
+  info = {
+    type : 'value',
+    field: t('field.' + f),
+    unit : t(V1.unitKey),
+    v1   : { val: V1.val, unit: V1.unitKey },
+    v2   : { val: V2.val, unit: V2.unitKey },
+    s1   : { val: S1.val, unit: S1.unitKey },
+    s2   : { val: S2.val, unit: S2.unitKey }
+  };
+}
+
 
     /*────── time ───────────────────────────────────*/
     else if (cfg.type === 'time') {

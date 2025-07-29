@@ -156,6 +156,25 @@
   "mass":     { "value": 1.309e22, "unit": "kg" },
   "luminosity": null,
   "distance_to_earth": { "value": 5.9e9, "unit": "km" }
+},
+{
+  "category_en": "orbit",
+  "category_ua": "Орбіта",
+  "category_es": "Órbita",
+
+  "name_en": "Orbit of Pluto",
+  "name_ua": "Орбіта Плутона",
+  "name_es": "Órbita de Plutón",
+
+  "description_en": "The average diameter of Pluto's orbit around the Sun.",
+  "description_ua": "Середній діаметр орбіти Плутона навколо Сонця.",
+  "description_es": "El diámetro medio de la órbita de Plutón alrededor del Sol.",
+
+  "diameter": { "value": 11.84e9, "unit": "km" },
+  "mass":     null,
+  "luminosity": null,
+
+  "distance_to_earth": { "value": 5.9e9, "unit": "km" }
 }
 
 ]

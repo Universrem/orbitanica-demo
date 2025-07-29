@@ -91,6 +91,16 @@
     "en": "One Million Dollars – Elon Musk Net Worth 2024",
     "es": "Un millón de dólares – Fortuna de Elon Musk 2024"
   },
+  "sidebar.ss_vs_mw": {
+  "ua": "Сонячна система і Чумацький Шлях",
+  "en": "Solar System and Milky Way",
+  "es": "Sistema Solar y Vía Láctea"
+},
+"sidebar.orbitpluto_vs_mw": {
+  "ua": "Орбіта Плутона і Чумацький Шлях",
+  "en": "Orbit of Pluto and Milky Way",
+  "es": "Órbita de Plutón y Vía Láctea"
+},
 
   "info.diameter": {
     "ua": "Уявіть, що {obj1Name} (діаметр {r1.val} {r1.unit}) масштабовано до {s1.val} {s1.unit}. Тоді {obj2Name} (діаметр {r2.val} {r2.unit}) у цьому масштабі буде {s2.val} {s2.unit}.",
@@ -132,6 +142,11 @@
     "en": "money",
     "es": "dinero"
   },
+  "field.size": {
+  "ua": "розмір",
+  "en": "size",
+  "es": "tamaño"
+},
   "unit.people": {
     "ua": "осіб",
     "en": "people",
@@ -222,6 +237,12 @@
     "en": "USD",
     "es": "USD"
   },
+  "unit.quantity": {
+  "ua": "од.",
+  "en": "unit",
+  "es": "unidad"
+},
+
   "intro_title": {
   "ua": "Демонстраційна версія.\nВізуальна презентація.",
   "en": "Demo version.\nVisual presentation.",
@@ -360,14 +381,14 @@
 },
 
 "features_10": {
-  "ua": "Масштабування до 20 об'єктів одночасно",
-  "en": "Scale up to 20 objects simultaneously",
-  "es": "Escala hasta 20 objetos simultáneamente"
+  "ua": "Одночасне масштабування необмеженої кількості об’єктів",
+  "en": "Simultaneous scaling of an unlimited number of objects",
+  "es": "Escalado simultáneo de una cantidad ilimitada de objetos"
 },
 "features_10_desc": {
-  "ua": "У Pro-версії можна буде порівнювати не два чи три, а до двадцяти об’єктів — для масштабного аналізу об’єктів, явищ або історичних процесів.",
-  "en": "In the Pro version, you’ll be able to compare not two or three, but up to twenty objects — for large-scale analysis of objects, phenomena, or historical processes.",
-  "es": "En la versión Pro, podrás comparar no solo dos o tres, sino hasta veinte objetos — para un análisis a gran escala de objetos, fenómenos o procesos históricos."
+  "ua": "У професійній версії можна буде порівнювати не лише до трьох об'єктів, а будь-яку кількість, необхідну для масштабного вивчення об’єктів, явищ або історичних процесів.",
+  "en": "In the Pro version, you’ll be able to compare not just up to three, but any number of objects needed for large-scale exploration of objects, phenomena, or historical processes.",
+  "es": "En la versión Pro, podrás comparar no solo hasta tres, sino cualquier cantidad de objetos necesaria para el estudio a gran escala de objetos, fenómenos o procesos históricos."
 }
 }
 
