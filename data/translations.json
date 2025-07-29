@@ -243,10 +243,10 @@
   "es": "unidad"
 },
 
-  "intro_title": {
-  "ua": "Демонстраційна версія.\nВізуальна презентація.",
-  "en": "Demo version.\nVisual presentation.",
-  "es": "Versión de demostración.\nPresentación visual."
+"intro_title": {
+  "ua": "Тестова версія:\nВізуальна презентація",
+  "en": "Test version:\nVisual presentation",
+  "es": "Versión de prueba:\nPresentación visual"
 },
 
 "intro_subtitle": {
