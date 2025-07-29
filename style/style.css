@@ -429,6 +429,56 @@ section {
 .scroll-button:hover {
   color: #aaa;
 }
+/* ==== Styles for Scaling Methods section ==== */
+#scaling-methods {
+  background-color: #fff;           /* білий фон */
+  padding: 2rem;                    /* внутрішні відступи */
+  border-radius: 0.5rem;            /* заокруглені кути */
+  margin: 2rem 0;                   /* зовнішні відступи зверху/знизу */
+}
+
+#scaling-methods h3 {
+  text-align: center;               /* заголовки по центру */
+  width: 33.333%;                   /* ширина 1/3 від контейнера */
+  margin: 1.5rem auto 0;      /* відступи та центрування */
+  position: relative;
+}
+#scaling-methods h3::before {
+  content: "●";                     /* кружечок перед заголовком */
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: #ff0000;
+}
+
+#scaling-methods p {
+  width: 50%;                   /* звуження тексту до 1/3 ширини */
+  margin: 0 auto 1rem;                /* центрування */
+  text-align: center;               /* вирівнювання тексту по центру */
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #555;
+}
+/* ==== Стиль загального заголовка секції розрахунків ==== */
+#scaling-methods h2 {
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  text-align: center;    /* якщо ще не було */
+}
+
+@media (max-width: 768px) {
+  #scaling-methods {
+    padding: 1.5rem;
+  }
+  #scaling-methods h3 {
+    font-size: 1.125rem;
+    width: 90%;                     /* адаптивна ширина на мобільних */
+  }
+  #scaling-methods p {
+    width: 90%;
+    font-size: 0.95rem;
+  }
+}
+
 
 
 

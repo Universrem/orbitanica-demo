@@ -281,9 +281,9 @@
     "es": "¿Qué habrá en la versión completa?"
   },
 "scroll_to_features": {
-  "ua": "Що буде у повноцінній версії?",
-  "en": "What's coming in the full version?",
-  "es": "¿Qué habrá en la versión completa?"
+  "ua": "Повна версія",
+  "en": "Full version",
+  "es": "Versión completa"
 },
   "features_1": {
   "ua": "Вибір об'єктів із тематичних бібліотек",
@@ -389,6 +389,63 @@
   "ua": "У професійній версії можна буде порівнювати не лише до трьох об'єктів, а будь-яку кількість, необхідну для масштабного вивчення об’єктів, явищ або історичних процесів.",
   "en": "In the Pro version, you’ll be able to compare not just up to three, but any number of objects needed for large-scale exploration of objects, phenomena, or historical processes.",
   "es": "En la versión Pro, podrás comparar no solo hasta tres, sino cualquier cantidad de objetos necesaria para el estudio a gran escala de objetos, fenómenos o procesos históricos."
+},
+"scroll_to_scaling": {
+  "ua": "Методи масштабування",
+  "en": "Calculation method",
+  "es": "Método de cálculo"
+},
+  "scaling_methods_title": {
+    "ua": "Як відбуваються розрахунки?",
+    "en": "How calculations are performed?",
+    "es": "¿Cómo se realizan los cálculos?"
+  },
+
+  "scaling_overview": {
+    "ua": "Усі об'єкти відображаються у вигляді кіл на глобусі. Принцип масштабування залежить від типу величини, яку представляє коло. Центром кожного кола є мітка — місце, яке користувач обирає самостійно. Це знайомий простір, місцевість, завдяки якій масштаб сприймається інтуїтивно, стає наочним і зрозумілим.",
+    "en": "All objects are represented as circles on the globe. The scaling principle depends on the type of quantity that the circle represents. The center of each circle is a marker — a location chosen by the user. This familiar space makes the scale intuitive, visual, and comprehensible.",
+    "es": "Todos los objetos se representan como círculos en el globo. El principio de escalado depende del tipo de magnitud que representa el círculo. El centro de cada círculo es un marcador — un lugar que el usuario elige. Este espacio familiar hace que la escala sea intuitiva, visual y comprensible."
+  },
+  "scaling_diameter_distance_title": {
+    "ua": "Діаметри та відстані",
+    "en": "Diameters and Distances",
+    "es": "Diámetros y Distancias"
+  },
+  "scaling_diameter_distance_desc": {
+    "ua": "Діаметри та відстані масштабуються лінійно: якщо один із об'єктів має заданий розмір, інші відображаються пропорційно. Наприклад, якщо діаметр Землі дорівнює одному метру, то діаметр Сонця буде у 109 разів більшим.",
+    "en": "Diameters and distances are scaled linearly: when one object has a defined size, others are displayed proportionally. For example, if Earth’s diameter is set to one meter, the Sun’s diameter will be 109 times larger.",
+    "es": "Los diámetros y distancias se escalan linealmente: cuando un objeto tiene un tamaño definido, los demás se muestran proporcionalmente. Por ejemplo, si el diámetro de la Tierra se establece en un metro, el diámetro del Sol será 109 veces mayor."
+  },
+  "scaling_time_intervals_title": {
+    "ua": "Часові інтервали",
+    "en": "Time Intervals",
+    "es": "Intervalos de Tiempo"
+  },
+  "scaling_time_intervals_desc": {
+    "ua": "Масштабування часу здійснюється шляхом перетворення часових інтервалів на лінійні розміри кіл. Чим більший часовий проміжок між подіями, тим більший діаметр відповідного кола. Це допомагає наочно уявити, наскільки давно відбулися історичні події.",
+    "en": "Time is scaled by converting temporal intervals into linear circle sizes. The greater the time span between events, the larger the diameter of the corresponding circle. This helps visualize how long ago historical events occurred.",
+    "es": "El tiempo se escala convirtiendo intervalos temporales en tamaños lineales de círculos. Cuanto mayor sea el lapso de tiempo entre eventos, mayor será el diámetro del círculo correspondiente. Esto ayuda a visualizar cuánto tiempo ha pasado desde eventos históricos."
+  },
+  "scaling_areas_volumes_title": {
+    "ua": "Площі та об'єми",
+    "en": "Areas and Volumes",
+    "es": "Áreas y Volúmenes"
+  },
+  "scaling_areas_volumes_desc": {
+    "ua": "Для візуалізації площ і обʼємів діаметри кіл розраховуються через квадратний або кубічний корінь їх реальних значень. Це забезпечує правильне співвідношення між колами, даючи змогу коректно порівнювати великі та малі об’єкти.",
+    "en": "To visualize areas and volumes, circle diameters are calculated using the square or cubic root of their real values. This ensures correct proportions between circles, allowing accurate comparison of large and small objects.",
+    "es": "Para visualizar áreas y volúmenes, los diámetros de los círculos se calculan usando la raíz cuadrada o cúbica de sus valores reales. Esto garantiza proporciones correctas entre los círculos, permitiendo comparar con precisión objetos grandes y pequeños."
+  },
+  "scaling_quantitative_indicators_title": {
+    "ua": "Кількісні показники (населення, гроші тощо)",
+    "en": "Quantitative Indicators (Population, Money, etc.)",
+    "es": "Indicadores Cuantitativos (Población, Dinero, etc.)"
+  },
+  "scaling_quantitative_indicators_desc": {
+    "ua": "Кількісні параметри, такі як населення або гроші, представлені через площу кола. Чим більше значення, тим більша площа, що наочно демонструє пропорційну різницю між великими та малими кількостями.",
+    "en": "Quantitative parameters such as population or money are represented by circle area. The larger the value, the greater the area, clearly demonstrating proportional differences between large and small quantities.",
+    "es": "Parámetros cuantitativos como la población o el dinero se representan mediante el área del círculo. Cuanto mayor sea el valor, mayor será el área, demostrando claramente las diferencias proporcionales entre cantidades grandes y pequeñas."
+  }
 }
-}
+
 

@@ -52,7 +52,14 @@ if (scrollBtn) {
     }
   });
 }
-
+// НОВИЙ обробник для scroll-to-scaling
+const scrollScalingBtn = document.getElementById('scroll-to-scaling');
+if (scrollScalingBtn) {
+  scrollScalingBtn.addEventListener('click', () => {
+    document.getElementById('scaling-methods')
+            .scrollIntoView({ behavior: 'smooth' });
+  });
+}
 
 
 
