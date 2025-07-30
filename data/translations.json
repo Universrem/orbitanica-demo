@@ -422,10 +422,10 @@
     "es": "Intervalos de Tiempo"
   },
   "scaling_time_intervals_desc": {
-    "ua": "Масштабування часу здійснюється шляхом перетворення часових інтервалів на лінійні розміри кіл. Чим більший часовий проміжок між подіями, тим більший діаметр відповідного кола. Це допомагає наочно уявити, наскільки давно відбулися історичні події.",
-    "en": "Time is scaled by converting temporal intervals into linear circle sizes. The greater the time span between events, the larger the diameter of the corresponding circle. This helps visualize how long ago historical events occurred.",
-    "es": "El tiempo se escala convirtiendo intervalos temporales en tamaños lineales de círculos. Cuanto mayor sea el lapso de tiempo entre eventos, mayor será el diámetro del círculo correspondiente. Esto ayuda a visualizar cuánto tiempo ha pasado desde eventos históricos."
-  },
+  "ua": "Масштабування часу здійснюється шляхом перетворення часових інтервалів на лінійні розміри кіл. Центр кіл відповідає сьогоднішньому дню. Чим більше коло, тим давніше відбулась подія або тривав період. Це допомагає наочно уявити, наскільки давно відбулися історичні події.",
+  "en": "Time scaling is achieved by converting temporal intervals into linear circle sizes. The center of the circles represents the present day. The larger the circle, the earlier the event occurred or the longer the period lasted. This helps visualize how long ago historical events took place.",
+  "es": "La escala del tiempo se realiza convirtiendo intervalos temporales en tamaños lineales de círculos. El centro de los círculos corresponde al día de hoy. Cuanto mayor sea el círculo, más antiguo fue el evento o más prolongado fue el periodo. Esto ayuda a visualizar cuánto tiempo ha pasado desde que ocurrieron eventos históricos."
+},
   "scaling_areas_volumes_title": {
     "ua": "Площі та об'єми",
     "en": "Areas and Volumes",
