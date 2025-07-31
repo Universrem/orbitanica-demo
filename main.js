@@ -60,6 +60,16 @@ if (scrollScalingBtn) {
             .scrollIntoView({ behavior: 'smooth' });
   });
 }
+const scrollAboutBtn = document.getElementById('scroll-to-about');
+if (scrollAboutBtn) {
+  scrollAboutBtn.addEventListener('click', () => {
+    const target = document.getElementById('about-us');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+}
+
 
 
 

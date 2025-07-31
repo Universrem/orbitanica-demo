@@ -445,7 +445,18 @@
     "ua": "Кількісні параметри, такі як населення або гроші, представлені через площу кола. Чим більше значення, тим більша площа, що наочно демонструє пропорційну різницю між великими та малими кількостями.",
     "en": "Quantitative parameters such as population or money are represented by circle area. The larger the value, the greater the area, clearly demonstrating proportional differences between large and small quantities.",
     "es": "Parámetros cuantitativos como la población o el dinero se representan mediante el área del círculo. Cuanto mayor sea el valor, mayor será el área, demostrando claramente las diferencias proporcionales entre cantidades grandes y pequeñas."
-  }
+  },
+  "join_us_paragraph": {
+  "ua": "Orbitanica зараз перебуває на ранній стадії створення та активного тестування. Розвиток проєкту вимагає поєднання різносторонніх знань із багатьох дисциплін, тому ми відкриті для співпраці з усіма, хто хоче поділитися своїм досвідом, знаннями та ідеями. Запрошуємо викладачів, програмістів та ентузіастів приєднатися до команди.",
+  "en": "Orbitanica is currently in the early stages of creation and testing. Developing the project requires combining diverse knowledge from many disciplines, so we welcome collaboration with anyone willing to share their experience, knowledge, and ideas. We invite educators, developers, and enthusiasts to join the team.",
+  "es": "Orbitanica está actualmente en una etapa temprana de creación y pruebas. El desarrollo del proyecto requiere combinar conocimientos diversos de muchas disciplinas, por lo que estamos abiertos a colaborar con quienes quieran compartir su experiencia, conocimientos e ideas. Invitamos a profesores, programadores y entusiastas a unirse al equipo."
+},
+"scroll_to_about": {
+  "ua": "Про нас",
+  "en": "About us",
+  "es": "Sobre nosotros"
+}
+
 }
 
 
