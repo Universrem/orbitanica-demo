@@ -11,6 +11,9 @@ import { drawTwoCircles, drawThreeCircles }         from './globe-main.js';
 import { t, getCurrentLang }      from './i18n.js';
 import { comparisons }            from './comparisons.js';
 import { formatNice }             from './formatNice.js';
+import { markerLayer, defaultCenterLat, defaultCenterLon } from './globe-main.js';
+import { LonLat, Entity } from '../lib/og.es.js';
+
 
 /*──────────────── Допоміжні ───────────────────────────────*/
 const locName = obj => {
@@ -101,6 +104,17 @@ export async function initSidebar() {
 
   li.addEventListener('click', () => {
     hideInfo();
+
+    // Якщо користувач ще не ставив мітку – ставимо її в центр Львова
+if (markerLayer.getEntities().length === 0) {
+  const autoMarker = new Entity({
+    name     : 'Default marker',
+    lonlat   : new LonLat(defaultCenterLon, defaultCenterLat),
+    billboard: { src: './res/marker.png', size: [16, 24], offset: [0, 12] }
+  });
+  markerLayer.add(autoMarker);
+}
+
 
     const o1 = findObj(cfg.obj1);
     const o2 = findObj(cfg.obj2);

@@ -14,13 +14,13 @@ initI18n();
 async function initI18n() {
   try {
     // 1) завантажуємо основний словник
-const base = await fetch('./data/translations.json')
+const base = await fetch('/data/translations.json')
                      .then(r => r.json());
 
 // 2) намагаємося підхопити додатковий словник блогу
 let blog = {};
 try {
-  const resBlog = await fetch('./data/blog.json');
+  const resBlog = await fetch('/data/blog.json');
   if (resBlog.ok) blog = await resBlog.json();
 } catch (_) {
   /* blog.json може бути відсутнім — тоді ігноруємо */

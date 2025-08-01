@@ -2,10 +2,6 @@
 
 import { Globe, LonLat, Vector, Entity, XYZ, Vec3 } from "../lib/og.es.js";
 
-// --- Центр глобуса: Львів
-const centerLatDeg = 49.8419;
-const centerLonDeg = 24.0315;
-
 // --- Базовий шар
 const osm = new XYZ("OpenStreetMap", {
   isBaseLayer: true,
@@ -13,13 +9,21 @@ const osm = new XYZ("OpenStreetMap", {
   visibility : true
 });
 
-// --- Початкова мітка
-const markerEntity = new Entity({
-  name     : "Львів",
-  lonlat   : new LonLat(centerLonDeg, centerLatDeg),
-  billboard: { src: "./res/marker.png", size: [16, 24], offset: [0, 12] }
-});
-export const markerLayer = new Vector("markerLayer", { entities: [markerEntity] });
+// Порожній шар: мітки з’являтимуться лише після дії користувача
+export const markerLayer = new Vector("markerLayer");
+
+// Координати «за замовчуванням» (Львів) – знадобляться sidebar
+export const defaultCenterLat = 49.8419;
+export const defaultCenterLon = 24.0315;
+
+/** Повертає LonLat останньої мітки,
+ *  або Львів, якщо мітки ще нема */
+export function getCurrentCenterLL() {
+  if (markerLayer.getEntities().length) {
+    return markerLayer.getEntities().slice(-1)[0].getLonLat();
+  }
+  return new LonLat(defaultCenterLon, defaultCenterLat);
+}
 
 // --- Глобус
 export const globus = new Globe({
@@ -28,7 +32,14 @@ export const globus = new Globe({
   layers      : [osm, markerLayer],
   resourcesSrc: "./res",
   fontsSrc    : "./res/fonts",
-  view        : { lat: centerLatDeg, lon: centerLonDeg, range: 10_000_000, tilt: 0, heading: 0 }
+  view: {               // було lat: centerLatDeg …
+  lat: defaultCenterLat,
+  lon: defaultCenterLon,
+  range: 10_000_000,
+  tilt: 0,
+  heading: 0
+}
+
 });
 updateCameraView({ type: 'initial' });
 
@@ -95,7 +106,9 @@ function getCirclePointsSphere(lon, lat, radiusMeters, segments = 128) {
 function addCircle(isGeodesic, radiusMeters, color) {
   if (!isGeodesic) return;
   ensureCircleLayer();
-  const centerLL = markerLayer.getEntities().slice(-1)[0].getLonLat();
+  const centerLL = markerLayer.getEntities().length
+  ? markerLayer.getEntities().slice(-1)[0].getLonLat()
+  : new LonLat(defaultCenterLon, defaultCenterLat);
   const coords = getCirclePointsSphere(centerLL.lon, centerLL.lat, radiusMeters);
   const ent = new Entity({
     geometry: { type: 'LineString', coordinates: coords, clampToGround: true },
@@ -150,7 +163,7 @@ export function drawTwoCircles(r1_m, r2_m, marker1, marker2) {
   addCircle(true, r1_m, defaultColors[0]);
   addCircle(true, r2_m, defaultColors[1]);
 
-  const centerLL = markerLayer.getEntities().slice(-1)[0].getLonLat();
+  const centerLL = getCurrentCenterLL();
   addEdgeMarker(centerLL, r1_m,  45, marker1);
   addEdgeMarker(centerLL, r2_m, -45, marker2);
 
@@ -168,7 +181,8 @@ export function drawThreeCircles(r1_m, r2_m, r3_m, marker1, marker2, marker3) {
   addCircle(true, r2_m, defaultColors[1]);
   addCircle(true, r3_m, defaultColors[2]);
 
-  const centerLL = markerLayer.getEntities().slice(-1)[0].getLonLat();
+  const centerLL = getCurrentCenterLL();
+
   addEdgeMarker(centerLL, r1_m,   135, marker1);
   addEdgeMarker(centerLL, r2_m,  -45, marker2);
   addEdgeMarker(centerLL, r3_m,  135, marker3);
@@ -180,7 +194,9 @@ export function drawThreeCircles(r1_m, r2_m, r3_m, marker1, marker2, marker3) {
 function updateCameraView(context) {
   const cam = globus.planet.camera;
   const ellipsoid = globus.planet.ellipsoid;
-  const centerLL = markerLayer.getEntities().slice(-1)[0].getLonLat();
+  
+  const centerLL = getCurrentCenterLL();
+
   const centerCart = ellipsoid.lonLatToCartesian(centerLL);
 
   switch (context?.type) {

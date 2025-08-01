@@ -452,14 +452,14 @@
   "es": "Orbitanica está actualmente en una etapa temprana de creación y pruebas. El desarrollo del proyecto requiere combinar conocimientos diversos de muchas disciplinas, por lo que estamos abiertos a colaborar con quienes quieran compartir su experiencia, conocimientos e ideas. Invitamos a profesores, programadores y entusiastas a unirse al equipo."
 },
 "scroll_to_about": {
-  "ua": "Про нас",
-  "en": "About us",
-  "es": "Sobre nosotros"
+  "ua": "Контакти",
+  "en": "Contacts",
+  "es": "Contactos"
 },
 "nav_idea": {
-  "ua": "Ідея",
-  "en": "Idea",
-  "es": "La idea"
+  "ua": "Про концепцію",
+  "en": "About the concept",
+  "es": "Sobre el concepto"
 },
 "back_to_main": {
   "ua": "← На головну",
