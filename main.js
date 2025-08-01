@@ -69,6 +69,19 @@ if (scrollAboutBtn) {
     }
   });
 }
+// 4. Плавна прокрутка в блозі (ліва навігація ➜ запис)
+if (document.getElementById('blog-sidebar')) {
+  document.querySelectorAll('#blog-sidebar a').forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      const id = link.getAttribute('href').substring(1); // вирізали "#"
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+}
 
 
 

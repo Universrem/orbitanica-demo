@@ -323,9 +323,9 @@
   "es": "Interfaz multilingüe"
 },
 "features_4_desc": {
-  "ua": "Інтерфейс Orbitanica буде доступний більш ніж 10 мовами, включно з українською, англійською та іспанською.",
-  "en": "The Orbitanica interface will support 10+ languages, including Ukrainian, English, and Spanish.",
-  "es": "La interfaz de Orbitanica estará disponible en más de 10 idiomas, incluidos el ucraniano, el inglés y el español."
+  "ua": "Кількість мов інтерфейсу Orbitanica буде поступово збільшуватися, що дозволить користувачам обирати серед ще більшої кількості доступних варіантів.",
+  "en": "The number of languages available in the Orbitanica interface will gradually increase, allowing users to select from an even wider range of options.",
+  "es": "El número de idiomas disponibles en la interfaz de Orbitanica aumentará gradualmente, lo que permitirá a los usuarios elegir entre una gama aún más amplia de opciones."
 },
   "features_5": {
   "ua": "Розширення бібліотек",
@@ -455,6 +455,16 @@
   "ua": "Про нас",
   "en": "About us",
   "es": "Sobre nosotros"
+},
+"nav_idea": {
+  "ua": "Ідея",
+  "en": "Idea",
+  "es": "La idea"
+},
+"back_to_main": {
+  "ua": "← На головну",
+  "en": "← Back to main",
+  "es": "← Volver al inicio"
 }
 
 }

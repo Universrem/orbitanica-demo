@@ -172,7 +172,6 @@ body {
 }
 
 /* ==== Блок 1: Фонова секція intro ==== */
-/* Блок #intro з фоновим зображенням */
 #intro {
   height: 80vh;
   background: url('../res/orbitanica.png') center center / cover no-repeat;
@@ -437,20 +436,23 @@ section {
   margin: 2rem 0;                   /* зовнішні відступи зверху/знизу */
 }
 
-#scaling-methods h3 {
+#scaling-methods h3,
+#blog-entries .blog-entry h2 {
   text-align: center;               /* заголовки по центру */
   width: 33.333%;                   /* ширина 1/3 від контейнера */
   margin: 1.5rem auto 0;      /* відступи та центрування */
   position: relative;
 }
-#scaling-methods h3::before {
+#scaling-methods h3::before,
+.blog-entry p::before {
   content: "●";                     /* кружечок перед заголовком */
   display: inline-block;
   margin-right: 0.5rem;
-  color: #ff0000;
+  color: #3998f1;
 }
 
-#scaling-methods p {
+#scaling-methods p,
+#blog-entries .blog-entry p {
   width: 50%;                   /* звуження тексту до 1/3 ширини */
   margin: 0 auto 1rem;                /* центрування */
   text-align: center;               /* вирівнювання тексту по центру */
@@ -459,7 +461,8 @@ section {
   color: #555;
 }
 /* ==== Стиль загального заголовка секції розрахунків ==== */
-#scaling-methods h2 {
+#scaling-methods h2,
+#blog-intro h1 {
   font-size: 1.8rem;
   margin-bottom: 2rem;
   text-align: center;    /* якщо ще не було */
@@ -469,11 +472,13 @@ section {
   #scaling-methods {
     padding: 1.5rem;
   }
-  #scaling-methods h3 {
+  #scaling-methods h3,
+  #blog-entries .blog-entry h2 {
     font-size: 1.125rem;
     width: 90%;                     /* адаптивна ширина на мобільних */
   }
-  #scaling-methods p {
+  #scaling-methods p,
+  #blog-entries .blog-entry p {
     width: 90%;
     font-size: 0.95rem;
   }
@@ -506,7 +511,154 @@ section {
   color: #555;
 }
 
+/* Секція 1: Верхня панель блогу */
+#blog-top-bar {
+  background: url('../res/orbitanica.png') center center / cover no-repeat;
+  padding: 10px 20px;              /* 10px зверху/знизу, 20px ліворуч/праворуч */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.blog-lang-switch {
+  display: flex;
+  justify-content: flex-end;  /* всі елементи прижмуться до правого краю */
+  align-items: center;
+  gap: 15px;
+}
 
+#blog-intro {
+  width: 100%;               /* займати всю ширину сторінки */
+  padding: 40px 20px;        /* відступи зверху/знизу 40px, з боків 20px */
+  text-align: center;        /* центр тексту */
+  background-color: #f0f0f0; /* світло-сірий фон, як у “Про нас” */
+}
+/* Звужуємо опис під заголовком блогу */
+#blog-intro p {
+  max-width: 60ch;   /* ~60 символів у рядку — читабельно */
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* На вузьких екранах даємо ширше поле, щоб не ламати верстку */
+@media (max-width: 768px) {
+  #blog-intro p {
+    max-width: 90%;
+  }
+}
+
+/* Секція 3: Записи блогу */
+#blog-entries {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;                       /* відстань між записами */
+}
+.blog-entry {
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 20px;
+}
+.blog-entry h2 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+.blog-entry p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #444;
+}
+.blog-entry .blog-date {
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 6px;
+}
+#blog-entries .blog-entry p {
+  max-width: 90ch;   /* читається краще, ніж 50% */
+  width: 100%;       /* або заберіть width зовсім */
+}
+/* Адаптивне відео у записі блогу */
+.video-wrapper {
+  position: relative;
+  padding-top: 56.25%;      /* 16:9 пропорція */
+  margin: 1rem auto;        /* відступи зверху/знизу */
+  max-width: 800px;         /* вирівнюємо з шириною запису */
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+/* ===== Блог: макет дві колонки ===== */
+#blog-container {
+  display: flex;      /* дві колонки */
+  gap: 30px;          /* відстань між ними */
+  width: 100%;        /* розтягнути на весь екран */
+  margin: 0;          /* без зовнішніх відступів */
+}
+
+#blog-sidebar {
+  flex: 0 0 240px;   /* фіксована ширина 180 px */
+  overflow-y: auto;  /* власний скрол, якщо пунктів багато */
+  padding: 20px 15px;
+  background: #ffffff;
+}
+
+.blog-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Лічильник + кружечок перед заголовком */
+.blog-nav li {
+  position: relative;   /* щоб можна було розмістити псевдоелемент */
+  margin-bottom: 10px;  /* залишаємо ваш відступ */
+  padding-left: 1.2rem; /* місце для кружечка */
+}
+
+.blog-nav li::before {
+  content: "●";         /* сам кружечок */
+  position: absolute;
+  left: 0;              /* вирівнюємо по лівому краю пункту */
+  top: 0.25rem;         /* трохи опускаємо, щоб центрувався по тексту */
+  font-size: 0.65rem;   /* розмір маркера */
+  color: #3998f1;          /* нейтрально-сірий колір */
+}
+
+.blog-nav a {
+  text-decoration: none;
+  color: #000000;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.blog-nav a:hover {
+  color: #3998f1;
+}
+
+/* Права колонка (#blog-entries) already styled; width — решта простору */
+.blog-nav-title {
+  text-align: center;   /* по центру панелі */
+  margin: 0 0 15px;     /* відступ униз */
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+.lang-icon {
+  width: 28px;   /* було 24px → тепер іконка стала меншою */
+  height: auto;
+  margin: 0 2px; /* можна трохи зменшити відступ, аби прапорці не “роз’їхались” */
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+/* Активна мова — повна насиченість і тонка рамка */
+.lang-icon.active {
+  opacity: 1;                     /* прибираємо напівпрозорість */
+}
 
 
 

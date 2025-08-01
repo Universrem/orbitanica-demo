@@ -13,8 +13,22 @@ initI18n();
 
 async function initI18n() {
   try {
-    translations = await fetch('./data/translations.json')
-                           .then(r => r.json());
+    // 1) завантажуємо основний словник
+const base = await fetch('./data/translations.json')
+                     .then(r => r.json());
+
+// 2) намагаємося підхопити додатковий словник блогу
+let blog = {};
+try {
+  const resBlog = await fetch('./data/blog.json');
+  if (resBlog.ok) blog = await resBlog.json();
+} catch (_) {
+  /* blog.json може бути відсутнім — тоді ігноруємо */
+}
+
+// 3) об’єднуємо: фрази з blog.json мають пріоритет
+translations = { ...base, ...blog };
+
 
     // Читаємо вибір із localStorage
     const saved = localStorage.getItem('lang');
@@ -62,4 +76,23 @@ function refreshStaticTexts() {
     el.textContent = t(key);
   });
 }
+// ─────────────────────────────────────────────────────────────
+// 4. Автопідключення перемикача мов для всіх сторінок
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.lang-option').forEach(el => {
+    el.addEventListener('click', () => {
+      const lang = el.getAttribute('data-lang');
+      if (lang && lang !== getCurrentLang()) {
+        setLanguage(lang);
+
+        // Оновити візуальну активність
+        document.querySelectorAll('.lang-option').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        el.classList.add('active');
+      }
+    });
+  });
+});
 
