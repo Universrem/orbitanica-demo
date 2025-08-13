@@ -1,0 +1,157 @@
+[
+  {
+    "category_en": "History",
+    "category_ua": "Історія",
+    "category_es": "Historia",
+
+    "key": "FirstHuman",
+    "name_en": "First human",
+    "name_ua": "Перша людина",
+    "name_es": "Primer humano",
+    "description_en": "Emergence of the first anatomically modern humans.",
+    "description_ua": "Поява перших анатомічно сучасних людей.",
+    "description_es": "Aparición de los primeros humanos anatómicamente modernos.",
+
+    "time_start": { "value": -300000,       "unit": "year" }
+  },
+  {
+    "key": "EarthFormation",
+    "name_en": "Formation of Earth",
+    "name_ua": "Створення Землі",
+    "name_es": "Formación de la Tierra",
+    "description_en": "Accretion and cooling of the planet Earth.",
+    "description_ua": "Утворення й охолодження планети Земля.",
+    "description_es": "Acreción y enfriamiento del planeta Tierra.",
+    "time_start": { "value": -4540000000,  "unit": "year" }
+  },
+  {
+    "key": "UniverseCreation",
+    "name_en": "Creation of the Universe",
+    "name_ua": "Створення Всесвіту",
+    "name_es": "Creación del Universo",
+    "description_en": "Big Bang and the birth of space–time.",
+    "description_ua": "Великий вибух і народження простору–часу.",
+    "description_es": "La Gran Explosión y el nacimiento del espacio-tiempo.",
+    "time_start": { "value": -13800000000, "unit": "year" }
+  },
+  {
+    "key": "PyramidsBuilt",
+    "name_en": "Construction of the Pyramids",
+    "name_ua": "Будівництво пірамід",
+    "name_es": "Construcción de las pirámides",
+    "description_en": "Erection of the Great Pyramids in Egypt.",
+    "description_ua": "Зведення Великих пірамід в Єгипті.",
+    "description_es": "Levantamiento de las Grandes Pirámides en Egipto.",
+    "time_start": { "value": -2560,        "unit": "year" }
+  },
+  {
+    "key": "DinoExtinction",
+    "name_en": "Extinction of the Dinosaurs",
+    "name_ua": "Вимирання динозаврів",
+    "name_es": "Extinción de los dinosaurios",
+    "description_en": "End of the Cretaceous period event.",
+    "description_ua": "Завершення крейдового періоду.",
+    "description_es": "Fin del período Cretácico.",
+    "time_start": { "value": -66000000,    "unit": "year" }
+  },
+  {
+    "key": "FirstLife",
+    "name_en": "Emergence of First Life",
+    "name_ua": "Перше життя",
+    "name_es": "Aparición de la primera vida",
+    "description_en": "Origin of the earliest known life forms.",
+    "description_ua": "Походження найперших відомих форм життя.",
+    "description_es": "Origen de las primeras formas de vida conocidas.",
+    "time_start": { "value": -3500000000,  "unit": "year" }
+  },
+  {
+    "key": "WW2End",
+    "name_en": "End of World War II",
+    "name_ua": "Кінець Другої світової війни",
+    "name_es": "Fin de la Segunda Guerra Mundial",
+    "description_en": "Surrender of Japan, marking WWII’s end in 1945.",
+    "description_ua": "Капітуляція Японії, кінець Другої світової у 1945.",
+    "description_es": "Rendición de Japón, fin de la II Guerra Mundial en 1945.",
+    "time_start": { "value": 1945,         "unit": "year" }
+  },
+  {
+    "key": "WW1End",
+    "name_en": "End of World War I",
+    "name_ua": "Кінець Першої світової війни",
+    "name_es": "Fin de la Primera Guerra Mundial",
+    "description_en": "Armistice signed on November 11, 1918.",
+    "description_ua": "Підписання перемир’я 11 листопада 1918.",
+    "description_es": "Firma del armisticio el 11 de noviembre de 1918.",
+    "time_start": { "value": 1918,         "unit": "year" }
+  },
+  {
+    "key": "ChristCrucifixion",
+    "name_en": "Crucifixion of Christ",
+    "name_ua": "Розп’яття Христа",
+    "name_es": "Crucifixión de Cristo",
+    "description_en": "Event traditionally dated around AD 33.",
+    "description_ua": "Подія, що традиційно датується близько 33 р. н.е.",
+    "description_es": "Evento datado tradicionalmente alrededor del 33 d.C.",
+    "time_start": { "value": 33,           "unit": "year" }
+  },
+  {
+    "key": "RomeFounded",
+    "name_en": "Founding of Rome",
+    "name_ua": "Заснування Риму",
+    "name_es": "Fundación de Roma",
+    "description_en": "Legendary founding year 753 BC.",
+    "description_ua": "Традиційна дата заснування 753 р. до н.е.",
+    "description_es": "Fundación legendaria en el 753 a.C.",
+    "time_start": { "value": -753,         "unit": "year" }
+  },
+  {
+    "key": "ColosseumBuilt",
+    "name_en": "Completion of the Colosseum",
+    "name_ua": "Будівництво Колізею",
+    "name_es": "Construcción del Coliseo",
+    "description_en": "Official opening in AD 80.",
+    "description_ua": "Офіційне відкриття в 80 р. н.е.",
+    "description_es": "Apertura oficial en el 80 d.C.",
+    "time_start": { "value": 80,           "unit": "year" }
+  },
+  {
+    "key": "AmericaDiscovery",
+    "name_en": "Discovery of America",
+    "name_ua": "Відкриття Америки",
+    "name_es": "Descubrimiento de América",
+    "description_en": "Christopher Columbus’s voyage in 1492.",
+    "description_ua": "Подорож Христофора Колумба 1492 р.",
+    "description_es": "Viaje de Cristóbal Colón en 1492.",
+    "time_start": { "value": 1492,         "unit": "year" }
+  },
+  {
+    "key": "WrightFlight",
+    "name_en": "Wright Brothers’ First Flight",
+    "name_ua": "Перший політ братів Райт",
+    "name_es": "Primer vuelo de los hermanos Wright",
+    "description_en": "First powered flight on December 17, 1903.",
+    "description_ua": "Перший політ 17 грудня 1903 р.",
+    "description_es": "Primer vuelo el 17 de diciembre de 1903.",
+    "time_start": { "value": 1903,         "unit": "year" }
+  },
+  {
+    "key": "FirstAutomobile",
+    "name_en": "First Automobile",
+    "name_ua": "Перший автомобіль",
+    "name_es": "Primer automóvil",
+    "description_en": "Karl Benz’s patent in 1886.",
+    "description_ua": "Патент Карла Бенца 1886 р.",
+    "description_es": "Patente de Karl Benz en 1886.",
+    "time_start": { "value": 1886,         "unit": "year" }
+  },
+  {
+    "key": "WheelInvention",
+    "name_en": "Invention of the Wheel",
+    "name_ua": "Винайд колеса",
+    "name_es": "Invención de la rueda",
+    "description_en": "Emergence around 3500 BC in Mesopotamia.",
+    "description_ua": "Поява близько 3500 р. до н.е. в Месопотамії.",
+    "description_es": "Aparición alrededor del 3500 a.C. en Mesopotamia.",
+    "time_start": { "value": -3500,        "unit": "year" }
+  }
+]

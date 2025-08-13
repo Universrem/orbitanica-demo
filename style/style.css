@@ -659,6 +659,13 @@ section {
 .lang-icon.active {
   opacity: 1;                     /* прибираємо напівпрозорість */
 }
+.nav-link-primary{
+  display:inline-block;padding:8px 14px;border-radius:8px;
+  background:#1e90ff;color:#fff;text-decoration:none;font-weight:600;line-height:1;margin-right:8px;
+  border:1px solid transparent;transition:transform .05s ease,filter .15s ease
+}
+.nav-link-primary:hover{filter:brightness(1.05)}
+.nav-link-primary:active{transform:translateY(1px)}
 
 
 

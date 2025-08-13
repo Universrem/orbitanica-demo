@@ -466,13 +466,235 @@
   "en": "← Back to main",
   "es": "← Volver al inicio"
 },
-"go_full_version": {
-  "ua": "Перейти до повної версії",
-  "en": "Go to full version",
-  "es": "Ir a la versión completa"
-}
+
+  "panel_title_comparison": {
+    "ua": "Порівняння",
+    "en": "Comparison",
+    "es": "Comparación"
+  },
+  "panel_title_univers": {
+    "ua": "Всесвіт",
+    "en": "Universe",
+    "es": "Universo"
+  },
+  "panel_title_univers_diameter": {
+    "ua": "Діаметр",
+    "en": "Diameter",
+    "es": "Diámetro"
+  },
+  "panel_title_univers_distance": {
+    "ua": "Відстань",
+    "en": "Distance",
+    "es": "Distancia"
+  },
+  "panel_title_univers_luminosity": {
+    "ua": "Світність",
+    "en": "Luminosity",
+    "es": "Luminosidad"
+  },
+  "panel_title_univers_mass": {
+    "ua": "Маса",
+    "en": "Mass",
+    "es": "Masa"
+  },
+  "panel_title_history": {
+    "ua": "Історія",
+    "en": "History",
+    "es": "Historia"
+  },
+  "panel_title_math": {
+    "ua": "Математика",
+    "en": "Mathematics",
+    "es": "Matemáticas"
+  },
+  "panel_title_money": {
+    "ua": "Гроші",
+    "en": "Money",
+    "es": "Dinero"
+  },
+  "panel_title_geo": {
+    "ua": "Географія",
+    "en": "Geography",
+    "es": "Geografía"
+  },
+  "panel_title_other": {
+    "ua": "Інше",
+    "en": "Other",
+    "es": "Otro"
+  },
+  "panel_placeholder_category": {
+  "ua": "Виберіть категорію",
+  "en": "Select category",
+  "es": "Seleccione categoría"
+},
+"panel_placeholder_object1": {
+  "ua": "Оберіть перший об'єкт",
+  "en": "Select object 1",
+  "es": "Seleccione objeto 1"
+},
+"panel_placeholder_object2": {
+  "ua": "Оберіть другий об'єкт",
+  "en": "Select object 2",
+  "es": "Seleccione objeto 2"
+},
+"panel_placeholder_event1": {
+  "ua": "Оберіть першу подію",
+  "en": "Select event 1",
+  "es": "Seleccione evento 1"
+},
+"panel_placeholder_event2": {
+  "ua": "Оберіть другу подію",
+  "en": "Select event 2",
+  "es": "Seleccione evento 2"
+},
+"panel_placeholder_input_diameter": {
+  "ua": "Задайте діаметр",
+  "en": "Set diameter",
+  "es": "Ingresar diámetro"
+},
+
+  "panel_button_calculate": {
+    "ua": "Старт",
+    "en": "Start",
+    "es": "Iniciar"
+  },
+  "panel_button_reset": {
+    "ua": "Скинути",
+    "en": "Reset",
+    "es": "Reiniciar"
+  },
+  "note_select_first_object": {
+    "ua": "Виберіть перший обʼєкт",
+    "en": "Select the first object",
+    "es": "Seleccione el primer objeto"
+  },
+  "note_set_scale_first_object": {
+    "ua": "Задайте масштаб першого обʼєкта",
+    "en": "Set the scale of the first object",
+    "es": "Establezca la escala del primer objeto"
+  },
+  "note_create_first_object": {
+    "ua": "Або створіть перший обʼєкт",
+    "en": "Or create the first object",
+    "es": "O cree el primer objeto"
+  },
+  "note_select_second_object": {
+    "ua": "Виберіть другий обʼєкт",
+    "en": "Select the second object",
+    "es": "Seleccione el segundo objeto"
+  },
+  "note_create_second_object": {
+    "ua": "Або створіть другий обʼєкт",
+    "en": "Or create the second object",
+    "es": "O cree el segundo objeto"
+  },
+  "note_visualization_controls": {
+    "ua": "Керування візуалізацією",
+    "en": "Visualization controls",
+    "es": "Controles de visualización"
+  },
+  "panel_button_create": {
+  "ua": "Створити",
+  "en": "Create",
+  "es": "Crear"
+},
+  "label.real_diameter": {
+    "ua": "Реальний діаметр",
+    "en": "Real diameter",
+    "es": "Diámetro real"
+  },
+  "label.scaled_diameter": {
+    "ua": "Масштабований діаметр",
+    "en": "Scaled diameter",
+    "es": "Diámetro escalado"
+  },
+
+  "ui.info_panel.title": {
+    "ua": "Результати масштабування",
+    "en": "Scaling results",
+    "es": "Resultados de escala"
+  },
+  "ui.info_panel.toggle_show": {
+    "ua": "+опис",
+    "en": "+description",
+    "es": "+descripción"
+  },
+  "ui.info_panel.toggle_hide": {
+    "ua": "–опис",
+    "en": "–description",
+    "es": "–descripción"
+  },
+  "ui.info_panel.descriptions": {
+    "ua": "Описи",
+    "en": "Descriptions",
+    "es": "Descripciones"
+  },
+  
+  "create_modal_title_diameter": {
+    "ua": "Новий об’єкт — Діаметри",
+    "en": "New Object — Diameters",
+    "es": "Nuevo objeto — Diámetros"
+  },
+  "field_category": {
+    "ua": "Категорія",
+    "en": "Category",
+    "es": "Categoría"
+  },
+  "field_name": {
+    "ua": "Назва",
+    "en": "Name",
+    "es": "Nombre"
+  },
+  "field_value": {
+    "ua": "Значення",
+    "en": "Value",
+    "es": "Valor"
+  },
+  "field_unit": {
+    "ua": "Одиниця",
+    "en": "Unit",
+    "es": "Unidad"
+  },
+  "field_description": {
+    "ua": "Опис (необов’язково)",
+    "en": "Description (optional)",
+    "es": "Descripción (opcional)"
+  },
+  "field_image": {
+    "ua": "Фото (скоро)",
+    "en": "Image (soon)",
+    "es": "Imagen (pronto)"
+  },
+  "btn_create": {
+    "ua": "Створити",
+    "en": "Create",
+    "es": "Crear"
+  },
+  "btn_cancel": {
+    "ua": "Скасувати",
+    "en": "Cancel",
+    "es": "Cancelar"
+  },
+  
+  "panel_placeholder_category_choose_or_enter": {
+    "ua": "Виберіть або введіть категорію",
+    "en": "Choose or enter a category",
+    "es": "Elige o escribe una categoría"
+  },
+  "panel_placeholder_enter_object_name": {
+    "ua": "Введіть назву об’єкта",
+    "en": "Enter object name",
+    "es": "Ingrese el nombre del objeto"
+  }
 
 
 }
+
+
+
+
+
+
+
 
 

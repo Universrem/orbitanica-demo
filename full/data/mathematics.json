@@ -1,0 +1,32 @@
+[
+  {
+    "category_en": "Mathematics",
+    "category_ua": "Математика",
+    "category_es": "Matemáticas",
+
+    "name_en": "One Million",
+    "name_ua": "Один мільйон",
+    "name_es": "Un millón",
+
+    "description_en": "The integer represented by the digit 1 followed by six zeros.",
+    "description_ua": "Ціле число, яке складається з 1 та шести нулів.",
+    "description_es": "El número entero representado por el dígito 1 seguido de seis ceros.",
+
+    "quantity": { "value": 1, "unit": "million" }
+  },
+  {
+    "category_en": "Mathematics",
+    "category_ua": "Математика",
+    "category_es": "Matemáticas",
+
+    "name_en": "One Billion",
+    "name_ua": "Один мільярд",
+    "name_es": "Mil millones",
+
+    "description_en": "The integer represented by the digit 1 followed by nine zeros.",
+    "description_ua": "Ціле число, яке складається з 1 та дев’яти нулів.",
+    "description_es": "El número entero representado por el dígito 1 seguido de nueve ceros.",
+
+    "quantity": { "value": 1000, "unit": "million" }
+  }
+]

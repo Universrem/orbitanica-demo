@@ -1,0 +1,570 @@
+/* ====== Базовий скидання та налаштування ====== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: sans-serif;
+  background-color: #f9f9f9;
+}
+
+/* ====== ВЕРХНЯ ПАНЕЛЬ ====== */
+#top-bar {
+  width: 100%;
+  height: 70px;
+  background-color: #ffffff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 2px 4px rgba(108, 159, 234, 0.2);
+  z-index: 1000;
+}
+
+/* ====== ОСНОВНИЙ КОНТЕНТ ====== */
+#main-content {
+  display: flex;
+  height: calc(100vh - 70px);
+  overflow: hidden;
+}
+
+/* ====== ЛІВА ПАНЕЛЬ ====== */
+#left-panel {
+  width: 280px;
+  height: calc(100vh - 70px);
+  background-color: #fff;
+  border-right: 1px solid #ddd;
+  padding: 20px;
+  overflow-y: scroll;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.05);
+  z-index: 1;
+}
+
+/* ====== КОНТЕЙНЕР ГЛОБУСА ====== */
+#globe-container {
+  flex-grow: 1;
+  position: relative;
+  z-index: 0;
+}
+#globe-container > .og-inner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+#globe-container > .og-inner > *:not(canvas) {
+  display: none !important;
+}
+
+/* ====== DETAILS & SUMMARY: прибрати стандартні маркери ====== */
+details > summary::-webkit-details-marker,
+details > summary::marker {
+  display: none;
+  content: none;
+}
+summary {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ====== ГОЛОВНІ ЗАГОЛОВКИ В ЛІВІЙ ПАНЕЛІ ====== */
+#left-panel > details > summary {
+  position: relative;
+  padding-left: 1.2em;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: #222;
+  transition: color 0.2s ease;
+}
+#left-panel > details > summary::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.2em;
+  height: 0.2em;
+  background-color: currentColor;
+  border-radius: 50%;
+}
+#left-panel > details > summary:hover {
+  color: #0077cc;
+}
+#left-panel > details[open] > summary {
+  color: #005fa3;
+}
+
+/* ====== ПІДЗАГОЛОВКИ ТА ВМОНТОВАНИЙ CONTENT ====== */
+.section-content {
+  display: block;
+}
+.section-content > * {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.75em;
+}
+.section-content > *:last-child {
+  margin-bottom: 0;
+}
+.section-content > details {
+  margin: 0;
+}
+.section-content > details > summary {
+  padding-left: 1.8em;
+  margin: 0;
+  font-weight: 400;
+  font-size: 1em;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: inherit;
+}
+.section-content > details > summary::before {
+  content: none;
+}
+.section-content > details > summary:hover {
+  color: #005fa3;
+}
+.section-content > details[open] > summary {
+  color: #0077cc;
+}
+
+/* ====== ЕЛЕМЕНТИ ФОРМИ В ЛІВІЙ ПАНЕЛІ ====== */
+#left-panel .section-content select,
+#left-panel .section-content input,
+#left-panel .section-content button {
+  height: 30px;
+  padding: 0 8px;
+  font-size: 0.8rem;
+  color: #000000;  
+  border: 1px solid #000000;
+  border-radius: 4px;
+  background-color: #fff;
+  line-height: 30px;
+}
+
+#left-panel .section-content > select:first-of-type {
+  margin-top: 0.5em;
+}
+
+/* Кнопка "Розрахувати": рамка зелена завжди; фон стає зеленим у стані .is-active */
+.section-content button#calculate {
+  border: 1px solid green;
+  background: #fff;
+  color: #000;
+  transition: background-color .18s ease, color .18s ease;
+}
+.section-content button#calculate.is-active {
+  background: green;
+  color: #fff;
+}
+.section-content button#calculate.is-active:hover {
+  background: green;
+  color: #fff;
+}
+
+/* Кнопка "Скинути": рамка червона завжди; фон стає червоним у стані .is-active */
+.section-content button#reset {
+  border: 1px solid red;
+  background: #fff;
+  color: #000;
+  transition: background-color .18s ease, color .18s ease;
+}
+.section-content button#reset.is-active {
+  background: red;
+  color: #fff;
+}
+.section-content button#reset.is-active:hover {
+  background: red;
+  color: #fff;
+}
+
+
+/* ====== ЕФЕКТ ПРИ НАВЕДЕННІ КУРСОРА ====== */
+#left-panel .section-content select:hover,
+#left-panel .section-content input:hover,
+#left-panel .section-content button:hover {
+  background-color: #f9f9f9;       
+  cursor: pointer;                
+}
+/* ====== СТИЛЬ ДЛЯ НЕАКТИВНИХ ПОЛІВ І КНОПОК ====== */
+#left-panel .section-content select:disabled,
+#left-panel .section-content input:disabled,
+#left-panel .section-content button:disabled {
+  background-color: #eee;       /* сірий фон */
+  color: #999;                  /* світло-сірий текст */
+  border-color: #ccc;           /* звичайна рамка */
+  cursor: not-allowed;          /* курсор показує, що не можна натискати */
+  opacity: 0.7;                 /* трохи прозоріше */
+}
+
+/* 🔹 Стилі перемикача мов */
+#lang-switch {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.lang-option {
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 16px;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.lang-option:hover {
+  color: #aaa;
+}
+
+.lang-option.active {
+  color: #127def; /* синій */
+}
+.lang-icon {
+  width: 28px;   /* було 24px → тепер іконка стала меншою */
+  height: auto;
+  margin: 0 2px; /* можна трохи зменшити відступ, аби прапорці не “роз’їхались” */
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+/* Активна мова — повна насиченість і тонка рамка */
+.lang-icon.active {
+  opacity: 1;                     /* прибираємо напівпрозорість */
+}
+
+/* ==== Блок 1: Фонова секція intro ==== */
+#top-bar {
+  background-color: #f7f7f7;
+  padding: 10px 20px;              /* 10px зверху/знизу, 20px ліворуч/праворуч */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+select.has-placeholder {
+  color: gray;
+  font-style: italic;
+  padding-left: 8px;
+}
+input::placeholder {
+  font-style: italic;
+  color: gray;
+  padding-left: 4px;
+}
+#left-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+#left-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#left-panel::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+#left-panel::-webkit-scrollbar-thumb:hover {
+  background-color: #bbb;
+}
+/* ====== Тексти-підказки в лівій панелі ====== */
+#left-panel .panel-note {
+  margin: 0.6em 0 0.3em 0;     /* вирівняний відступ */
+  font-style: italic;
+  font-weight: normal;
+  font-size: 0.8em;
+  color: #bababa;
+  line-height: 1.4;
+  text-align: center;  
+}
+#left-panel .sector-block {
+  margin: 6px 0;  
+  padding: 8px 12px; 
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #ffffff;
+}
+#left-panel .sector-block select,
+#left-panel .sector-block input,
+#left-panel .sector-block button {
+  display: block;
+  margin: 6px auto;
+  max-width: 90%;           
+  width: 100%;              
+  box-sizing: border-box;     
+}
+hr {
+  border: none;
+  border-top: 2px solid #1947b2;
+  margin: 15px 0;
+}
+
+/* ==== Info Panel ==== */
+#info-panel {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 280px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-family: sans-serif;
+  z-index: 10;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+#info-panel.hidden {
+  display: none;
+}
+
+#info-panel .info-panel__title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+#info-panel .info-panel__description {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+#info-panel .info-panel__unit {
+  font-style: italic;
+  text-align: right;
+  font-size: 0.85rem;
+}
+
+.info-panel__row .scaled {
+  color: #555;
+}
+
+/* InfoPanel: тумблер-світчер  */
+#info-panel .info-panel__toggleWrap {
+  display: flex;
+  align-items: center; /* вище */
+  gap: 6px;
+  flex: 0 0 auto;
+  margin-top: 0px;        /* легкий нудж вгору */
+}
+
+#info-panel .info-panel__toggleLabel {
+  font-size: 0.9rem;
+  color: #333;
+  white-space: nowrap;
+}
+
+#info-panel .switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.2);
+  background: #fff;
+  cursor: pointer;
+  flex: 0 0 auto;
+  outline: none;
+}
+
+#info-panel .switch__knob {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #666;
+  transform: translateY(-50%);
+  transition: left .18s ease;
+}
+
+#info-panel .switch.is-on .switch__knob {
+  left: calc(100% - 18px);
+  background: #111;
+}
+
+#info-panel .switch[aria-checked="true"] {
+  background: #eaeaea;
+}
+/* ===== Hover preview для назв у InfoPanel ================== */
+#ip-hover {
+  position: fixed;
+  z-index: 9999;
+  display: none;
+  pointer-events: none;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.15);
+  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  border-radius: 6px;
+  padding: 6px;
+  max-width: 280px;
+  max-height: 280px;
+}
+#ip-hover img {
+  display: block;
+  max-width: 268px;   /* 280 - padding*2 */
+  max-height: 268px;
+}
+
+#info-panel .ip-name.has-thumb {
+  text-decoration: underline dotted;
+  cursor: pointer;
+}
+/* ===== InfoPanel: компонування результатів (ФІНАЛ) ===== */
+#info-panel .info-panel__row {
+  display: flex;           /* компактна частина в один рядок */
+  flex-wrap: wrap;         /* опис іде НА НОВИЙ РЯДОК */
+  align-items: baseline;
+  margin: 6px 0 12px;
+  font-size: 14px;
+}
+
+/* скидання артефактів у назві (щоб не було «лінії») */
+#info-panel .ip-name {
+  display: inline;
+  font-weight: 600;
+  text-decoration: none;
+  border: 0;
+  background: transparent;
+}
+#info-panel .info-panel__row::before,
+#info-panel .ip-name::before,
+#info-panel .ip-name::after {
+  content: none;
+}
+
+/* опис займає всю ширину під компактним рядком */
+#info-panel .info-panel__extra {
+  flex: 1 0 100%;          /* повна ширина, перенос вниз */
+  margin-top: 6px;
+}
+
+#info-panel .info-panel__description {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+/* ==== Info Panel v4: прозора шапка, автозріст, скрол по правому краю ==== */
+#info-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: var(--info-panel-max-h, 72vh);
+  height: auto;
+  /* важливо: не додаємо внутрішній правий відступ, щоб скрол був впритул */
+  padding-right: 0;
+}
+
+#info-panel .info-header {
+  flex: 0 0 auto;
+  background: transparent;   /* шапка прозора */
+  border: none;              /* без рамок */
+  position: relative;
+  z-index: 1;
+}
+
+#info-panel .info-scroll {
+  flex: 1 1 auto;
+  min-height: 0;                  /* для коректного скролу у flex-контейнері */
+  overflow-y: auto;               /* з’являється лише коли потрібно */
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  /* критично: будь-які паддінги всередині — виносимо у внутрішні елементи,
+     щоб сам скролбар не «заходив» лівіше краю */
+  padding-inline: 0;
+
+  /* резервує місце під скролбар і тримає його біля правого краю без зсувів */
+  scrollbar-gutter: stable;
+}
+#info-panel .info-header {
+  padding-right: 12px; /* додає 12px справа тільки для шапки */
+}
+
+/* Єдиний стиль «тонкого» скролу — як у лівому фреймі */
+#left-panel,
+#info-panel .info-scroll {
+  scrollbar-width: thin;                                  /* Firefox */
+  scrollbar-color: rgba(0, 0, 0, 0.35) transparent;       /* Firefox */
+}
+
+#left-panel::-webkit-scrollbar,
+#info-panel .info-scroll::-webkit-scrollbar {
+  width: 8px;                                             /* Chrome/Edge */
+}
+
+#left-panel::-webkit-scrollbar-track,
+#info-panel .info-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#left-panel::-webkit-scrollbar-thumb,
+#info-panel .info-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+}
+
+#left-panel::-webkit-scrollbar-thumb:hover,
+#info-panel .info-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+/* Блокування сектора (Об’єкт 1) після розрахунку */
+.sector-block.is-locked {
+  opacity: .6;
+}
+.sector-block.is-locked select,
+.sector-block.is-locked input,
+.sector-block.is-locked button {
+  pointer-events: none;
+}
+
+/* Валідація: незаповнене поле */
+select.is-invalid,
+input.is-invalid {
+  border-color: red !important;
+  outline: none;
+}
+/* ====== Modal: User Object Creation ====== */
+body.modal-open { overflow: hidden; }
+#modal-root { position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
+.ouo-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; pointer-events: all; }
+.ouo-modal { width: min(640px, 92vw); max-height: 88vh; overflow: auto; background: #fff; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,.2); padding: 16px 18px; }
+.ouo-modal__header h3 { font-size: 18px; margin-bottom: 12px; font-weight: 600; }
+.ouo-modal__body .ouo-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.ouo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ouo-field input[type="text"],
+.ouo-field input[type="number"],
+.ouo-field select,
+.ouo-field textarea { padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: #fff; }
+.ouo-field--disabled { opacity: .6; }
+.ouo-modal__footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.btn-primary { padding: 8px 14px; border-radius: 10px; border: none; background: #1f6feb; color: #fff; cursor: pointer; }
+.btn-secondary { padding: 8px 14px; border-radius: 10px; border: 1px solid #ccc; background: #f3f3f3; cursor: pointer; }
+.is-invalid { border-color: #d33 !important; outline: none; }
+
+/* InfoPanel: кольорова крапка та базова стилізація імені */
+.ip-dot{
+  display:inline-block;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  margin-right:6px;
+  vertical-align:middle;
+  border:1px solid rgba(0,0,0,0.25);
+}
+.ip-name{
+  color:#000;            /* завжди чорний текст назви */
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "category_en": "Geography",
+    "category_ua": "Географія",
+    "category_es": "Geografía",
+    "name_en": "Population of Europe 2024",
+    "name_ua": "Населення Європи 2024",
+    "name_es": "Población de Europa 2024",
+    "description_en": "Total population living in Europe as of 2024.",
+    "description_ua": "Загальна кількість жителів у Європі станом на 2024 рік.",
+    "description_es": "Población total que vive en Europa a partir de 2024.",
+    "population": { "value": 450400000, "unit": "people" }
+  },
+  {
+    "category_en": "Geography",
+    "category_ua": "Географія",
+    "category_es": "Geografía",
+    "name_en": "Population of USA 2024",
+    "name_ua": "Населення США 2024",
+    "name_es": "Población de EE.UU. 2024",
+    "description_en": "Total population of the United States as of 2024.",
+    "description_ua": "Загальна кількість населення США станом на 2024 рік.",
+    "description_es": "Población total de Estados Unidos a partir de 2024.",
+    "population": { "value": 340110988, "unit": "people" }
+  },
+  {
+    "category_en": "Geography",
+    "category_ua": "Географія",
+    "category_es": "Geografía",
+    "name_en": "Global Population 2024",
+    "name_ua": "Населення світу 2024",
+    "name_es": "Población mundial 2024",
+    "description_en": "Estimated total population of the world as of January 1, 2025.",
+    "description_ua": "Оцінкова загальна кількість населення світу станом на 1 січня 2025 року.",
+    "description_es": "Estimación de la población mundial total al 1 de enero de 2025.",
+    "population": { "value": 8090000000, "unit": "people" }
+  },
+  {
+    "category_en": "Geography",
+    "category_ua": "Географія",
+    "category_es": "Geografía",
+    "name_en": "Population of China 2024",
+    "name_ua": "Населення Китаю 2024",
+    "name_es": "Población de China 2024",
+    "description_en": "Total population of China in 2024 after a third consecutive year of decline.",
+    "description_ua": "Загальна кількість населення Китаю в 2024 році після третього підряд року зменшення.",
+    "description_es": "Población total de China en 2024 tras el tercer año consecutivo de descenso.",
+    "population": { "value": 1408000000, "unit": "people" }
+  },
+  {
+    "category_en": "Geography",
+    "category_ua": "Географія",
+    "category_es": "Geografía",
+    "name_en": "Land Area of Earth",
+    "name_ua": "Площа суходолу",
+    "name_es": "Área terrestre",
+    "description_en": "Total land area of Earth excluding bodies of water.",
+    "description_ua": "Загальна площа суходолу Землі без урахування водних об'єктів.",
+    "description_es": "Área terrestre total de la Tierra excluyendo cuerpos de agua.",
+    "area": { "value": 150000000, "unit": "km²" }
+  },
+  {
+    "category_en": "Geography",
+    "category_ua": "Географія",
+    "category_es": "Geografía",
+    "name_en": "Land Area of Europe",
+    "name_ua": "Площа Європи",
+    "name_es": "Área de Europa",
+    "description_en": "Total geographical area of the continent of Europe.",
+    "description_ua": "Загальна географічна площа континенту Європа.",
+    "description_es": "Área geográfica total del continente europeo.",
+    "area": { "value": 10180000, "unit": "km²" }
+  },
+  {
+    "category_en": "Geography",
+    "category_ua": "Географія",
+    "category_es": "Geografía",
+    "name_en": "Water Area of Earth",
+    "name_ua": "Площа води",
+    "name_es": "Área de agua",
+    "description_en": "Total surface area of Earth's oceans and inland waters.",
+    "description_ua": "Загальна площа океанів та внутрішніх вод Землі.",
+    "description_es": "Área total de océanos y aguas interiores de la Tierra.",
+    "area": { "value": 360000000, "unit": "km²" }
+  },
+  {
+    "category_en": "Geography",
+    "category_ua": "Географія",
+    "category_es": "Geografía",
+    "name_en": "Mount Everest Height",
+    "name_ua": "Висота Евересту",
+    "name_es": "Altura del Monte Everest",
+    "description_en": "Official measured height of Mount Everest as of December 2020.",
+    "description_ua": "Офіційна виміряна висота гори Еверест станом на грудень 2020 року.",
+    "description_es": "Altura oficial medida del Monte Everest a diciembre de 2020.",
+    "height": { "value": 8848.86, "unit": "m" }
+  },
+  {
+    "category_en": "Geography",
+    "category_ua": "Географія",
+    "category_es": "Geografía",
+    "name_en": "Height of the Tallest Building (Burj Khalifa)",
+    "name_ua": "Висота найвищої будівлі",
+    "name_es": "Altura del edificio más alto",
+    "description_en": "Height of the Burj Khalifa, the world's tallest building.",
+    "description_ua": "Висота Бурдж Халіфа, найвищої будівлі світу.",
+    "description_es": "Altura del Burj Khalifa, el edificio más alto del mundo.",
+    "height": { "value": 828, "unit": "m" }
+  }
+]
