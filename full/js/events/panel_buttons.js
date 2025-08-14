@@ -8,6 +8,7 @@ import { setObject1Scale, addObject2Circle, getCurrentScale } from '../calc/calc
 import { setBaselineResult, addResult } from '../ui/infoPanel.js';
 import { resetAllUI } from './reset.js';
 import { getColorForKey } from '../utils/color.js';
+import { setCircleLabelText } from '../globe/circles.js';
 
 
 // ---- валідатор: знімати .is-invalid при вводі/виборі ----
@@ -43,22 +44,28 @@ document.addEventListener('click', (e) => {
     // === A) ВАЛІДАЦІЯ ОБОХ СЕКТОРІВ У ЦІЙ ПІДСЕКЦІЇ (Об'єкт 1 і Об'єкт 2) ===
     const scope = btn.closest('details'); // підсекція, де натиснули кнопку
     const groups = scope ? scope.querySelectorAll('.sector-block') : [];
-    const object1Group = groups[0]; // Об’єкт 1
-    const object2Group = groups[1]; // Об’єкт 2 (може не бути у деяких режимах)
-
+    const object1Group = groups[0] || null;
+    const object2Group = groups[1] || null;
     const validateGroup = (grp) => {
-      if (!grp) return true;
-      const req = grp.querySelectorAll('select, input[type="number"]');
-      let ok = true;
-      req.forEach(el => {
-        const empty = (el.tagName === 'SELECT')
-          ? (el.selectedIndex <= 0)
-          : (String(el.value ?? '').trim() === '');
-        el.classList.toggle('is-invalid', empty);
-        if (empty) ok = false;
-      });
-      return ok;
-    };
+  if (!grp) return true;
+
+  // якщо сектор уже зафіксований після розрахунку — НЕ валідимо його
+  if (grp.classList.contains('is-locked')) return true;
+
+  // валідимо тільки ті поля, що не disabled
+  const req = grp.querySelectorAll('select:not([disabled]), input[type="number"]:not([disabled])');
+
+  let ok = true;
+  req.forEach(el => {
+    const empty = (el.tagName === 'SELECT')
+      ? (el.selectedIndex <= 0)
+      : (String(el.value ?? '').trim() === '');
+    el.classList.toggle('is-invalid', empty);
+    if (empty) ok = false;
+  });
+  return ok;
+};
+
 
     const g1ok = validateGroup(object1Group);
     const g2ok = validateGroup(object2Group);
@@ -121,6 +128,7 @@ document.addEventListener('click', (e) => {
           color: color1
         });
 
+        setCircleLabelText(color1, data.object1.name);
 
         addResult({
           libIndex: data.object2.libIndex,
@@ -132,8 +140,7 @@ document.addEventListener('click', (e) => {
           color: color2
         });
 
-
-
+        setCircleLabelText(color2, data.object2.name);
 
       // 4) Після успіху: блокуємо сектор 1 і підсвічуємо кнопки в ЦІЙ підсекції
       if (object1Group) {

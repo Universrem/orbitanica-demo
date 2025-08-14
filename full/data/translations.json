@@ -685,9 +685,12 @@
     "ua": "Введіть назву об’єкта",
     "en": "Enter object name",
     "es": "Ingrese el nombre del objeto"
-  }
-
-
+  },
+  "wip_notice_short": {
+  "ua": "Розробка: деякі функції тимчасово недоступні",
+  "en": "Work in progress: some features are temporarily unavailable",
+  "es": "En desarrollo: algunas funciones no están disponibles temporalmente"
+}
 }
 
 

@@ -180,6 +180,13 @@ function repopulateObjectsSelect(selectId, category, placeholderKey) {
   const sel = document.getElementById(selectId);
   if (!sel) return;
 
+  // ⟵ NEW: якщо сектор заблокований — не чіпаємо його зовсім
+  const group = sel.closest('.sector-block');
+  if (group && group.classList.contains('is-locked')) return;
+
+  // ⟵ NEW: запам’ятати попередній вибір
+  const prev = sel.value;
+
   sel.innerHTML = '';
 
   const ph = document.createElement('option');
@@ -189,21 +196,37 @@ function repopulateObjectsSelect(selectId, category, placeholderKey) {
 
   if (!category) return;
 
-  buildCombinedObjectsForCategory(category).forEach(it => {
+  const list = buildCombinedObjectsForCategory(category);
+  list.forEach(it => {
     const opt = document.createElement('option');
     opt.value = it.name;
     opt.textContent = it.source === 'user' ? `${it.name} •` : it.name;
     sel.appendChild(opt);
   });
+
+  // ⟵ NEW: якщо попереднє значення є в новому списку — відновити його
+  if (prev) {
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === prev) { sel.value = prev; break; }
+    }
+  }
 }
 
+
 function rebuildForSlot(slot) {
-  const catId = slot === 'object1' ? 'diamCategoryObject1' : 'diamCategoryObject2';
   const objId = slot === 'object1' ? 'diamObject1' : 'diamObject2';
+  const objSel = document.getElementById(objId);
+  const group = objSel ? objSel.closest('.sector-block') : null;
+
+  // ⟵ NEW: якщо сектор заблокований — нічого не робимо
+  if (group && group.classList.contains('is-locked')) return;
+
+  const catId = slot === 'object1' ? 'diamCategoryObject1' : 'diamCategoryObject2';
   const placeholderKey = slot === 'object1' ? 'panel_placeholder_object1' : 'panel_placeholder_object2';
   const cat = document.getElementById(catId)?.value || '';
   repopulateObjectsSelect(objId, cat, placeholderKey);
 }
+
 
 function rebuildObjectsForSelectedCategories() {
   rebuildForSlot('object1');

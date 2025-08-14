@@ -201,7 +201,16 @@ function render() {
 
 
     // Ховер-прев’ю: беремо перше доступне поле зображення
-    const thumbUrl = (rec?.image_thumb || rec?.image || rec?.image_url || rec?.image_full || '').trim();
+    function fixUrl(u) {
+      if (!u) return '';
+      if (/^https?:\/\//i.test(u)) return u;       // вже абсолютний
+      if (u.startsWith('/')) return u;              // кореневий
+      if (u.startsWith('./')) return u.slice(1);    // ./res/... -> /res/...
+      if (u.startsWith('../')) return '/' + u.replace(/^\.\.\//, ''); // ../res/... -> /res/...
+      return '/' + u.replace(/^\/+/, '');           // res/... -> /res/...
+    }
+    const thumbUrl = fixUrl((rec?.image_thumb || rec?.image || rec?.image_url || rec?.image_full || '').trim());
+
     if (thumbUrl) {
       nameSpan.classList.add('has-thumb');
       nameSpan.addEventListener('mouseenter', (e) => scheduleHover(e, thumbUrl));

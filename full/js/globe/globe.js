@@ -35,6 +35,8 @@ export const globus = new Globe({
     heading: 0
   }
 });
+export const labelsLayer = new Vector("labelsLayer", { visibility: true });
+globus.planet.addLayer(labelsLayer);
 
 // Підключаємо модулі камери та маркерів
 initCamera(globus);
