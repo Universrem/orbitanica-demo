@@ -4,31 +4,27 @@
 import { circlesLayer } from '../globe/circles.js';
 import { clearInfoPanel } from '../ui/infoPanel.js';
 
-/**
- * Повний скидання інтерфейсу та візуалізації (універсально для всіх розділів):
- * 1) Сповіщає модулі про скидання (вони самі обнуляють свій внутрішній state)
- * 2) Стирає кола, ховає інфопанель
- * 3) Очищає всі select/input/checkbox у лівій панелі (без переліку ID)
- * 4) Повертає кнопки до білого фону (рамки зберігаються)
- */
+/** Часткове очищення екрана (не чіпає форми/стан сесії) */
+export function resetScreenUI() {
+  try { circlesLayer && circlesLayer.removeAll(); } catch {}
+  try { clearInfoPanel({ hideOnly: true }); } catch {}
+}
+
+/** Повний скидання: нова сесія (скидає ВСЕ, у т.ч. масштаб і baseline) */
 export function resetAllUI() {
-  // 1) 🔔 Спершу сповіщаємо всі модулі: «йде скидання state»
-  //    (щоб жоден «вотчер» не підставляв значення назад у поля)
-  window.dispatchEvent(new Event('orbit:ui-reset'));
+  // 1) Дати знати всім модулям про повний reset (circles.js сам очистить свої шари/реєстр)
+  window.dispatchEvent(new CustomEvent('orbit:ui-reset'));
 
-  // 2) Візуалізація та інфопанель
-  try { circlesLayer && circlesLayer.clear && circlesLayer.clear(); } catch (e) {}
-  try { clearInfoPanel && clearInfoPanel(); } catch (e) {}
+  // 2) Підстрахуємося локально
+  try { circlesLayer && circlesLayer.removeAll(); } catch {}
+  try { clearInfoPanel({ hideOnly: false }); } catch {}
 
-  // 3) Очистити форми у лівій панелі (будь-який розділ/режим)
+  // 3) Очистити поля лівої панелі
   resetFormControls();
 
-
-  // 4) Кнопки — у початковий (білий) фон; рамки залишаються
-    // Зняти підсвітку з усіх пар кнопок у лівій панелі (id можуть повторюватися у підсекціях)
-    document.querySelectorAll('#left-panel button#calculate').forEach(b => b.classList.remove('is-active'));
-    document.querySelectorAll('#left-panel button#reset').forEach(b => b.classList.remove('is-active'));
-
+  // 4) Завершити сесію (розблокує перемикач мови тощо)
+  window.__orbitSessionActive = false;
+  window.dispatchEvent(new CustomEvent('orbit:session-end'));
 }
 
 /** Очищення контролів без хардкоду ID */
@@ -55,9 +51,9 @@ function resetFormControls(root = document.getElementById('left-panel')) {
 
   // d) Зняти блокування та прибрати помилкові підсвітки
   root.querySelectorAll('.sector-block.is-locked').forEach(b => b.classList.remove('is-locked'));
-  root.querySelectorAll('select[disabled], input[disabled], button[disabled]').forEach(el => el.disabled = false);
+  root.querySelectorAll('select[disabled], input[disabled], button[disabled]').forEach(el => { el.disabled = false; });
   root.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-
 }
+
 
 

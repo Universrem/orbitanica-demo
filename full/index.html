@@ -51,11 +51,24 @@
 <body>
 
 <header id="top-bar">
-  <div id="lang-switch">
-    <img src="/full/res/ua.svg" alt="UA" class="lang-icon lang-option active" data-lang="ua">
-    <img src="/full/res/en.svg" alt="EN" class="lang-icon lang-option"        data-lang="en">
-    <img src="/full/res/es.svg" alt="ES" class="lang-icon lang-option"        data-lang="es">
-  </div>
+  <div id="lang-menu" class="lang-free">
+  <button id="lang-button" aria-haspopup="listbox" aria-expanded="false" title="Мова / Language">
+    <img src="/full/res/language_change.png" alt="" class="lang-globe">
+    <span id="lang-current">UA</span>
+  </button>
+  <ul id="lang-dropdown" role="listbox" hidden>
+    <li data-lang="ua" role="option">
+      <img src="/full/res/ua.svg" alt="UA" class="lang-flag"> Українська
+    </li>
+    <li data-lang="en" role="option">
+      <img src="/full/res/en.svg" alt="EN" class="lang-flag"> English
+    </li>
+    <li data-lang="es" role="option">
+      <img src="/full/res/es.svg" alt="ES" class="lang-flag"> Español
+    </li>
+  </ul>
+</div>
+
   <div id="top-actions">
     <span class="wip-pill" data-i18n-key="wip_notice_short"></span>
   </div>

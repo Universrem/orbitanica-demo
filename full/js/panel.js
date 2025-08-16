@@ -1,7 +1,8 @@
 // panel.js
 import { t } from './i18n.js';
 import { initUniversDiameterBlock } from './blocks/univers_diameter.js';
-import { resetAllUI } from './events/reset.js';
+import { resetAllUI, resetScreenUI } from './events/reset.js';
+
 
 function createField(f) {
   let el;
@@ -513,10 +514,10 @@ if (leftPanel && !leftPanel.__orbitResetHookAttached) {
     if (!sum || !leftPanel.contains(sum)) return;
 
     const det = sum.parentElement; // <details>
-    // Скидаємо тільки коли ми ВІДКРИВАЄМО інший details (він ще закритий)
     if (det && det.tagName === 'DETAILS' && !det.open) {
-      resetAllUI();
-    }
+  resetScreenUI();   // тільки почистити екран, baseline і масштаб залишити
+}
+
   }, true); // capture: спрацьовує до перемикання open
 
   // Захист від повторного підвішування, якщо initLeftPanel викличеться ще раз

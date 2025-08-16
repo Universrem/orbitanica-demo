@@ -5,6 +5,8 @@ import { globus, markerLayer } from "./globe.js";
 import { LonLat, Entity } from '../../lib/og.es.js';
 import { updateCameraView } from "./camera.js";
 
+let __lastCenter = { lon: null, lat: null };
+
 /** Публічна функція для встановлення/перенесення маркера */
 export function placeMarker(lon, lat, { silent = false, suppressEvent = false } = {}) {
 
@@ -21,25 +23,23 @@ export function placeMarker(lon, lat, { silent = false, suppressEvent = false } 
   });
 
   markerLayer.add(newMarker);
-  // повідомляємо, що центр змінився (крім випадків, коли приглушено)
+
+  // повідомляємо, що центр змінився (один раз і лише якщо координати реально нові)
   if (!suppressEvent) {
-    window.dispatchEvent(new CustomEvent('orbit:center-changed', {
-      detail: { lon, lat }
-    }));
+    const same = (__lastCenter.lon === lon && __lastCenter.lat === lat);
+    if (!same) {
+      __lastCenter = { lon, lat };
+      window.dispatchEvent(new CustomEvent('orbit:center-changed', {
+        detail: { lon, lat }
+      }));
+    }
   }
-
-
-  // 🔔 повідомляємо всім модулям (колам тощо), що центр змінився
-  window.dispatchEvent(new CustomEvent('orbit:center-changed', {
-    detail: { lon, lat }
-  }));
 
   // Камеру рухаємо лише якщо не silent
   if (!silent) {
     updateCameraView(globus, { type: 'markerMoved' });
   }
 }
-
 
 /** Вішає обробник кліку по глобусу для встановлення маркера */
 export function initMarkers(globus) {
@@ -57,4 +57,5 @@ export function initMarkers(globus) {
     placeMarker(lonLat.lon, lonLat.lat);
   });
 }
+
 

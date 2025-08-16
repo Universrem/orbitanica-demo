@@ -1,3 +1,4 @@
+// full/js/ui/infoPanel.js
 'use strict';
 
 import { t, getCurrentLang } from '../i18n.js';
@@ -9,44 +10,37 @@ let listEl = null;
 let toggleLabelEl = null;
 let toggleBtn = null;
 
-let baselineSet = false;
 let showDescriptions = false;
 
-let ipHover = null;      // контейнер попапу прев’ю
-let hoverTimer = null;   // затримка для ховера
+let ipHover = null;
+let hoverTimer = null;
 
-// Елементи панелі (порядок додавання результатів)
-const items = []; // { type: 'baseline'|'item', libIndex, realValue, realUnit, scaledMeters }
+const items = []; // { type:'baseline'|'item', libIndex, realValue, realUnit, scaledMeters, name?, description?, color }
 
-// Локаль форматування чисел
 const LOCALES = { ua: 'uk-UA', en: 'en-US', es: 'es-ES' };
 const locale = () => LOCALES[getCurrentLang?.()] || 'uk-UA';
 
-// Форматування
 const fmtNumber = v => (typeof v === 'number' ? v : Number(v)).toLocaleString(locale());
 function fmtMeters(m) {
+  if (m == null || !isFinite(m)) return '';
   if (m >= 1000) return `${(m / 1000).toLocaleString(locale(), { maximumFractionDigits: 3 })} ${t('unit.km')}`;
   return `${m.toLocaleString(locale(), { maximumFractionDigits: 2 })} ${t('unit.m')}`;
 }
 const UNIT_KEY = { mm: 'unit.mm', cm: 'unit.cm', m: 'unit.m', km: 'unit.km' };
-const fmtUnit = code => (UNIT_KEY[code] ? t(UNIT_KEY[code]) : code);
+const fmtUnit = code => (UNIT_KEY[code] ? t(UNIT_KEY[code]) : (code || ''));
 
-// ── Статус тумблера описів
 function updateDescSwitch() {
   if (!toggleBtn) return;
   toggleBtn.setAttribute('aria-checked', showDescriptions ? 'true' : 'false');
   toggleBtn.classList.toggle('is-on', showDescriptions);
 }
 
-// ── Попап прев’ю (ховер біля курсора)
 function scheduleHover(e, src) {
   clearTimeout(hoverTimer);
   if (!ipHover) return;
-
   const img = ipHover.querySelector('img');
   if (!img) return;
   img.src = src;
-
   hoverTimer = setTimeout(() => {
     ipHover.style.display = 'block';
     moveHover(e);
@@ -57,13 +51,10 @@ function moveHover(e) {
   const margin = 12;
   let x = e.clientX + margin;
   let y = e.clientY + margin;
-
   const vw = window.innerWidth, vh = window.innerHeight;
   const rect = ipHover.getBoundingClientRect();
-
   if (x + rect.width > vw) x = e.clientX - rect.width - margin;
   if (y + rect.height > vh) y = e.clientY - rect.height - margin;
-
   ipHover.style.left = x + 'px';
   ipHover.style.top  = y + 'px';
 }
@@ -72,7 +63,6 @@ function hideHover() {
   if (ipHover) ipHover.style.display = 'none';
 }
 
-// ── Підготовка DOM панелі
 function ensureDom() {
   if (panelEl) return;
 
@@ -80,12 +70,10 @@ function ensureDom() {
   panelEl.id = 'info-panel';
   panelEl.classList.add('hidden');
 
-  // Заголовок
   titleEl = document.createElement('div');
   titleEl.className = 'info-panel__title';
   titleEl.textContent = t('ui.info_panel.title');
 
-  // Тумблер-свічер “Описи”
   const toggleWrap = document.createElement('div');
   toggleWrap.className = 'info-panel__toggleWrap';
   toggleWrap.style.alignSelf = 'flex-start';
@@ -112,7 +100,6 @@ function ensureDom() {
 
   toggleWrap.append(toggleLabelEl, toggleBtn);
 
-  // Шапка (заголовок + тумблер)
   const titleWrap = document.createElement('div');
   titleWrap.style.display = 'flex';
   titleWrap.style.alignItems = 'flex-start';
@@ -120,11 +107,8 @@ function ensureDom() {
   titleWrap.style.gap = '8px';
   titleWrap.append(titleEl, toggleWrap);
 
-  // Контейнер списку
   listEl = document.createElement('div');
 
-  // Збір панелі
-  // Новий каркас: шапка (нерухома) + прокрутний контейнер
   const header = document.createElement('div');
   header.className = 'info-header';
   header.appendChild(titleWrap);
@@ -137,10 +121,8 @@ function ensureDom() {
 
   (document.getElementById('globe-container') || document.body).appendChild(panelEl);
 
-  // Попап для ховер-прев’ю зображення
   ipHover = document.createElement('div');
   ipHover.id = 'ip-hover';
-  // Базові inline-стилі, щоб працювало навіть без CSS
   ipHover.style.position = 'fixed';
   ipHover.style.zIndex = '9999';
   ipHover.style.display = 'none';
@@ -160,16 +142,16 @@ function ensureDom() {
   ipHover.appendChild(ipImg);
   document.body.appendChild(ipHover);
 
-  // Реакція на зміну мови
-  document.addEventListener('languageChanged', () => {
+  const onLang = () => {
     titleEl.textContent = t('ui.info_panel.title');
     if (toggleLabelEl) toggleLabelEl.textContent = t('ui.info_panel.descriptions');
     updateDescSwitch();
     render();
-  });
+  };
+  document.addEventListener('languageChanged', onLang);
+  window.addEventListener('orbit:lang-change', onLang);
 }
 
-// ── Рендер списку
 function render() {
   ensureDom();
   listEl.innerHTML = '';
@@ -178,11 +160,15 @@ function render() {
   const lang = getCurrentLang?.() || 'ua';
 
   items.forEach(it => {
-    const rec = lib?.[it.libIndex];
-    const nameText = it.name ?? (rec ? rec[`name_${lang}`] : '');
-    const descText = it.description ?? (rec ? rec[`description_${lang}`] : '');
+    const rec = (Number.isInteger(it.libIndex) && it.libIndex >= 0) ? (lib?.[it.libIndex]) : null;
 
-    const name = rec ? (rec[`name_${lang}`] ?? rec.name_en ?? '') : '';
+    const nameText = rec
+      ? (rec[`name_${lang}`] ?? rec.name_en ?? '')
+      : (it.name || '');
+
+    const descText = rec
+      ? (rec[`description_${lang}`] || '')
+      : (it.description || '');
 
     const row = document.createElement('div');
     row.className = 'info-panel__row';
@@ -191,26 +177,20 @@ function render() {
     dot.className = 'ip-dot';
     dot.style.backgroundColor = it.color || 'rgba(60,60,60,0.9)';
 
-    // Назва об'єкта
     const nameSpan = document.createElement('span');
     nameSpan.className = 'ip-name';
-    nameSpan.dataset.index = String(it.libIndex);
-    nameSpan.textContent = nameText;
-    row.appendChild(dot);
-    row.appendChild(nameSpan);
+    if (Number.isInteger(it.libIndex)) nameSpan.dataset.index = String(it.libIndex);
+    nameSpan.textContent = nameText || '';
 
-
-    // Ховер-прев’ю: беремо перше доступне поле зображення
-    function fixUrl(u) {
+    const fixUrl = (u) => {
       if (!u) return '';
-      if (/^https?:\/\//i.test(u)) return u;       // вже абсолютний
-      if (u.startsWith('/')) return u;              // кореневий
-      if (u.startsWith('./')) return u.slice(1);    // ./res/... -> /res/...
-      if (u.startsWith('../')) return '/' + u.replace(/^\.\.\//, ''); // ../res/... -> /res/...
-      return '/' + u.replace(/^\/+/, '');           // res/... -> /res/...
-    }
+      if (/^https?:\/\//i.test(u)) return u;
+      if (u.startsWith('/')) return u;
+      if (u.startsWith('./')) return u.slice(1);
+      if (u.startsWith('../')) return '/' + u.replace(/^\.\.\//, '');
+      return '/' + u.replace(/^\/+/, '');
+    };
     const thumbUrl = fixUrl((rec?.image_thumb || rec?.image || rec?.image_url || rec?.image_full || '').trim());
-
     if (thumbUrl) {
       nameSpan.classList.add('has-thumb');
       nameSpan.addEventListener('mouseenter', (e) => scheduleHover(e, thumbUrl));
@@ -218,22 +198,22 @@ function render() {
       nameSpan.addEventListener('mouseleave', hideHover);
     }
 
-    // Компактний запис значень: "Назва: 12 742 км → 100 м"
-    const real = `${fmtNumber(it.realValue)} ${fmtUnit(it.realUnit)}`;
-    const scaled = fmtMeters(it.scaledMeters);
+    const real = (it.realValue != null && it.realUnit) ? `${fmtNumber(it.realValue)} ${fmtUnit(it.realUnit)}` : '';
+    const scaled = (it.scaledMeters != null) ? fmtMeters(it.scaledMeters) : '';
 
+    row.appendChild(dot);
     row.appendChild(nameSpan);
-    row.appendChild(document.createTextNode(`: ${real} \u2192 ${scaled}`));
+    if (real || scaled) {
+      const sep = document.createTextNode(`: ${real}${(real && scaled) ? ' \u2192 ' : ''}${scaled}`);
+      row.appendChild(sep);
+    }
 
-    // Розширений блок (лише опис), якщо увімкнуто
     if (showDescriptions && descText) {
       const extra = document.createElement('div');
       extra.className = 'info-panel__extra';
-
       const desc = document.createElement('div');
       desc.className = 'info-panel__description';
       desc.textContent = descText;
-
       extra.append(desc);
       row.appendChild(extra);
     }
@@ -244,24 +224,30 @@ function render() {
   panelEl.classList.toggle('hidden', items.length === 0);
 }
 
-// ── Публічні API
 export function initInfoPanel() { ensureDom(); }
 
-export function clearInfoPanel() {
+export function clearInfoPanel(opts = {}) {
+  const { hideOnly = false } = opts;
   ensureDom();
+  if (hideOnly) {
+    showDescriptions = false;
+    updateDescSwitch();
+    hideHover();
+    if (listEl) listEl.innerHTML = '';
+    return;
+  }
   items.length = 0;
-  baselineSet = false;
   showDescriptions = false;
   updateDescSwitch();
-  hideHover();    
+  hideHover();
   render();
 }
 
 export function setBaselineResult({ libIndex, realValue, realUnit, scaledMeters, name, description, color }) {
   ensureDom();
-  if (baselineSet) return;
-  items.push({ type: 'baseline', libIndex, realValue, realUnit, scaledMeters, name, description, color });
-  baselineSet = true;
+  const rec = { type: 'baseline', libIndex, realValue, realUnit, scaledMeters, name, description, color };
+  const idx = items.findIndex(it => it.type === 'baseline');
+  if (idx >= 0) items[idx] = rec; else items.unshift(rec);
   render();
 }
 
@@ -270,6 +256,7 @@ export function addResult({ libIndex, realValue, realUnit, scaledMeters, name, d
   items.push({ type: 'item', libIndex, realValue, realUnit, scaledMeters, name, description, color });
   render();
 }
+
 
 
 
