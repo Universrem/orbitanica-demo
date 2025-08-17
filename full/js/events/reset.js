@@ -2,13 +2,13 @@
 'use strict';
 
 import { circlesLayer } from '../globe/circles.js';
-import { labelsLayer } from '../globe/globe.js';      // ← додаємо: чистимо й лейбли/крапки
+import { labelsLayer } from '../globe/globe.js';      // чистимо й лейбли/крапки
 import { clearInfoPanel } from '../ui/infoPanel.js';
 
 /** Часткове очищення екрана (не чіпає форми/стан сесії/масштаб) */
 export function resetScreenUI() {
-  try { circlesLayer && circlesLayer.removeAll(); } catch {}
-  try { labelsLayer && labelsLayer.removeAll(); } catch {}     // ← важливо: прибрати dot+label
+  try { circlesLayer && circlesLayer.clear(); } catch {}
+  try { labelsLayer && labelsLayer.clear(); } catch {}    // важливо: прибрати dot+label
   try { clearInfoPanel({ hideOnly: true }); } catch {}
 
   // зняти підсвічування Start/Reset у лівій панелі (для повторного входу в підсекцію)
@@ -27,8 +27,8 @@ export function resetAllUI() {
   window.dispatchEvent(new CustomEvent('orbit:ui-reset'));
 
   // 2) Підстрахуємося локально (очистити обидва векторні шари)
-  try { circlesLayer && circlesLayer.removeAll(); } catch {}
-  try { labelsLayer && labelsLayer.removeAll(); } catch {}
+  try { circlesLayer && circlesLayer.clear(); } catch {}
+  try { labelsLayer && labelsLayer.clear(); } catch {}
   try { clearInfoPanel({ hideOnly: false }); } catch {}
 
   // 3) Очистити поля лівої панелі
