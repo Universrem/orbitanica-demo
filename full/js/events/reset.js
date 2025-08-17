@@ -1,14 +1,15 @@
-// full/js/events/reset.js
 'use strict';
 
 import { circlesLayer } from '../globe/circles.js';
-import { labelsLayer } from '../globe/globe.js';      // чистимо й лейбли/крапки
+import { labelsLayer } from '../globe/globe.js';
 import { clearInfoPanel } from '../ui/infoPanel.js';
 
 /** Часткове очищення екрана (не чіпає форми/стан сесії/масштаб) */
 export function resetScreenUI() {
-  try { circlesLayer && circlesLayer.clear(); } catch {}
-  try { labelsLayer && labelsLayer.clear(); } catch {}    // важливо: прибрати dot+label
+  // ✅ ЯВНИЙ СИГНАЛ ПРО ЧАСТКОВЕ ОЧИЩЕННЯ (нічого не чистимо напряму)
+  try { window.dispatchEvent(new CustomEvent('orbit:screen-partial-cleared', { detail: 'resetScreenUI' })); } catch {}
+
+  // інфопанель — сховати список, але не стирати результати з пам'яті шарів
   try { clearInfoPanel({ hideOnly: true }); } catch {}
 
   // зняти підсвічування Start/Reset у лівій панелі (для повторного входу в підсекцію)
@@ -24,7 +25,7 @@ export function resetScreenUI() {
 /** Повний скидання: нова сесія (скидає ВСЕ, у т.ч. масштаб і baseline) */
 export function resetAllUI() {
   // 1) Дати знати всім модулям про повний reset (circles.js сам очистить свої шари/реєстр)
-  window.dispatchEvent(new CustomEvent('orbit:ui-reset'));
+  try { window.dispatchEvent(new CustomEvent('orbit:ui-reset')); } catch {}
 
   // 2) Підстрахуємося локально (очистити обидва векторні шари)
   try { circlesLayer && circlesLayer.clear(); } catch {}
@@ -36,7 +37,7 @@ export function resetAllUI() {
 
   // 4) Завершити сесію (розблокує перемикач мови тощо)
   window.__orbitSessionActive = false;
-  window.dispatchEvent(new CustomEvent('orbit:session-end'));
+  try { window.dispatchEvent(new CustomEvent('orbit:session-end')); } catch {}
 }
 
 /** Очищення контролів без хардкоду ID */

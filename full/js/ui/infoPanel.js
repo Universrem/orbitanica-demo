@@ -256,8 +256,3 @@ export function addResult({ libIndex, realValue, realUnit, scaledMeters, name, d
   items.push({ type: 'item', libIndex, realValue, realUnit, scaledMeters, name, description, color });
   render();
 }
-
-
-
-
-

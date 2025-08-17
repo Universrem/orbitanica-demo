@@ -1,4 +1,3 @@
-// full/js/calc/calculate_diameter.js
 'use strict';
 
 import { convertUnit } from '../utils/unit_converter.js';
@@ -9,7 +8,6 @@ import { getUniverseLibrary } from '../data/data_diameter.js';
 // Поточний масштаб (зберігається між викликами)
 let currentScale = null;
 let __baselineId = null;
-
 
 // Скидання внутрішнього масштабу на глобальний reset UI
 window.addEventListener('orbit:ui-reset', () => {
@@ -56,7 +54,6 @@ export function setObject1Scale(realDiameterVal, realDiameterUnit, circleDiamete
   }
 }
 
-
 /**
  * Малює коло для Об’єкта 2 з використанням масштабу Об’єкта 1
  * @param {number} realDiameterVal  Реальний діаметр Об’єкта 2
@@ -90,7 +87,6 @@ export function addObject2Circle(realDiameterVal, realDiameterUnit, color) {
   }
 }
 
-
 /* ─────────────────────────────────────────────────────────────
  * Хелпери для інфопанелі: назва та опис з юзер-об’єктів
  * з фолбеком на офіційну бібліотеку за libIndex.
@@ -123,6 +119,3 @@ export function displayDescFor(obj) {
   const lo = obj ? libObjByIndex(obj.libIndex) : null;
   return lo ? (lo[`description_${lang}`] || '') : '';
 }
-
-
-

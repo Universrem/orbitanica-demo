@@ -1,4 +1,3 @@
-// full/js/panel.js
 'use strict';
 
 import { initUniversDiameterBlock } from './blocks/univers_diameter.js';
@@ -29,11 +28,10 @@ function createField(f) {
 
   } else if (f.type === 'button') {
     el = document.createElement('button');
-    // ❗ КЛЮЧОВА ЗМІНА: замість дубльованих id — використовуємо data-action
-    // (сумісність з існуючим кодом збережено у handlers/css)
-    el.dataset.action = f.id;         // 'calculate' | 'reset' | 'create'
+    // Щоб підсвічування працювало зі старим CSS, додамо і id, і data-action
+    el.id = f.id;                    // ⚠️ дубльовані id допускаємо лише для стилізації
+    el.dataset.action = f.id;        // сучасний спосіб для логіки
     el.textContent = f.text;
-
   } else if (f.type === 'text') {
     el = document.createElement('div');
     el.id = f.id; // тут ідентичні id зустрічаються у різних підсекціях — ок для нашого апдейту текстів

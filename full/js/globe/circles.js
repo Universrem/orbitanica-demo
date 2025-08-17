@@ -1,4 +1,3 @@
-// full/js/globe/circles.js
 'use strict';
 
 import { markerLayer, globus, defaultCenterLat, defaultCenterLon, labelsLayer } from "./globe.js";
@@ -12,12 +11,128 @@ import { getCurrentLang } from '../i18n.js';
 export const circlesLayer = new Vector("circlesLayer", { visibility: true });
 globus.planet.addLayer(circlesLayer);
 
-// РЕЄСТР КІЛ: тільки id → запис (колір — це стиль, НЕ ключ)
-const REG = new Map();           // id -> { id,color,radiusMeters,line,halo,dot,label,nameKey,nameText,anchorDeg }
+// ── Захист від сторонніх очищень/видалень шарів
+let __hardReset = false; // істинний лише на час повного reset
+
+// Перехоплення методів шарів (clear/removeAll) — щоб самовідновлюватись після «м'яких» клірів
+const __patchLayer = (layer) => {
+  try {
+    if (!layer) return;
+
+    // patch .clear
+    if (typeof layer.clear === 'function' && !layer.__patchedClear) {
+      const origClear = layer.clear.bind(layer);
+      layer.clear = function (...args) {
+        const res = origClear(...args);
+        try {
+          if (!__hardReset) {
+            console.warn('[circles] layer.clear detected (soft):', layer?.name || layer);
+            try { console.trace(); } catch {}
+            requestAnimationFrame(() => { try { __redrawAllFromRegistry(); } catch {} });
+          }
+        } catch { __redrawAllFromRegistry(); }
+        return res;
+      };
+      layer.__patchedClear = true;
+    }
+
+    // patch .removeAll (деякі версії og.es)
+    if (typeof layer.removeAll === 'function' && !layer.__patchedRemoveAll) {
+      const origRemoveAll = layer.removeAll.bind(layer);
+      layer.removeAll = function (...args) {
+        const res = origRemoveAll(...args);
+        try {
+          if (!__hardReset) {
+            console.warn('[circles] layer.removeAll detected (soft):', layer?.name || layer);
+            try { console.trace(); } catch {}
+            requestAnimationFrame(() => { try { __redrawAllFromRegistry(); } catch {} });
+          }
+        } catch { __redrawAllFromRegistry(); }
+        return res;
+      };
+      layer.__patchedRemoveAll = true;
+    }
+  } catch {}
+};
+__patchLayer(circlesLayer);
+__patchLayer(labelsLayer);
+
+// Перехоплення методів планети (removeLayer/clearLayers) — щоб повернути шари, якщо їх зняли цілком
+(function __patchPlanet() {
+  try {
+    const planet = globus.planet;
+
+    // позначаємо «жорсткий» reset, щоб не відновлювати під час full-reset
+    window.addEventListener('orbit:ui-reset', () => {
+      __hardReset = true;
+      setTimeout(() => { __hardReset = false; }, 0);
+    });
+
+    const readd = () => {
+      try { planet.addLayer(circlesLayer); } catch {}
+      try { planet.addLayer(labelsLayer); } catch {}
+      try { __redrawAllFromRegistry(); } catch {}
+    };
+
+    if (planet && typeof planet.removeLayer === 'function' && !planet.__circlesPatchedRemoveLayer) {
+      const orig = planet.removeLayer.bind(planet);
+      planet.removeLayer = function (layer) {
+        const out = orig(layer);
+        try {
+          if (!__hardReset && (layer === circlesLayer || layer === labelsLayer)) {
+            console.warn('[circles] planet.removeLayer on our layer:', layer?.name || layer);
+            try { console.trace(); } catch {}
+            requestAnimationFrame(readd);
+          }
+        } catch { readd(); }
+        return out;
+      };
+      planet.__circlesPatchedRemoveLayer = true;
+    }
+
+    if (planet && typeof planet.clearLayers === 'function' && !planet.__circlesPatchedClearLayers) {
+      const orig = planet.clearLayers.bind(planet);
+      planet.clearLayers = function (...args) {
+        const out = orig(...args);
+        try {
+          if (!__hardReset) {
+            console.warn('[circles] planet.clearLayers detected');
+            try { console.trace(); } catch {}
+            requestAnimationFrame(readd);
+          }
+        } catch { readd(); }
+        return out;
+      };
+      planet.__circlesPatchedClearLayers = true;
+    }
+  } catch {}
+})();
+
+// РЕЄСТР КІЛ
+const REG = new Map(); // id -> { id,color,radiusMeters,line,halo,dot,label,nameKey,nameText,anchorDeg }
 let _seq = 0;
 const mkId = () => `c_${++_seq}`;
 
-// Створення/оновлення запису по id
+// ───────────────────────────────────────────────────────────────────────────────
+// Утіліти
+const R_EARTH = 6371000; // м
+const PI = Math.PI;
+const TWO_PI = 2 * PI;
+const DEG = 180 / PI;
+
+const rad = (d) => d / DEG;
+const deg = (r) => r * DEG;
+const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+const normLon = (lon) => {
+  // [-180, 180)
+  let L = lon;
+  while (L < -180) L += 360;
+  while (L >= 180) L -= 360;
+  return L;
+};
+
+// ───────────────────────────────────────────────────────────────────────────────
+// Реєстр
 function upsertById({ id = null, color, radiusMeters = null, line = null, halo = null, dot = null, label = null, nameKey = null, nameText = null, anchorDeg = null }) {
   if (!id) id = mkId();
   const prev = REG.get(id) || {};
@@ -37,64 +152,125 @@ function upsertById({ id = null, color, radiusMeters = null, line = null, halo =
   return rec;
 }
 
-
-function setNameKeyById(id, payload /* {type:'lib'|'custom', libIndex?, customName?} */) {
+function setNameKeyById(id, payload) {
   const r = REG.get(id);
   if (!r) return;
   r.nameKey = payload || null;
 }
-
 
 function setLabelTextById(id, text) {
   const r = REG.get(id);
   if (!r || !r.label) return;
   r.nameText = text;
   const le = r.label;
-  // ОНОВЛЮЄМО ЛИШЕ ЧЕРЕЗ API ЛЕЙБЛА; НЕ ВИКЛИКАТИ entity.setLabel(...)
   if (le.label && typeof le.label.setText === 'function') {
     le.label.setText('\u00A0' + (text || ''));
   }
 }
+
 function clearRegistry() {
   REG.clear();
 }
 
+// «Сховати» попередні entity запису без remove/clear
+function __clearRecEntities(rec) {
+  try {
+    if (rec.line && typeof rec.line.setVisibility === 'function')  { try { rec.line.setVisibility(false); } catch {} }
+    if (rec.halo && typeof rec.halo.setVisibility === 'function')  { try { rec.halo.setVisibility(false); } catch {} }
+    if (rec.dot  && typeof rec.dot.setVisibility === 'function')   { try { rec.dot.setVisibility(false); } catch {} }
+    if (rec.label&& typeof rec.label.setVisibility === 'function') { try { rec.label.setVisibility(false); } catch {} }
+  } catch {}
+  rec.line = null;
+  rec.halo = null;
+  rec.dot = null;
+  rec.label = null;
+}
+
+// Якщо шари спорожніли/відсутні — повернути їх і перемалювати з реєстру
+function __ensureLayersSynced() {
+  try {
+    // гарантуємо, що шари підключені до планети
+    try { globus.planet.addLayer(circlesLayer); } catch {}
+    try { globus.planet.addLayer(labelsLayer); }  catch {}
+
+    const cEmpty = !circlesLayer.getEntities || circlesLayer.getEntities().length === 0;
+    const lEmpty = !labelsLayer.getEntities || labelsLayer.getEntities().length === 0;
+    if ((cEmpty || lEmpty) && REG.size > 0) __redrawAllFromRegistry();
+  } catch {}
+}
 
 // ───────────────────────────────────────────────────────────────────────────────
-// Геометрія
+// Центр
 function __getCurrentCenter() {
   const entities = markerLayer.getEntities();
   if (entities.length) {
     const ll = entities[entities.length - 1].getLonLat();
     return { lon: ll.lon, lat: ll.lat };
   }
-  // Ставимо маркер у дефолт і повертаємо центр
   placeMarker(defaultCenterLon, defaultCenterLat, { silent: true, suppressEvent: true });
   return { lon: defaultCenterLon, lat: defaultCenterLat };
 }
 
-/** Обчислює точки геодезичного кола (апроксимація для невеликих радіусів). */
-function getCirclePointsSphere(lon, lat, radiusMeters, segments = 64) {
-  const coords = [];
-  const R = 6371000;
-
-  const latRad = lat * Math.PI / 180;
-  const lonRad = lon * Math.PI / 180;
-
-  for (let i = 0; i <= segments; i++) {
-    const angle = (i / segments) * 2 * Math.PI;
-    const dx = radiusMeters * Math.cos(angle);
-    const dy = radiusMeters * Math.sin(angle);
-
-    const newLat = latRad + (dy / R);
-    const newLon = lonRad + (dx / (R * Math.cos(latRad)));
-
-    coords.push([newLon * 180 / Math.PI, newLat * 180 / Math.PI]);
+// ───────────────────────────────────────────────────────────────────────────────
+// Імена
+function __resolveNameFromKey(payload) {
+  try {
+    if (!payload) return '';
+    if (payload.type === 'custom') return payload.customName || '';
+    if (payload.type === 'lib') {
+      const lib = getUniverseLibrary();
+      const lang = getCurrentLang?.() || 'ua';
+      const rec = lib?.[payload.libIndex];
+      return rec ? (rec[`name_${lang}`] ?? rec.name_en ?? '') : '';
+    }
+    return '';
+  } catch {
+    return '';
   }
-  return coords;
 }
 
-// Рознесення підписів по дузі
+// ───────────────────────────────────────────────────────────────────────────────
+// Геодезичне коло на сфері (forward geodesic, істинне до антиподу)
+function getGeodesicCirclePoints(lonDeg, latDeg, radiusMeters, segmentsHint = 256) {
+  const φ1 = rad(latDeg);
+  const λ1 = rad(lonDeg);
+
+  // Кутова відстань
+  let δ = radiusMeters / R_EARTH;
+  δ = clamp(δ, 0, PI);
+
+  // Виродження в антипод
+  const EPS = 1e-8;
+  if (PI - δ <= EPS) {
+    return { coords: [], isAntipode: true, antipode: [normLon(lonDeg + 180), -latDeg] };
+  }
+
+  // Щільність сегментів пропорційна довжині кола
+  const seg = clamp(Math.round(64 + (segmentsHint - 64) * (δ / PI)), 64, segmentsHint);
+  const coords = [];
+  const sinφ1 = Math.sin(φ1), cosφ1 = Math.cos(φ1);
+  const sinδ = Math.sin(δ),   cosδ  = Math.cos(δ);
+
+  for (let i = 0; i <= seg; i++) {
+    const θ = (i / seg) * TWO_PI; // азимут
+    const cosθ = Math.cos(θ),   sinθ  = Math.sin(θ);
+
+    const sinφ2 = sinφ1 * cosδ + cosφ1 * sinδ * cosθ;
+    const φ2 = Math.asin(clamp(sinφ2, -1, 1));
+
+    const y = sinθ * sinδ * cosφ1;
+    const x = cosδ - sinφ1 * Math.sin(φ2);
+    const λ2 = λ1 + Math.atan2(y, x);
+
+    const lat2 = deg(φ2);
+    const lon2 = normLon(deg(λ2));
+    coords.push([lon2, lat2]);
+  }
+  return { coords, isAntipode: false, antipode: null };
+}
+
+// ───────────────────────────────────────────────────────────────────────────────
+// Рознесення підписів
 const LABEL_BASE_DEG = 24;
 function __hashColor(str) {
   if (!str) return 0;
@@ -112,18 +288,60 @@ function __pickAnchorIndex(coords, color) {
   }
   const n = coords.length;
   const bucket = __hashColor(color) % 6;      // 0..5
-  const deg = LABEL_BASE_DEG * (bucket + 1);  // 24°, 48°, ..., 144°
-  const step = Math.max(1, Math.round(n * (deg / 360)));
+  const degShift = LABEL_BASE_DEG * (bucket + 1);  // 24°, 48°, ..., 144°
+  const step = Math.max(1, Math.round(n * (degShift / 360)));
   return (bestIdx + step) % n;
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
-// Малювання одного запису (створює/оновлює entity згідно з поточним центром)
+// Малювання одного запису
 function __drawRecord(rec) {
   if (!rec || !Number.isFinite(rec.radiusMeters) || rec.radiusMeters <= 0) return;
 
   const { lon, lat } = __getCurrentCenter();
-  const coords = getCirclePointsSphere(lon, lat, rec.radiusMeters);
+  const { coords, isAntipode, antipode } = getGeodesicCirclePoints(lon, lat, rec.radiusMeters, 320);
+
+  if (isAntipode) {
+    const anchor = antipode;
+
+    // Крапка
+    const svgDot = `<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><circle cx='6' cy='6' r='5' fill='${rec.color}'/></svg>`;
+    const dotEntity = new Entity({
+      lonlat: anchor,
+      billboard: {
+        src: 'data:image/svg+xml;utf8,' + encodeURIComponent(svgDot),
+        size: [12, 12],
+        offset: [0, 0]
+      }
+    });
+    labelsLayer.add(dotEntity);
+
+    // Лейбл
+    const labelEntity = new Entity({
+      lonlat: anchor,
+      label: {
+        text: "\u00A0",
+        size: 11,
+        color: "#111",
+        outline: 0,
+        align: "left",
+        offset: [6, 0]
+      }
+    });
+    labelsLayer.add(labelEntity);
+
+    rec.dot = dotEntity;
+    rec.label = labelEntity;
+
+    if (typeof rec.nameText === 'string' && rec.nameText.length) {
+      setLabelTextById(rec.id, rec.nameText);
+    } else if (rec.nameKey) {
+      const txt = __resolveNameFromKey(rec.nameKey);
+      if (txt) setLabelTextById(rec.id, txt);
+    }
+
+    return; // Лінію не малюємо — це точка антиподу
+  }
 
   // Halo
   const haloEntity = new Entity({
@@ -196,19 +414,34 @@ function __drawRecord(rec) {
   }
 }
 
+// ───────────────────────────────────────────────────────────────────────────────
+// API
 export function addGeodesicCircle(radiusMeters, color = 'rgba(255,0,0,0.8)', id = null) {
   if (!Number.isFinite(radiusMeters) || radiusMeters <= 0) return null;
+
+  // Якщо хтось до цього очистив/зняв шари — відновимо перед додаванням
+  __ensureLayersSynced();
+
+  const existed = !!(id && REG.has(id));
   const rec = upsertById({ id, color, radiusMeters });
+
+  // Якщо це оновлення існуючого запису (той самий id) — сховаємо попередні ентіті без remove/clear
+  if (existed) {
+    __clearRecEntities(rec);
+  }
+
   __drawRecord(rec);
+
+  // підстрахуємось від можливого стороннього кліру у цьому ж тіку
+  try { requestAnimationFrame(() => { try { __ensureLayersSynced(); } catch {} }); } catch { __ensureLayersSynced(); }
   return rec.id;
 }
 
-export function setCircleLabelTextById(id, text) {
-  setLabelTextById(id, text);
-}
+// Сумісність з існуючими імпортами
+export function setCircleLabelTextById(id, text) { setLabelTextById(id, text); }
+export function setCircleLabelText(id, text) { setLabelTextById(id, text); }
 
 export function setCircleLabelKeyById(id, payload) {
-  // payload: { type:'lib', libIndex } | { type:'custom', customName }
   setNameKeyById(id, payload);
   const rec = REG.get(id);
   if (!rec) return;
@@ -218,42 +451,22 @@ export function setCircleLabelKeyById(id, payload) {
   } else if (payload?.type === 'custom') {
     txt = payload.customName || rec.nameText || '';
   }
-  if (txt) setLabelTextById(id, txt);
+  if (txt) setLabelTextById(rec.id, txt);
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
-// Перемальовка при зміні центру
+// Перемальовка / скидання
 function __redrawAllFromRegistry() {
-  try { circlesLayer.clear(); } catch (e) {}
-  try { labelsLayer.clear(); } catch (e) {}
   for (const rec of REG.values()) {
-    __drawRecord(rec);
+    try { __clearRecEntities(rec); __drawRecord(rec); }
+    catch (e) { console.error('[circles] redraw failed', e); }
   }
 }
 
-// Повний reset
 function __fullClear() {
-  try { circlesLayer.clear(); } catch (e) {}
-  try { labelsLayer.clear(); } catch (e) {}
+  try { circlesLayer.clear(); } catch {}
+  try { labelsLayer.clear(); } catch {}
   clearRegistry();
-}
-
-// ───────────────────────────────────────────────────────────────────────────────
-// Текст за ключем
-function __resolveNameFromKey(payload) {
-  try {
-    if (!payload) return '';
-    if (payload.type === 'custom') return payload.customName || '';
-    if (payload.type === 'lib') {
-      const lib = getUniverseLibrary();
-      const lang = getCurrentLang?.() || 'ua';
-      const rec = lib?.[payload.libIndex];
-      return rec ? (rec[`name_${lang}`] ?? rec.name_en ?? '') : '';
-    }
-    return '';
-  } catch {
-    return '';
-  }
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
@@ -271,8 +484,9 @@ const __onLangChange = () => {
 document.addEventListener('languageChanged', __onLangChange);
 window.addEventListener('orbit:lang-change', __onLangChange);
 
+// Опційне відновлення після часткового очищення екрана
+window.addEventListener('orbit:screen-partial-cleared', () => {
+  try { requestAnimationFrame(__ensureLayersSynced); } catch { __ensureLayersSynced(); }
+});
+
 window.addEventListener('orbit:ui-reset', __fullClear);
-
-
-
-
