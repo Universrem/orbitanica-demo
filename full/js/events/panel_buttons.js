@@ -14,7 +14,11 @@ import { setCircleLabelTextById, setCircleLabelKeyById } from '../globe/circles.
 if (!window.__orbitInvalidFix) {
   const clearInvalid = (e) => {
     const el = e.target;
-    if (el && (el.matches('#left-panel select') || el.matches('#left-panel input[type="number"], #left-panel input[type="text"]'))) {
+    if (
+      el &&
+      (el.matches('#left-panel select') ||
+        el.matches('#left-panel input[type="number"], #left-panel input[type="text"]'))
+    ) {
       el.classList.remove('is-invalid');
     }
   };
@@ -37,11 +41,12 @@ document.addEventListener('click', (e) => {
   const block = btn.closest('#univers_diameter');
   if (!block) return;
 
-  const id = btn.id;
-  if (!id) return;
+  // після переходу на data-action у panel.js
+  const action = btn.dataset?.action || btn.id;
+  if (!action) return;
 
   // 1) "Розрахувати"
-  if (id === 'calculate') {
+  if (action === 'calculate') {
     // === A) ВАЛІДАЦІЯ ОБОХ СЕКТОРІВ У ЦІЙ ПІДСЕКЦІЇ (Об'єкт 1 і Об'єкт 2) ===
     const scope = btn.closest('details'); // підсекція, де натиснули кнопку
     const groups = scope ? scope.querySelectorAll('.sector-block') : [];
@@ -58,10 +63,11 @@ document.addEventListener('click', (e) => {
       const req = grp.querySelectorAll('select:not([disabled]), input[type="number"]:not([disabled])');
 
       let ok = true;
-      req.forEach(el => {
-        const empty = (el.tagName === 'SELECT')
-          ? (el.selectedIndex <= 0)
-          : (String(el.value ?? '').trim() === '');
+      req.forEach((el) => {
+        const empty =
+          el.tagName === 'SELECT'
+            ? el.selectedIndex <= 0
+            : String(el.value ?? '').trim() === '';
         el.classList.toggle('is-invalid', empty);
         if (empty) ok = false;
       });
@@ -71,7 +77,9 @@ document.addEventListener('click', (e) => {
     const isGroupEmpty = (grp) => {
       if (!grp) return true;
       // ігноруємо заблоковані поля
-      const fields = grp.querySelectorAll('select:not([disabled]), input[type="number"]:not([disabled]), input[type="text"]:not([disabled])');
+      const fields = grp.querySelectorAll(
+        'select:not([disabled]), input[type="number"]:not([disabled]), input[type="text"]:not([disabled])'
+      );
       for (const el of fields) {
         if (el.tagName === 'SELECT' && el.value) return false;
         if (el.type === 'number' && !isNaN(parseFloat(el.value))) return false;
@@ -85,7 +93,9 @@ document.addEventListener('click', (e) => {
     if (!g1ok || !g2ok) return; // є порожні поля — не рахуємо
 
     // === B) Визначаємо поточний режим цієї ж підсекції
-    const subblock = btn.closest('[id^="univers_diameter"], [id^="univers_distance"], [id^="univers_luminosity"], [id^="univers_mass"], [id^="history"], [id^="math"], [id^="money"], [id^="geo"], [id^="other"]');
+    const subblock = btn.closest(
+      '[id^="univers_diameter"], [id^="univers_distance"], [id^="univers_luminosity"], [id^="univers_mass"], [id^="history"], [id^="math"], [id^="money"], [id^="geo"], [id^="other"]'
+    );
     if (!subblock) return;
 
     // --- ДІАМЕТР ---
@@ -108,21 +118,12 @@ document.addEventListener('click', (e) => {
       // 2) Об'єкт 2 (опціонально): малюємо, рахуємо масштабований діаметр, додаємо в інфопанель і ставимо лейбл
       if (data.object2) {
         const color2 = getColorForKey(`diam:${data.object2.name || data.object2.libIndex}`);
-        const id2 = addObject2Circle(
-          data.object2.diameterReal,
-          data.object2.unit,
-          color2
-        );
+        const id2 = addObject2Circle(data.object2.diameterReal, data.object2.unit, color2);
 
         const scale = getCurrentScale();
         let obj2ScaledMeters = null;
         if (scale && isFinite(scale)) {
-          const real2m = Number(convertUnit(
-            data.object2.diameterReal,
-            data.object2.unit,
-            'm',
-            'diameter'
-          ));
+          const real2m = Number(convertUnit(data.object2.diameterReal, data.object2.unit, 'm', 'diameter'));
           if (isFinite(real2m) && real2m > 0) obj2ScaledMeters = real2m * scale;
         }
 
@@ -142,7 +143,7 @@ document.addEventListener('click', (e) => {
           setCircleLabelTextById(id2, data.object2.name);
           setCircleLabelKeyById(
             id2,
-            (Number.isInteger(data.object2.libIndex) && data.object2.libIndex >= 0)
+            Number.isInteger(data.object2.libIndex) && data.object2.libIndex >= 0
               ? { type: 'lib', libIndex: data.object2.libIndex }
               : { type: 'custom', customName: data.object2.name }
           );
@@ -171,7 +172,7 @@ document.addEventListener('click', (e) => {
         setCircleLabelTextById(baselineId, data.object1.name);
         setCircleLabelKeyById(
           baselineId,
-          (Number.isInteger(data.object1.libIndex) && data.object1.libIndex >= 0)
+          Number.isInteger(data.object1.libIndex) && data.object1.libIndex >= 0
             ? { type: 'lib', libIndex: data.object1.libIndex }
             : { type: 'custom', customName: data.object1.name }
         );
@@ -180,14 +181,15 @@ document.addEventListener('click', (e) => {
       // 5) Після успіху: блокуємо сектор 1 і підсвічуємо кнопки в ЦІЙ підсекції
       if (object1Group) {
         object1Group.classList.add('is-locked');
-        object1Group.querySelectorAll('select, input, button').forEach(el => {
-          if (el.id === 'calculate' || el.id === 'reset') return; // не блокуємо ці кнопки
+        object1Group.querySelectorAll('select, input, button').forEach((el) => {
+          const act = el.dataset?.action || el.id || '';
+          if (act === 'calculate' || act === 'reset') return; // не блокуємо ці кнопки
           el.disabled = true;
         });
       }
       if (scope) {
-        scope.querySelectorAll('button#calculate').forEach(b => b.classList.add('is-active')); // зелена
-        scope.querySelectorAll('button#reset').forEach(b => b.classList.add('is-active'));     // червона
+        scope.querySelectorAll('button[data-action="calculate"]').forEach((b) => b.classList.add('is-active')); // зелена
+        scope.querySelectorAll('button[data-action="reset"]').forEach((b) => b.classList.add('is-active')); // червона
       }
 
       console.log('✅ Розрахунок діаметра виконано');
@@ -195,20 +197,20 @@ document.addEventListener('click', (e) => {
     }
 
     // --- Інші режими (плейсхолдери) ---
-    if (subblock.id.startsWith('univers_distance'))  console.log('📏 distance: TODO');
+    if (subblock.id.startsWith('univers_distance')) console.log('📏 distance: TODO');
     if (subblock.id.startsWith('univers_luminosity')) console.log('💡 luminosity: TODO');
-    if (subblock.id.startsWith('univers_mass'))       console.log('⚖ mass: TODO');
-    if (subblock.id.startsWith('history'))            console.log('🕰 history: TODO');
-    if (subblock.id.startsWith('math'))               console.log('➗ math: TODO');
-    if (subblock.id.startsWith('money'))              console.log('💰 money: TODO');
-    if (subblock.id.startsWith('geo'))                console.log('🗺 geo: TODO');
-    if (subblock.id.startsWith('other'))              console.log('📦 other: TODO');
+    if (subblock.id.startsWith('univers_mass')) console.log('⚖ mass: TODO');
+    if (subblock.id.startsWith('history')) console.log('🕰 history: TODO');
+    if (subblock.id.startsWith('math')) console.log('➗ math: TODO');
+    if (subblock.id.startsWith('money')) console.log('💰 money: TODO');
+    if (subblock.id.startsWith('geo')) console.log('🗺 geo: TODO');
+    if (subblock.id.startsWith('other')) console.log('📦 other: TODO');
 
     return; // завершили гілку calculate
   }
 
   // 2) "Скинути"
-  if (id === 'reset') {
+  if (action === 'reset') {
     resetAllUI();
     console.log('✅ Повний скидання виконано');
     return;
@@ -218,9 +220,11 @@ document.addEventListener('click', (e) => {
 // ─────────────────────────────────────────────────────────────
 // Делегований обробник для кнопок "Створити" у блоці ДІАМЕТРИ
 document.addEventListener('click', async (e) => {
-  const btn = e.target;
+  const btn = e.target.closest('button');
   if (!(btn instanceof HTMLElement)) return;
-  if (btn.id !== 'create') return;
+
+  const action = btn.dataset?.action || btn.id;
+  if (action !== 'create') return;
 
   // Працюємо тільки коли клік всередині блоку "Діаметри"
   const block = btn.closest('#univers_diameter');
@@ -229,16 +233,15 @@ document.addEventListener('click', async (e) => {
   // Визначаємо слот за сектором
   const group = btn.closest('.sector-block');
   let slot = 'object2';
-  if (group?.querySelector('#createFirstObject'))  slot = 'object1';
+  if (group?.querySelector('#createFirstObject')) slot = 'object1';
   if (group?.querySelector('#createSecondObject')) slot = 'object2';
 
   // Підтягуємо попередньо вибрану категорію відповідного слота
   const presetCategoryEl = document.getElementById(
     slot === 'object1' ? 'diamCategoryObject1' : 'diamCategoryObject2'
   );
-  const presetCategory = presetCategoryEl && typeof presetCategoryEl.value === 'string'
-    ? presetCategoryEl.value
-    : '';
+  const presetCategory =
+    presetCategoryEl && typeof presetCategoryEl.value === 'string' ? presetCategoryEl.value : '';
 
   // Відкрити модалку створення
   await openCreateModal({ mode: 'diameter', presetCategory, slot });

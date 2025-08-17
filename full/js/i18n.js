@@ -1,23 +1,40 @@
 // full/js/i18n.js
-import { initLeftPanel } from './panel.js';
+'use strict';
 
+// Підтримувані мови
 const SUPPORTED_LANGS = ['ua', 'en', 'es'];
+
+// Стан i18n
 let translations = {};
 let currentLang = 'ua';
+let __inited = false;
 
 // ─────────────────────────────────────────────────────────────
-// 1) Ініціалізація
-document.addEventListener('DOMContentLoaded', initI18n);
+// ПУБЛІЧНИЙ API
 
-async function initI18n() {
+/**
+ * Ініціалізація i18n: завантажує словник, визначає мову, оновлює статичні тексти,
+ * надсилає події languageChanged / orbit:lang-change.
+ * Може безпечно викликатися кілька разів (працює як guard).
+ */
+export async function initI18n() {
+  if (__inited) {
+    // навіть якщо вже ініт, оновимо статичні тексти та повідомимо слухачів
+    refreshStaticTexts();
+    dispatchLangEvents(currentLang);
+    return;
+  }
+
+  // 1) Завантаження словника
   try {
-    translations = await fetch('/full/data/translations.json').then(r => r.json());
+    const resp = await fetch('/full/data/translations.json');
+    translations = await resp.json();
   } catch (err) {
     console.error('🌐 Не вдалося завантажити translations.json', err);
     translations = {};
   }
 
-  // Пріоритет: localStorage ('orbit:lang' → 'lang') → браузер → 'ua'
+  // 2) Визначення мови: localStorage → браузер → 'ua'
   let saved = null;
   try {
     saved = localStorage.getItem('orbit:lang') || localStorage.getItem('lang') || null;
@@ -33,32 +50,36 @@ async function initI18n() {
     else currentLang = 'ua';
   }
 
-  // Підставляємо переклади, ініціалізуємо ліву панель
+  // 3) Підстановка текстів у DOM
   refreshStaticTexts();
-  try { initLeftPanel(); } catch {}
 
-  // Синхронізація з UI (обидві події — для сумісності)
+  // 4) Зберегти вибір і повідомити слухачів (панель, інші модулі)
   try { localStorage.setItem('orbit:lang', currentLang); } catch {}
-  document.dispatchEvent(new CustomEvent('languageChanged', { detail: currentLang }));
-  window.dispatchEvent(new CustomEvent('orbit:lang-change', { detail: { lang: currentLang } }));
+  dispatchLangEvents(currentLang);
 
-  // Активувати legacy-перемикачі, якщо присутні
+  // 5) Активувати legacy-перемикачі, якщо присутні у DOM
   initLegacyFlagSwitchers();
+
+  __inited = true;
 }
 
-// ─────────────────────────────────────────────────────────────
-// 2) API перекладу
+/** Поточна мова */
+export function getCurrentLang() {
+  return currentLang;
+}
 
+/** Переклад ключа */
 export function t(key) {
+  if (!key) return '';
   const row = translations[key];
   if (!row) return key;
   return row[currentLang] || row.ua || key;
 }
 
-export function getCurrentLang() {
-  return currentLang;
-}
-
+/**
+ * Змінити мову інтерфейсу.
+ * Оновлює статичні тексти, зберігає вибір, шле події для всіх модулів.
+ */
 export function setLanguage(lang) {
   if (!SUPPORTED_LANGS.includes(lang)) return;
   if (lang === currentLang) return;
@@ -67,48 +88,70 @@ export function setLanguage(lang) {
   try { localStorage.setItem('orbit:lang', lang); } catch {}
 
   refreshStaticTexts();
-
-  // Події для всіх частин UI (сумісність зі старими/новими слухачами)
-  document.dispatchEvent(new CustomEvent('languageChanged', { detail: lang }));
-  window.dispatchEvent(new CustomEvent('orbit:lang-change', { detail: { lang } }));
-
-  // Оновити підсвітку у legacy-перемикачів (якщо є)
+  dispatchLangEvents(lang);
   highlightLegacy(lang);
 }
 
 // ─────────────────────────────────────────────────────────────
-// 3) Підстановка тексту для всіх [data-i18n-key]
+// ДОПОМІЖНЕ
 
+/** Оновлює всі елементи з атрибутом [data-i18n-key] */
 function refreshStaticTexts() {
-  document.querySelectorAll('[data-i18n-key]').forEach(el => {
-    const key = el.getAttribute('data-i18n-key');
-    const translated = t(key);
-    if (el.tagName === 'INPUT' && 'placeholder' in el) {
-      el.placeholder = translated;
-    } else {
-      el.textContent = translated;
-    }
-  });
+  try {
+    document.querySelectorAll('[data-i18n-key]').forEach(el => {
+      const key = el.getAttribute('data-i18n-key');
+      const translated = t(key);
+      if (el.tagName === 'INPUT' && 'placeholder' in el) {
+        el.placeholder = translated;
+      } else {
+        el.textContent = translated;
+      }
+    });
+  } catch (e) {
+    // тиха деградація, якщо DOM ще не готовий
+  }
+}
+
+/** Розсилка подій зміни мови (нові/старі слухачі) */
+function dispatchLangEvents(lang) {
+  try {
+    document.dispatchEvent(new CustomEvent('languageChanged', { detail: lang }));
+  } catch {}
+  try {
+    window.dispatchEvent(new CustomEvent('orbit:lang-change', { detail: { lang } }));
+  } catch {}
+}
+
+/** Ініціалізація legacy-перемикачів (прапорці .lang-option), якщо присутні */
+function initLegacyFlagSwitchers() {
+  try {
+    document.querySelectorAll('.lang-option').forEach(el => {
+      el.addEventListener('click', () => {
+        const lang = el.getAttribute('data-lang');
+        if (lang && lang !== getCurrentLang()) {
+          setLanguage(lang);
+        }
+      });
+    });
+    highlightLegacy(currentLang);
+  } catch {}
+}
+
+/** Підсвітка активної мови для legacy-перемикачів */
+function highlightLegacy(lang) {
+  try {
+    document.querySelectorAll('.lang-option').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+    });
+  } catch {}
 }
 
 // ─────────────────────────────────────────────────────────────
-// 4) Legacy-перемикачі (прапорці .lang-option)
-
-function initLegacyFlagSwitchers() {
-  document.querySelectorAll('.lang-option').forEach(el => {
-    el.addEventListener('click', () => {
-      const lang = el.getAttribute('data-lang');
-      if (lang && lang !== getCurrentLang()) {
-        setLanguage(lang);
-      }
-    });
-  });
-  highlightLegacy(currentLang);
+// АВТО-СТАРТ I18N (без підключення панелі)
+// Якщо документ уже готовий — ініціалізуємось одразу; інакше — на DOMContentLoaded.
+if (document.readyState !== 'loading') {
+  // не блокуємо main.js, який може викликати initI18n ще раз — guard всередині
+  initI18n();
+} else {
+  document.addEventListener('DOMContentLoaded', () => { initI18n(); }, { once: true });
 }
-
-function highlightLegacy(lang) {
-  document.querySelectorAll('.lang-option').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-  });
-}
-

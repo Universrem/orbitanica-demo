@@ -2,12 +2,23 @@
 'use strict';
 
 import { circlesLayer } from '../globe/circles.js';
+import { labelsLayer } from '../globe/globe.js';      // ← додаємо: чистимо й лейбли/крапки
 import { clearInfoPanel } from '../ui/infoPanel.js';
 
-/** Часткове очищення екрана (не чіпає форми/стан сесії) */
+/** Часткове очищення екрана (не чіпає форми/стан сесії/масштаб) */
 export function resetScreenUI() {
   try { circlesLayer && circlesLayer.removeAll(); } catch {}
+  try { labelsLayer && labelsLayer.removeAll(); } catch {}     // ← важливо: прибрати dot+label
   try { clearInfoPanel({ hideOnly: true }); } catch {}
+
+  // зняти підсвічування Start/Reset у лівій панелі (для повторного входу в підсекцію)
+  const root = document.getElementById('left-panel');
+  if (root) {
+    root.querySelectorAll(
+      'button#calculate.is-active, button#reset.is-active,' +
+      'button[data-action="calculate"].is-active, button[data-action="reset"].is-active'
+    ).forEach(el => el.classList.remove('is-active'));
+  }
 }
 
 /** Повний скидання: нова сесія (скидає ВСЕ, у т.ч. масштаб і baseline) */
@@ -15,8 +26,9 @@ export function resetAllUI() {
   // 1) Дати знати всім модулям про повний reset (circles.js сам очистить свої шари/реєстр)
   window.dispatchEvent(new CustomEvent('orbit:ui-reset'));
 
-  // 2) Підстрахуємося локально
+  // 2) Підстрахуємося локально (очистити обидва векторні шари)
   try { circlesLayer && circlesLayer.removeAll(); } catch {}
+  try { labelsLayer && labelsLayer.removeAll(); } catch {}
   try { clearInfoPanel({ hideOnly: false }); } catch {}
 
   // 3) Очистити поля лівої панелі
@@ -51,14 +63,13 @@ function resetFormControls(root = document.getElementById('left-panel')) {
 
   // d) Зняти блокування та прибрати помилкові підсвітки
   root.querySelectorAll('.sector-block.is-locked').forEach(b => b.classList.remove('is-locked'));
-  root.querySelectorAll('select[disabled], input[disabled], button[disabled]').forEach(el => { el.disabled = false; });
+  root.querySelectorAll('select[disabled], input[disabled], button[disabled]')
+    .forEach(el => { el.disabled = false; });
   root.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
 
-    // e) зняти підсвічування Start/Reset у лівій панелі
-  root.querySelectorAll('button#calculate.is-active, button#reset.is-active')
-    .forEach(el => el.classList.remove('is-active'));
-
+  // e) зняти підсвічування Start/Reset у лівій панелі
+  root.querySelectorAll(
+    'button#calculate.is-active, button#reset.is-active,' +
+    'button[data-action="calculate"].is-active, button[data-action="reset"].is-active'
+  ).forEach(el => el.classList.remove('is-active'));
 }
-
-
-
