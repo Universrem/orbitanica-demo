@@ -159,11 +159,11 @@ summary {
   color: #000;
   transition: background-color .18s ease, color .18s ease;
 }
-.section-content button#calculate.is-active {
+#left-panel button#calculate.is-active {
   background: rgb(107, 172, 107);
   color: #fff;
 }
-.section-content button#calculate.is-active:hover {
+#left-panel button#calculate.is-active:hover {
   background: rgb(107, 172, 107);
   color: #fff;
 }
@@ -175,11 +175,11 @@ summary {
   color: #000;
   transition: background-color .18s ease, color .18s ease;
 }
-.section-content button#reset.is-active {
+#left-panel button#reset.is-active {
   background: rgb(255, 125, 125);
   color: #fff;
 }
-.section-content button#reset.is-active:hover {
+#left-panel button#reset.is-active:hover {
   background: rgb(255, 125, 125);
   color: #fff;
 }
@@ -527,9 +527,10 @@ hr {
 }
 .sector-block.is-locked select,
 .sector-block.is-locked input,
-.sector-block.is-locked button {
+.sector-block.is-locked button:not(#calculate):not(#reset) {
   pointer-events: none;
 }
+
 
 /* Валідація: незаповнене поле */
 select.is-invalid,

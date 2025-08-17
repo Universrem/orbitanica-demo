@@ -59,9 +59,10 @@ export function getDiameterData() {
   const category2 = document.getElementById('diamCategoryObject2')?.value;
   const object2   = document.getElementById('diamObject2')?.value;
 
-  if (!category1 || !object1 || isNaN(input1) || !category2 || !object2) {
-    return null;
+  if (!category1 || !object1 || isNaN(input1)) {
+    return null; // Об'єкт 1 обов'язковий; Об'єкт 2 — опціональний
   }
+
 
   // 1) спочатку шукаємо серед КОРИСТУВАЦЬКИХ (пріоритет при однакових назвах)
   const store = getStore();
@@ -159,7 +160,8 @@ export function getDiameterData() {
     idx2 = -1;
   }
 
-  if (!obj1 || !obj2) return null;
+  if (!obj1) return null; // без О2 допускаємо розрахунок
+
 
   // 4) фінальний об’єкт для інфопанелі й розрахунку
   return {
@@ -172,14 +174,14 @@ export function getDiameterData() {
       diameterScaled: input1,
       description: obj1.user ? (obj1.description || '') : (obj1[`description_${lang}`] || '')
     },
-    object2: {
+    object2: obj2 ? {
       libIndex: idx2,
       name: obj2.user ? obj2.name : obj2[`name_${lang}`],
       category: obj2.user ? obj2.category : obj2[`category_${lang}`],
       diameterReal: diamVal(obj2),
       unit: diamUnit(obj2),
       description: obj2.user ? (obj2.description || '') : (obj2[`description_${lang}`] || '')
-    }
+    } : null
   };
 }
 

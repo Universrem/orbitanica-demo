@@ -8,10 +8,13 @@ import { getUniverseLibrary } from '../data/data_diameter.js';
 
 // Поточний масштаб (зберігається між викликами)
 let currentScale = null;
+let __baselineId = null;
+
 
 // Скидання внутрішнього масштабу на глобальний reset UI
 window.addEventListener('orbit:ui-reset', () => {
   currentScale = null;
+  __baselineId = null;
 });
 
 export function getCurrentScale() {
@@ -45,11 +48,14 @@ export function setObject1Scale(realDiameterVal, realDiameterUnit, circleDiamete
 
   // Малюємо коло Об’єкта 1 (радіус = половина діаметра)
   try {
-    addGeodesicCircle(circleDM / 2, color);
+    __baselineId = addGeodesicCircle(circleDM / 2, color, __baselineId);
+    return __baselineId;
   } catch (e) {
     console.error('[setObject1Scale] draw error:', e);
+    return null;
   }
 }
+
 
 /**
  * Малює коло для Об’єкта 2 з використанням масштабу Об’єкта 1
@@ -77,11 +83,13 @@ export function addObject2Circle(realDiameterVal, realDiameterUnit, color) {
   }
 
   try {
-    addGeodesicCircle(circleDiameterMeters / 2, color);
+    return addGeodesicCircle(circleDiameterMeters / 2, color);
   } catch (e) {
     console.error('[addObject2Circle] draw error:', e);
+    return null;
   }
 }
+
 
 /* ─────────────────────────────────────────────────────────────
  * Хелпери для інфопанелі: назва та опис з юзер-об’єктів

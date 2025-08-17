@@ -12,20 +12,14 @@ import { getCurrentLang } from '../i18n.js';
 export const circlesLayer = new Vector("circlesLayer", { visibility: true });
 globus.planet.addLayer(circlesLayer);
 
-// ───────────────────────────────────────────────────────────────────────────────
-// РЕЄСТР КІЛ: id → запис; колір → id (для сумісності зі старими викликами)
+// РЕЄСТР КІЛ: тільки id → запис (колір — це стиль, НЕ ключ)
 const REG = new Map();           // id -> { id,color,radiusMeters,line,halo,dot,label,nameKey,nameText,anchorDeg }
-const COLOR2ID = new Map();      // color -> id
 let _seq = 0;
 const mkId = () => `c_${++_seq}`;
 
-// Створення/оновлення запису по кольору (збереження сумісності)
-function upsertByColor({ color, radiusMeters = null, line = null, halo = null, dot = null, label = null, nameKey = null, nameText = null, anchorDeg = null }) {
-  let id = COLOR2ID.get(color);
-  if (!id) {
-    id = mkId();
-    COLOR2ID.set(color, id);
-  }
+// Створення/оновлення запису по id
+function upsertById({ id = null, color, radiusMeters = null, line = null, halo = null, dot = null, label = null, nameKey = null, nameText = null, anchorDeg = null }) {
+  if (!id) id = mkId();
   const prev = REG.get(id) || {};
   const rec = {
     id,
@@ -43,17 +37,13 @@ function upsertByColor({ color, radiusMeters = null, line = null, halo = null, d
   return rec;
 }
 
-function getIdByColor(color) {
-  return COLOR2ID.get(color) || null;
-}
 
-function setNameKeyByColor(color, payload /* {type:'lib'|'custom', libIndex?, customName?} */) {
-  const id = getIdByColor(color);
-  if (!id) return;
+function setNameKeyById(id, payload /* {type:'lib'|'custom', libIndex?, customName?} */) {
   const r = REG.get(id);
   if (!r) return;
   r.nameKey = payload || null;
 }
+
 
 function setLabelTextById(id, text) {
   const r = REG.get(id);
@@ -65,16 +55,10 @@ function setLabelTextById(id, text) {
     le.label.setText('\u00A0' + (text || ''));
   }
 }
-
-function setLabelTextByColor(color, text) {
-  const id = getIdByColor(color);
-  if (id) setLabelTextById(id, text);
-}
-
 function clearRegistry() {
   REG.clear();
-  COLOR2ID.clear();
 }
+
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Геометрія
@@ -212,23 +196,20 @@ function __drawRecord(rec) {
   }
 }
 
-// ───────────────────────────────────────────────────────────────────────────────
-// Публічні API (збережено сумісність з "color")
-export function addGeodesicCircle(radiusMeters, color = 'rgba(255,0,0,0.8)', _isRedraw = false) {
-  if (!Number.isFinite(radiusMeters) || radiusMeters <= 0) return;
-  const rec = upsertByColor({ color, radiusMeters });
+export function addGeodesicCircle(radiusMeters, color = 'rgba(255,0,0,0.8)', id = null) {
+  if (!Number.isFinite(radiusMeters) || radiusMeters <= 0) return null;
+  const rec = upsertById({ id, color, radiusMeters });
   __drawRecord(rec);
+  return rec.id;
 }
 
-export function setCircleLabelText(color, text) {
-  setLabelTextByColor(color, text);
+export function setCircleLabelTextById(id, text) {
+  setLabelTextById(id, text);
 }
 
-export function setCircleLabelKey(color, payload) {
+export function setCircleLabelKeyById(id, payload) {
   // payload: { type:'lib', libIndex } | { type:'custom', customName }
-  setNameKeyByColor(color, payload);
-  const id = getIdByColor(color);
-  if (!id) return;
+  setNameKeyById(id, payload);
   const rec = REG.get(id);
   if (!rec) return;
   let txt = '';

@@ -53,6 +53,11 @@ function resetFormControls(root = document.getElementById('left-panel')) {
   root.querySelectorAll('.sector-block.is-locked').forEach(b => b.classList.remove('is-locked'));
   root.querySelectorAll('select[disabled], input[disabled], button[disabled]').forEach(el => { el.disabled = false; });
   root.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+    // e) зняти підсвічування Start/Reset у лівій панелі
+  root.querySelectorAll('button#calculate.is-active, button#reset.is-active')
+    .forEach(el => el.classList.remove('is-active'));
+
 }
 
 
