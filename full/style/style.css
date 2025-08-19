@@ -688,3 +688,7 @@ body.modal-open { overflow: hidden; }
 #lang-dropdown[hidden] { 
   display: none !important; 
 }
+#info-panel .ip-note--warn {
+  color: #c0392b; /* червоний, достатньо контрастний */
+  font-weight: 600;
+}

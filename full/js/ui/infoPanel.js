@@ -207,6 +207,24 @@ function render() {
       const sep = document.createTextNode(`: ${real}${(real && scaled) ? ' \u2192 ' : ''}${scaled}`);
       row.appendChild(sep);
     }
+    // Позначка: об'єкт не відображається на глобусі (> π·R)
+    if (it.invisibleReason === 'tooLarge') {
+      const badge = document.createElement('span');
+      badge.className = 'ip-note ip-note--warn';
+
+      badge.textContent = ' • ' + t('ui.info_panel.too_large_badge');
+      row.appendChild(badge);
+
+      if (typeof it.requiredBaselineMeters === 'number' && isFinite(it.requiredBaselineMeters)) {
+        const hint = document.createElement('span');
+        hint.className = 'ip-note';
+        const kmText = fmtMeters(it.requiredBaselineMeters); // автоматично км
+const mText  = `${Math.round(it.requiredBaselineMeters).toLocaleString(locale())} ${t('unit.m')}`;
+hint.textContent = ' — ' + t('ui.info_panel.required_baseline') + ': ' + kmText + ' (' + mText + ')';
+
+        row.appendChild(hint);
+      }
+    }
 
     if (showDescriptions && descText) {
       const extra = document.createElement('div');
@@ -251,8 +269,8 @@ export function setBaselineResult({ libIndex, realValue, realUnit, scaledMeters,
   render();
 }
 
-export function addResult({ libIndex, realValue, realUnit, scaledMeters, name, description, color }) {
+export function addResult({ libIndex, realValue, realUnit, scaledMeters, name, description, color, invisibleReason = null, requiredBaselineMeters = null }) {
   ensureDom();
-  items.push({ type: 'item', libIndex, realValue, realUnit, scaledMeters, name, description, color });
+  items.push({ type: 'item', libIndex, realValue, realUnit, scaledMeters, name, description, color, invisibleReason, requiredBaselineMeters });
   render();
 }

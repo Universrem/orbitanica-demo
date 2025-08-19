@@ -37,6 +37,16 @@ export function setObject1Scale(realDiameterVal, realDiameterUnit, circleDiamete
   const realDiameterMeters = Number(convertUnit(realDiameterVal, realDiameterUnit, 'm', 'diameter'));
   const circleDM = Number(circleDiameterMeters);
 
+  // Межа візуалізації: якщо радіус базового кола > π·R — не малюємо (масштаб залишається)
+const R_EARTH = 6_371_000;
+const LIM_RADIUS = Math.PI * R_EARTH;
+const EPS_M = 1;
+if ((circleDM / 2) > (LIM_RADIUS + EPS_M)) {
+  __baselineId = null;
+  return null; // інфопанель покаже базу як є, але без геометрії
+}
+
+
   if (!isFinite(realDiameterMeters) || realDiameterMeters <= 0 || !isFinite(circleDM) || circleDM <= 0) {
     console.warn('[setObject1Scale] invalid inputs', { realDiameterVal, realDiameterUnit, circleDiameterMeters });
     currentScale = null;

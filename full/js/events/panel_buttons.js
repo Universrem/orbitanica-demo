@@ -129,7 +129,6 @@ if (!window.__panelButtonsBound) {
           // 2) Об'єкт 2 (опціонально)
           if (data.object2) {
             const color2 = getColorForKey(`diam:${data.object2.name || data.object2.libIndex}`);
-            const id2 = addObject2Circle(data.object2.diameterReal, data.object2.unit, color2);
 
             const scale = getCurrentScale();
             let obj2ScaledMeters = null;
@@ -137,6 +136,30 @@ if (!window.__panelButtonsBound) {
               const real2m = Number(convertUnit(data.object2.diameterReal, data.object2.unit, 'm', 'diameter'));
               if (isFinite(real2m) && real2m > 0) obj2ScaledMeters = real2m * scale;
             }
+// Рішення щодо візуалізації Об'єкта 2 (без текстів; інфопанель відрендерить повідомлення)
+const R_EARTH = 6_371_000;
+const LIM_RADIUS = Math.PI * R_EARTH;
+const EPS_M = 1;
+
+let invisibleReason = null;
+let requiredBaselineMeters = null;
+let id2 = null;
+
+if (obj2ScaledMeters != null && isFinite(obj2ScaledMeters)) {
+  const r2 = obj2ScaledMeters / 2;
+  if (r2 > LIM_RADIUS + EPS_M) {
+    // Не малюємо. Порахуємо “який має бути діаметр Об’єкта 1”, щоб Об’єкт 2 став антиподом.
+    const real1m_forHint = Number(convertUnit(data.object1.diameterReal, data.object1.unit, 'm', 'diameter'));
+    const real2m_forHint = Number(convertUnit(data.object2.diameterReal, data.object2.unit, 'm', 'diameter'));
+    if (isFinite(real1m_forHint) && real1m_forHint > 0 && isFinite(real2m_forHint) && real2m_forHint > 0) {
+      requiredBaselineMeters = (2 * Math.PI * R_EARTH) * (real1m_forHint / real2m_forHint);
+    }
+    invisibleReason = 'tooLarge';
+  } else {
+    // В межах — малюємо як раніше
+    id2 = addObject2Circle(data.object2.diameterReal, data.object2.unit, color2);
+  }
+}
 
             addResult({
               libIndex: data.object2.libIndex,
@@ -145,7 +168,10 @@ if (!window.__panelButtonsBound) {
               scaledMeters: obj2ScaledMeters,
               name: data.object2.name,
               description: data.object2.description,
-              color: color2
+              color: color2,
+              invisibleReason,
+              requiredBaselineMeters
+
             });
 
             if (id2) {
