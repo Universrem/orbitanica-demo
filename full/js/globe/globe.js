@@ -1,3 +1,4 @@
+//full/js/globe/globe.js
 'use strict';
 
 import { Globe, XYZ, Vector } from '../../lib/og.es.js';

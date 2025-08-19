@@ -1,3 +1,5 @@
+//full/js/globe/circles.js
+
 'use strict';
 
 import { markerLayer, globus, defaultCenterLat, defaultCenterLon, labelsLayer } from "./globe.js";
@@ -172,19 +174,28 @@ function clearRegistry() {
   REG.clear();
 }
 
-// «Сховати» попередні entity запису без remove/clear
 function __clearRecEntities(rec) {
+  const removeSafe = (layer, e) => { try { layer.removeEntity(e); } catch {} };
+  const removeAny = (layer, val) => {
+    if (!val) return;
+    if (Array.isArray(val)) {
+      for (const e of val) removeSafe(layer, e);
+    } else {
+      removeSafe(layer, val);
+    }
+  };
   try {
-    if (rec.line && typeof rec.line.setVisibility === 'function')  { try { rec.line.setVisibility(false); } catch {} }
-    if (rec.halo && typeof rec.halo.setVisibility === 'function')  { try { rec.halo.setVisibility(false); } catch {} }
-    if (rec.dot  && typeof rec.dot.setVisibility === 'function')   { try { rec.dot.setVisibility(false); } catch {} }
-    if (rec.label&& typeof rec.label.setVisibility === 'function') { try { rec.label.setVisibility(false); } catch {} }
+    removeAny(circlesLayer, rec.line);
+    removeAny(circlesLayer, rec.halo);
+    removeAny(labelsLayer,  rec.dot);
+    removeAny(labelsLayer,  rec.label);
   } catch {}
-  rec.line = null;
-  rec.halo = null;
-  rec.dot = null;
+  rec.line  = null;
+  rec.halo  = null;
+  rec.dot   = null;
   rec.label = null;
 }
+
 
 // Якщо шари спорожніли/відсутні — повернути їх і перемалювати з реєстру
 function __ensureLayersSynced() {
@@ -192,6 +203,9 @@ function __ensureLayersSynced() {
     // гарантуємо, що шари підключені до планети
     try { globus.planet.addLayer(circlesLayer); } catch {}
     try { globus.planet.addLayer(labelsLayer); }  catch {}
+    if ((cEmpty || lEmpty) && REG.size > 0) {
+      console.warn('[circles] ensureLayersSynced: empty -> redraw', { cEmpty, lEmpty, reg: REG.size });
+    }
 
     const cEmpty = !circlesLayer.getEntities || circlesLayer.getEntities().length === 0;
     const lEmpty = !labelsLayer.getEntities || labelsLayer.getEntities().length === 0;
@@ -247,6 +261,14 @@ function getGeodesicCirclePoints(lonDeg, latDeg, radiusMeters, segmentsHint = 25
 
   // Щільність сегментів пропорційна довжині кола
   const seg = clamp(Math.round(64 + (segmentsHint - 64) * (δ / PI)), 64, segmentsHint);
+    // DIAG: параметри кола
+  console.log('[circles] circle params', {
+    center: { lon: lonDeg, lat: latDeg },
+    radius_m: radiusMeters,
+    delta_rad: +(radiusMeters / R_EARTH).toFixed(6),
+    seg
+  });
+
   const coords = [];
   const sinφ1 = Math.sin(φ1), cosφ1 = Math.cos(φ1);
   const sinδ = Math.sin(δ),   cosδ  = Math.cos(δ);
@@ -284,6 +306,8 @@ function __pickAnchorIndex(coords, color) {
   for (let i = 0; i < coords.length; i++) {
     const ll = coords[i];
     const p = globus.planet.getPixelFromLonLat(new LonLat(ll[0], ll[1]));
+        if (!p) { console.count('[circles] __pickAnchorIndex: null pixel'); }
+
     if (p && p.y < bestY) { bestY = p.y; bestIdx = i; }
   }
   const n = coords.length;
@@ -301,6 +325,7 @@ function __drawRecord(rec) {
   const { lon, lat } = __getCurrentCenter();
   const { coords, isAntipode, antipode } = getGeodesicCirclePoints(lon, lat, rec.radiusMeters, 320);
 
+  // --- Антиподальний випадок: тільки точка + лейбл ---
   if (isAntipode) {
     const anchor = antipode;
 
@@ -308,68 +333,69 @@ function __drawRecord(rec) {
     const svgDot = `<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12'><circle cx='6' cy='6' r='5' fill='${rec.color}'/></svg>`;
     const dotEntity = new Entity({
       lonlat: anchor,
-      billboard: {
-        src: 'data:image/svg+xml;utf8,' + encodeURIComponent(svgDot),
-        size: [12, 12],
-        offset: [0, 0]
-      }
+      billboard: { src: 'data:image/svg+xml;utf8,' + encodeURIComponent(svgDot), size: [12, 12], offset: [0, 0] }
     });
     labelsLayer.add(dotEntity);
 
     // Лейбл
     const labelEntity = new Entity({
       lonlat: anchor,
-      label: {
-        text: "\u00A0",
-        size: 11,
-        color: "#111",
-        outline: 0,
-        align: "left",
-        offset: [6, 0]
-      }
+      label: { text: "\u00A0", size: 11, color: "#111", outline: 0, align: "left", offset: [6, 0] }
     });
     labelsLayer.add(labelEntity);
 
+    rec.line = null;
+    rec.halo = null;
     rec.dot = dotEntity;
     rec.label = labelEntity;
 
+    // Початковий текст
     if (typeof rec.nameText === 'string' && rec.nameText.length) {
       setLabelTextById(rec.id, rec.nameText);
     } else if (rec.nameKey) {
       const txt = __resolveNameFromKey(rec.nameKey);
       if (txt) setLabelTextById(rec.id, txt);
     }
-
-    return; // Лінію не малюємо — це точка антиподу
+    return;
   }
 
-  // Halo
-  const haloEntity = new Entity({
-    geometry: {
-      type: "LineString",
-      coordinates: coords,
-      style: {
-        lineColor: "rgba(0,0,0,0.35)",
-        lineWidth: 7
-      }
+  // --- Розріз на антимеридіані: не з’єднуємо через |Δlon|>180 ---
+  const segments = [];
+  let buf = [coords[0]];
+  for (let i = 1; i < coords.length; i++) {
+    const prev = coords[i - 1];
+    const cur  = coords[i];
+    const dLon = Math.abs(cur[0] - prev[0]);
+    if (dLon > 180) {
+      if (buf.length >= 2) segments.push(buf);
+      // Починаємо новий сегмент з поточної точки (НЕ додаємо prev знову)
+      buf = [cur];
+    } else {
+      buf.push(cur);
     }
-  });
-  circlesLayer.add(haloEntity);
+  }
+  if (buf.length >= 2) segments.push(buf);
 
-  // Основне коло
-  const circleEntity = new Entity({
-    geometry: {
-      type: "LineString",
-      coordinates: coords,
-      style: {
-        lineColor: rec.color,
-        lineWidth: 5
-      }
-    }
-  });
-  circlesLayer.add(circleEntity);
+  // --- Малювання кожного сегмента окремо ---
+  const haloEntities = [];
+  const lineEntities = [];
+  for (const segCoords of segments) {
+    // Halo
+    const halo = new Entity({
+      geometry: { type: "LineString", coordinates: segCoords, style: { lineColor: "rgba(0,0,0,0.35)", lineWidth: 7 } }
+    });
+    circlesLayer.add(halo);
+    haloEntities.push(halo);
 
-  // Якір
+    // Основна лінія
+    const line = new Entity({
+      geometry: { type: "LineString", coordinates: segCoords, style: { lineColor: rec.color, lineWidth: 5 } }
+    });
+    circlesLayer.add(line);
+    lineEntities.push(line);
+  }
+
+  // --- Якір для крапки/лейблу (за повним контуром) ---
   const anchorIdx = __pickAnchorIndex(coords, rec.color);
   const anchor = coords[anchorIdx];
 
@@ -377,31 +403,20 @@ function __drawRecord(rec) {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><circle cx='5' cy='5' r='4' fill='${rec.color}'/></svg>`;
   const dotEntity = new Entity({
     lonlat: anchor,
-    billboard: {
-      src: 'data:image/svg+xml;utf8,' + encodeURIComponent(svg),
-      size: [10, 10],
-      offset: [0, 0]
-    }
+    billboard: { src: 'data:image/svg+xml;utf8,' + encodeURIComponent(svg), size: [10, 10], offset: [0, 0] }
   });
   labelsLayer.add(dotEntity);
 
   // Лейбл
   const labelEntity = new Entity({
     lonlat: anchor,
-    label: {
-      text: "\u00A0",
-      size: 11,
-      color: "#111",
-      outline: 0,
-      align: "left",
-      offset: [4, 0]
-    }
+    label: { text: "\u00A0", size: 11, color: "#111", outline: 0, align: "left", offset: [4, 0] }
   });
   labelsLayer.add(labelEntity);
 
-  // Оновити запис зв’язками
-  rec.line = circleEntity;
-  rec.halo = haloEntity;
+  // --- Оновлюємо зв’язки в записі ---
+  rec.line = lineEntities;   // тепер масиви
+  rec.halo = haloEntities;
   rec.dot = dotEntity;
   rec.label = labelEntity;
 
@@ -414,6 +429,7 @@ function __drawRecord(rec) {
   }
 }
 
+
 // ───────────────────────────────────────────────────────────────────────────────
 // API
 export function addGeodesicCircle(radiusMeters, color = 'rgba(255,0,0,0.8)', id = null) {
@@ -424,6 +440,7 @@ export function addGeodesicCircle(radiusMeters, color = 'rgba(255,0,0,0.8)', id 
 
   const existed = !!(id && REG.has(id));
   const rec = upsertById({ id, color, radiusMeters });
+console.log('[circles] add', { incomingId: id, usedId: rec.id, existed, radiusMeters });
 
   // Якщо це оновлення існуючого запису (той самий id) — сховаємо попередні ентіті без remove/clear
   if (existed) {
@@ -457,10 +474,20 @@ export function setCircleLabelKeyById(id, payload) {
 // ───────────────────────────────────────────────────────────────────────────────
 // Перемальовка / скидання
 function __redrawAllFromRegistry() {
+    const _cBefore = circlesLayer.getEntities?.().length ?? -1;
+  const _lBefore = labelsLayer.getEntities?.().length ?? -1;
+  console.groupCollapsed('[circles] redraw start');
+  console.log('REG size =', REG.size, 'circles before =', _cBefore, 'labels before =', _lBefore);
+
   for (const rec of REG.values()) {
     try { __clearRecEntities(rec); __drawRecord(rec); }
     catch (e) { console.error('[circles] redraw failed', e); }
   }
+    const _cAfter = circlesLayer.getEntities?.().length ?? -1;
+  const _lAfter = labelsLayer.getEntities?.().length ?? -1;
+  console.log('circles after =', _cAfter, 'labels after =', _lAfter);
+  console.groupEnd();
+
 }
 
 function __fullClear() {

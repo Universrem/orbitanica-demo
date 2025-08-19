@@ -1,3 +1,5 @@
+//full/js/events/panel_buttons.js
+
 'use strict';
 
 import { openCreateModal } from '../userObjects/modal.js';
