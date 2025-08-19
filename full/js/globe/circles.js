@@ -202,14 +202,14 @@ function __ensureLayersSynced() {
   try {
     // гарантуємо, що шари підключені до планети
     try { globus.planet.addLayer(circlesLayer); } catch {}
-    try { globus.planet.addLayer(labelsLayer); }  catch {}
-    if ((cEmpty || lEmpty) && REG.size > 0) {
-      console.warn('[circles] ensureLayersSynced: empty -> redraw', { cEmpty, lEmpty, reg: REG.size });
-    }
+try { globus.planet.addLayer(labelsLayer); }  catch {}
 
-    const cEmpty = !circlesLayer.getEntities || circlesLayer.getEntities().length === 0;
-    const lEmpty = !labelsLayer.getEntities || labelsLayer.getEntities().length === 0;
-    if ((cEmpty || lEmpty) && REG.size > 0) __redrawAllFromRegistry();
+const cEmpty = !circlesLayer.getEntities || circlesLayer.getEntities().length === 0;
+const lEmpty = !labelsLayer.getEntities || labelsLayer.getEntities().length === 0;
+if ((cEmpty || lEmpty) && REG.size > 0) {
+  __redrawAllFromRegistry();
+}
+
   } catch {}
 }
 
@@ -260,15 +260,9 @@ function getGeodesicCirclePoints(lonDeg, latDeg, radiusMeters, segmentsHint = 25
   }
 
   // Щільність сегментів пропорційна довжині кола
-  const seg = clamp(Math.round(64 + (segmentsHint - 64) * (δ / PI)), 64, segmentsHint);
-    // DIAG: параметри кола
-  console.log('[circles] circle params', {
-    center: { lon: lonDeg, lat: latDeg },
-    radius_m: radiusMeters,
-    delta_rad: +(radiusMeters / R_EARTH).toFixed(6),
-    seg
-  });
+const seg = clamp(Math.round(180 + (segmentsHint - 180) * (δ / PI)), 180, segmentsHint);
 
+  
   const coords = [];
   const sinφ1 = Math.sin(φ1), cosφ1 = Math.cos(φ1);
   const sinδ = Math.sin(δ),   cosδ  = Math.cos(δ);
@@ -306,7 +300,6 @@ function __pickAnchorIndex(coords, color) {
   for (let i = 0; i < coords.length; i++) {
     const ll = coords[i];
     const p = globus.planet.getPixelFromLonLat(new LonLat(ll[0], ll[1]));
-        if (!p) { console.count('[circles] __pickAnchorIndex: null pixel'); }
 
     if (p && p.y < bestY) { bestY = p.y; bestIdx = i; }
   }
@@ -323,7 +316,8 @@ function __drawRecord(rec) {
   if (!rec || !Number.isFinite(rec.radiusMeters) || rec.radiusMeters <= 0) return;
 
   const { lon, lat } = __getCurrentCenter();
-  const { coords, isAntipode, antipode } = getGeodesicCirclePoints(lon, lat, rec.radiusMeters, 320);
+ const { coords, isAntipode, antipode } = getGeodesicCirclePoints(lon, lat, rec.radiusMeters, 1024);
+
 
   // --- Антиподальний випадок: тільки точка + лейбл ---
   if (isAntipode) {
@@ -440,8 +434,6 @@ export function addGeodesicCircle(radiusMeters, color = 'rgba(255,0,0,0.8)', id 
 
   const existed = !!(id && REG.has(id));
   const rec = upsertById({ id, color, radiusMeters });
-console.log('[circles] add', { incomingId: id, usedId: rec.id, existed, radiusMeters });
-
   // Якщо це оновлення існуючого запису (той самий id) — сховаємо попередні ентіті без remove/clear
   if (existed) {
     __clearRecEntities(rec);
@@ -474,20 +466,11 @@ export function setCircleLabelKeyById(id, payload) {
 // ───────────────────────────────────────────────────────────────────────────────
 // Перемальовка / скидання
 function __redrawAllFromRegistry() {
-    const _cBefore = circlesLayer.getEntities?.().length ?? -1;
-  const _lBefore = labelsLayer.getEntities?.().length ?? -1;
-  console.groupCollapsed('[circles] redraw start');
-  console.log('REG size =', REG.size, 'circles before =', _cBefore, 'labels before =', _lBefore);
 
   for (const rec of REG.values()) {
     try { __clearRecEntities(rec); __drawRecord(rec); }
     catch (e) { console.error('[circles] redraw failed', e); }
   }
-    const _cAfter = circlesLayer.getEntities?.().length ?? -1;
-  const _lAfter = labelsLayer.getEntities?.().length ?? -1;
-  console.log('circles after =', _cAfter, 'labels after =', _lAfter);
-  console.groupEnd();
-
 }
 
 function __fullClear() {
