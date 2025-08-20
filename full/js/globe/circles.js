@@ -5,8 +5,8 @@
 import { markerLayer, globus, defaultCenterLat, defaultCenterLon, labelsLayer } from "./globe.js";
 import { Entity, Vector, LonLat } from '../../lib/og.es.js';
 import { placeMarker } from "./markers.js";
-import { getUniverseLibrary } from '../data/data_diameter.js';
 import { getCurrentLang } from '../i18n.js';
+import { getUniverseLibrary } from '../data/universe.js';
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Шар кіл

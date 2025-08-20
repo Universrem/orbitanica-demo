@@ -3,8 +3,7 @@
 
 import { getCurrentLang, t } from '../i18n.js';
 import { getStore } from '../userObjects/api.js';
-
-let universeLibrary = [];
+import { loadUniverseLibrary, getUniverseLibrary } from '../data/universe.js';
 
 /**
  * Головна ініціалізація блоку "Діаметр"
@@ -78,7 +77,6 @@ export async function initUniversDiameterBlock() {
 
   // зміна мови: перезавантажуємо бібліотеку і перебудовуємо все
   document.addEventListener('languageChanged', async () => {
-    await loadUniverseLibrary();
     updateCategories();
     rebuildObjectsForSelectedCategories();
   });
@@ -86,19 +84,9 @@ export async function initUniversDiameterBlock() {
 
 // ─────────────────────────────────────────────
 
-async function loadUniverseLibrary() {
-  try {
-    const response = await fetch('/full/data/univers.json');
-    universeLibrary = await response.json();
-  } catch (err) {
-    console.error('❌ Не вдалося завантажити univers.json', err);
-    universeLibrary = [];
-  }
-}
-
-// ─────────────────────────────────────────────
-
 function updateCategories() {
+  const universeLibrary = getUniverseLibrary();
+
   const lang = getCurrentLang();
   const set = new Set();
 
@@ -143,6 +131,8 @@ function updateCategories() {
 }
 
 function buildCombinedObjectsForCategory(category) {
+  const universeLibrary = getUniverseLibrary();
+
   const lang = getCurrentLang();
   const out = [];
 

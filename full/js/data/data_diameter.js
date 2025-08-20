@@ -3,22 +3,7 @@
 
 import { getCurrentLang } from '../i18n.js';
 import { getStore } from '../userObjects/api.js';
-
-let universeLibrary = [];
-
-export function getUniverseLibrary() {
-  return universeLibrary;
-}
-
-export async function loadUniverseLibrary() {
-  try {
-    const response = await fetch('/full/data/univers.json');
-    universeLibrary = await response.json();
-  } catch (err) {
-    console.error('❌ Не вдалося завантажити univers.json', err);
-    universeLibrary = [];
-  }
-}
+import { getUniverseLibrary } from './universe.js';
 
 // ── хелпери читання діаметра з різних форматів ─────────────────────────────
 
@@ -51,6 +36,7 @@ function userDesc(u, lang) {
 /** Повертає дані для розрахунку масштабування діаметра */
 export function getDiameterData() {
   const lang = getCurrentLang();
+  const universeLibrary = getUniverseLibrary();
 
   const category1 = document.getElementById('diamCategoryObject1')?.value;
   const object1   = document.getElementById('diamObject1')?.value;

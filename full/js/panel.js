@@ -1,6 +1,9 @@
+//full/js/panel.js
+
 'use strict';
 
 import { initUniversDiameterBlock } from './blocks/univers_diameter.js';
+import { initUniversDistanceBlock } from './blocks/univers_distance.js';
 import { resetAllUI, resetScreenUI } from './events/reset.js';
 
 /** Фабрика елементів полів лівої панелі */
@@ -104,12 +107,9 @@ export function initLeftPanel(t) {
             {
               type: 'group', className: 'sector-block', children: [
                 { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-                { type: 'select', id: 'distCategoryObject1', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'distObject1',         placeholder: t('panel_placeholder_object1') },
                 { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
                 { type: 'input',  id: 'distCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
-                { type: 'button', id: 'create',              text: t('panel_button_create') },
               ]
             },
             {
@@ -491,8 +491,9 @@ export function initLeftPanel(t) {
     container.append(det);
   });
 
-  // Після рендера інітимо дані для Діаметрів
+  // Після рендера інітимо дані
   initUniversDiameterBlock();
+  initUniversDistanceBlock();
 
   // ==== Авто-скидання при переході у будь-яку іншу секцію лівої панелі
   const leftPanel = document.getElementById('left-panel');

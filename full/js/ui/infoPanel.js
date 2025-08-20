@@ -2,7 +2,8 @@
 'use strict';
 
 import { t, getCurrentLang } from '../i18n.js';
-import { getUniverseLibrary } from '../data/data_diameter.js';
+import { getUniverseLibrary } from '../data/universe.js';
+
 
 let panelEl = null;
 let titleEl = null;
