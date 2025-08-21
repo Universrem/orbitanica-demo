@@ -6,6 +6,7 @@ import { initI18n, t } from './i18n.js';
 import { initLeftPanel } from './panel.js';
 import './events/panel_buttons.js';
 import './events/distance_buttons.js';
+import './events/luminosity_buttons.js';
 import './userObjects/modal.js';
 import './ui/langMenu.js';
 

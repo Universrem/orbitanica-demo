@@ -8,6 +8,7 @@ import { loadBaseUnits, convertUnit } from '../utils/unit_converter.js';
 import { resetAllUI } from './reset.js';
 import { onDistanceCalculate } from './distance_buttons.js';
 import { onDiameterCalculate } from './diameter_buttons.js';
+import { onLuminosityCalculate } from './luminosity_buttons.js';
 
 
 
@@ -47,7 +48,7 @@ if (!window.__panelButtonsBound) {
     if (!btn) return;
 
     // працюємо лише в межах блоку діаметр, відстань
-    const block = btn.closest('#univers_diameter, #univers_distance');
+    const block = btn.closest('#univers_diameter, #univers_distance, #univers_luminosity');
 
     if (!block) return;
 
@@ -122,7 +123,11 @@ if (!window.__panelButtonsBound) {
           return;
         }
 
-        if (subblock.id.startsWith('univers_luminosity')) console.log('💡 luminosity: TODO');
+        if (subblock.id.startsWith('univers_luminosity')) {
+          onLuminosityCalculate({ scope, object1Group, object2Group });
+          return;
+        }
+
         if (subblock.id.startsWith('univers_mass')) console.log('⚖ mass: TODO');
         if (subblock.id.startsWith('history')) console.log('🕰 history: TODO');
         if (subblock.id.startsWith('math')) console.log('➗ math: TODO');
@@ -163,7 +168,8 @@ if (!window.__panelCreateBound) {
     if (action !== 'create') return;
 
     // Працюємо тільки коли клік всередині блоку "Діаметри"
-    const block = btn.closest('#univers_diameter');
+    const block = btn.closest('#univers_diameter, #univers_distance, #univers_luminosity');
+
     if (!block) return;
 
     // Визначаємо слот за сектором
@@ -173,13 +179,25 @@ if (!window.__panelCreateBound) {
     if (group?.querySelector('#createSecondObject')) slot = 'object2';
 
     // Підтягуємо попередньо вибрану категорію відповідного слота
-    const presetCategoryEl = document.getElementById(
-      slot === 'object1' ? 'diamCategoryObject1' : 'diamCategoryObject2'
-    );
-    const presetCategory =
-      presetCategoryEl && typeof presetCategoryEl.value === 'string' ? presetCategoryEl.value : '';
+    const parentSubblock = btn.closest('[id^="univers_"]');
+// шукаємо селект категорії в межах поточної підсекції, незалежно від режиму
+const presetCategoryEl = parentSubblock?.querySelector(
+  slot === 'object1'
+    ? 'select[id$="CategoryObject1"]'
+    : 'select[id$="CategoryObject2"]'
+);
+
+const presetCategory =
+  presetCategoryEl && typeof presetCategoryEl.value === 'string' ? presetCategoryEl.value : '';
+
 
     // Відкрити модалку створення
-    await openCreateModal({ mode: 'diameter', presetCategory, slot });
+    const mode =
+  parentSubblock?.id?.startsWith('univers_luminosity') ? 'luminosity' :
+  parentSubblock?.id?.startsWith('univers_distance')   ? 'distance'   :
+  'diameter';
+
+    await openCreateModal({ mode, presetCategory, slot });
+
   });
 }
