@@ -5,6 +5,7 @@
 import { initUniversDiameterBlock } from './blocks/univers_diameter.js';
 import { initUniversDistanceBlock } from './blocks/univers_distance.js';
 import { initUniversLuminosityBlock } from './blocks/univers_luminosity.js';
+import { initUniversMassBlock } from './blocks/univers_mass.js';
 import { resetAllUI, resetScreenUI } from './events/reset.js';
 
 /** Фабрика елементів полів лівої панелі */
@@ -496,6 +497,7 @@ export function initLeftPanel(t) {
   initUniversDiameterBlock();
   initUniversDistanceBlock();
   initUniversLuminosityBlock();
+  initUniversMassBlock();
 
 
   // ==== Авто-скидання при переході у будь-яку іншу секцію лівої панелі

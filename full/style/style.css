@@ -345,6 +345,28 @@ hr {
   text-align: right;
   font-size: 0.85rem;
 }
+/* Пояснювальний підпис над групами (О1/О2) */
+#info-panel .info-panel__subtitle {
+  display: block;
+  width: 100%;
+  margin: 6px 0 4px;
+  color: #666;              /* трохи сіріше за основний текст */
+  font-style: normal;       /* курсив, щоб відрізнялося від значень */
+  font-size: 13px;          /* менший шрифт */
+  text-align: center;       /* по центру рядка */
+  line-height: 1.3;
+}
+/* Робить охайну лінію під усім підписом (виглядає як роздільник).*/
+#info-panel .info-panel__subtitle::after {
+  content: "";
+  display: block;
+  width: 70%;                        /* довжина лінії */
+  height: 1px;
+  margin: 4px auto 0;
+  background: rgba(0,0,0,.15);       /* колір лінії */
+  border-radius: 999px;              /* «hairline» вигляд */
+}
+
 
 .info-panel__row .scaled {
   color: #555;
@@ -360,10 +382,17 @@ hr {
 }
 
 #info-panel .info-panel__toggleLabel {
-  font-size: 0.9rem;
-  color: #333;
+  display: inline-block;
   white-space: nowrap;
+
+  /* узгоджено з .info-panel__subtitle */
+  color: #666;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.3;
 }
+
 
 #info-panel .switch {
   position: relative;

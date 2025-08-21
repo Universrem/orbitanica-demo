@@ -9,6 +9,8 @@ import { resetAllUI } from './reset.js';
 import { onDistanceCalculate } from './distance_buttons.js';
 import { onDiameterCalculate } from './diameter_buttons.js';
 import { onLuminosityCalculate } from './luminosity_buttons.js';
+import { onMassCalculate } from './mass_buttons.js';
+
 
 
 
@@ -48,7 +50,7 @@ if (!window.__panelButtonsBound) {
     if (!btn) return;
 
     // працюємо лише в межах блоку діаметр, відстань
-    const block = btn.closest('#univers_diameter, #univers_distance, #univers_luminosity');
+    const block = btn.closest('#univers_diameter, #univers_distance, #univers_luminosity, #univers_mass');
 
     if (!block) return;
 
@@ -128,7 +130,11 @@ if (!window.__panelButtonsBound) {
           return;
         }
 
-        if (subblock.id.startsWith('univers_mass')) console.log('⚖ mass: TODO');
+        if (subblock.id.startsWith('univers_mass')) {
+          onMassCalculate({ scope, object1Group, object2Group });
+          return;
+        }
+
         if (subblock.id.startsWith('history')) console.log('🕰 history: TODO');
         if (subblock.id.startsWith('math')) console.log('➗ math: TODO');
         if (subblock.id.startsWith('money')) console.log('💰 money: TODO');
@@ -168,7 +174,7 @@ if (!window.__panelCreateBound) {
     if (action !== 'create') return;
 
     // Працюємо тільки коли клік всередині блоку "Діаметри"
-    const block = btn.closest('#univers_diameter, #univers_distance, #univers_luminosity');
+    const block = btn.closest('#univers_diameter, #univers_distance, #univers_luminosity, #univers_mass');
 
     if (!block) return;
 
@@ -192,10 +198,12 @@ const presetCategory =
 
 
     // Відкрити модалку створення
-    const mode =
+const mode =
   parentSubblock?.id?.startsWith('univers_luminosity') ? 'luminosity' :
   parentSubblock?.id?.startsWith('univers_distance')   ? 'distance'   :
+  parentSubblock?.id?.startsWith('univers_mass')       ? 'mass'       :
   'diameter';
+
 
     await openCreateModal({ mode, presetCategory, slot });
 

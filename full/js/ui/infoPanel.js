@@ -15,6 +15,10 @@ let showDescriptions = false;
 
 let ipHover = null;
 let hoverTimer = null;
+// Прапорці для одноразових підписів над О1 та О2
+let baselineSubtitleShown = false;
+let itemSubtitleShown = false;
+
 
 const items = []; // { type:'baseline'|'item', libIndex, realValue, realUnit, scaledMeters, name?, description?, color }
 
@@ -156,9 +160,48 @@ function ensureDom() {
 function render() {
   ensureDom();
   listEl.innerHTML = '';
+  baselineSubtitleShown = false;
+  itemSubtitleShown = false;
+
 
   const lib = getUniverseLibrary();
   const lang = getCurrentLang?.() || 'ua';
+
+  // Формуємо текст підпису з ключів перекладу (якщо ключі прийшли)
+  const subtitleText = (it) => {
+    const leftKey = it?.uiLeftLabelKey || '';
+    const rightKey = it?.uiRightLabelKey || '';
+    const left = leftKey ? t(leftKey) : '';
+    const right = rightKey ? t(rightKey) : '';
+    if (left && right) return `${left} \u2192 ${right}`;
+    if (left) return left;
+    if (right) return right;
+    return '';
+  };
+
+  // Додаємо підпис один раз над блоком О1 або О2, тільки якщо є ключі
+  const appendSubtitleIfNeeded = (it) => {
+    if (it.type === 'baseline' && !baselineSubtitleShown) {
+      const txt = subtitleText(it);
+      if (txt) {
+        const sub = document.createElement('div');
+        sub.className = 'info-panel__subtitle';
+        sub.textContent = txt;
+        listEl.appendChild(sub);
+      }
+      baselineSubtitleShown = true;
+    }
+    if (it.type === 'item' && !itemSubtitleShown) {
+      const txt = subtitleText(it);
+      if (txt) {
+        const sub = document.createElement('div');
+        sub.className = 'info-panel__subtitle';
+        sub.textContent = txt;
+        listEl.appendChild(sub);
+      }
+      itemSubtitleShown = true;
+    }
+  };
 
   items.forEach(it => {
     const rec = (Number.isInteger(it.libIndex) && it.libIndex >= 0) ? (lib?.[it.libIndex]) : null;
@@ -170,6 +213,9 @@ function render() {
     const descText = rec
       ? (rec[`description_${lang}`] || '')
       : (it.description || '');
+
+    // Показати підпис над групою (О1 або О2), тільки якщо ключі прийшли
+    appendSubtitleIfNeeded(it);
 
     const row = document.createElement('div');
     row.className = 'info-panel__row';
@@ -262,16 +308,16 @@ export function clearInfoPanel(opts = {}) {
   render();
 }
 
-export function setBaselineResult({ libIndex, realValue, realUnit, scaledMeters, name, description, color }) {
+export function setBaselineResult({ libIndex, realValue, realUnit, scaledMeters, name, description, color, uiLeftLabelKey, uiRightLabelKey }) {
+
   ensureDom();
-  const rec = { type: 'baseline', libIndex, realValue, realUnit, scaledMeters, name, description, color };
+  const rec = { type: 'baseline', libIndex, realValue, realUnit, scaledMeters, name, description, color, uiLeftLabelKey, uiRightLabelKey };
   const idx = items.findIndex(it => it.type === 'baseline');
   if (idx >= 0) items[idx] = rec; else items.unshift(rec);
   render();
 }
-
-export function addResult({ libIndex, realValue, realUnit, scaledMeters, name, description, color, invisibleReason = null, requiredBaselineMeters = null }) {
+export function addResult({ libIndex, realValue, realUnit, scaledMeters, name, description, color, uiLeftLabelKey, uiRightLabelKey, invisibleReason = null, requiredBaselineMeters = null }) {
   ensureDom();
-  items.push({ type: 'item', libIndex, realValue, realUnit, scaledMeters, name, description, color, invisibleReason, requiredBaselineMeters });
+  items.push({ type: 'item', libIndex, realValue, realUnit, scaledMeters, name, description, color, uiLeftLabelKey, uiRightLabelKey, invisibleReason, requiredBaselineMeters });
   render();
 }

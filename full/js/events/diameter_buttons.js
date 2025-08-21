@@ -32,7 +32,9 @@ export function onDiameterCalculate(ctx = {}) {
     scaledMeters: data.object1.diameterScaled,
     name: data.object1.name,
     description: data.object1.description,
-    color: color1
+    color: color1,
+    uiLeftLabelKey: 'diameter.labels.o1.left',
+    uiRightLabelKey: 'diameter.labels.o1.right',
   });
 
   if (baselineId) {

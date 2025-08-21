@@ -36,7 +36,9 @@ export function onDistanceCalculate(ctx = {}) {
     scaledMeters: data.object1.diameterScaled, // на мапі — ДІАМЕТР довідкового кола О1
     name: data.object1.name,
     description: data.object1.description,
-    color: color1
+    color: color1,
+        uiLeftLabelKey: 'distance.labels.o1.left',
+    uiRightLabelKey: 'distance.labels.o1.right',
   });
 
   // Лейбл для базового кола (якщо він намалювався)
@@ -83,7 +85,9 @@ export function onDistanceCalculate(ctx = {}) {
       description: data.object2.description,
       color: color2,
       invisibleReason: res.tooLarge ? 'tooLarge' : null,
-      requiredBaselineMeters: res.requiredBaselineMeters || null
+      requiredBaselineMeters: res.requiredBaselineMeters || null,
+      uiLeftLabelKey: 'distance.labels.o2.left',
+      uiRightLabelKey: 'distance.labels.o2.right',
     });
 
     // Лейбл/точка на колі (якщо намалювали)

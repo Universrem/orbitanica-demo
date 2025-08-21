@@ -700,10 +700,63 @@
   "ua": "Максимальний діаметр Об'єкта 1 для відображення",
   "en": "Maximum Object 1 circle diameter to display",
   "es": "Diámetro máximo del Objeto 1 para visualizar"
+},
+
+  "diameter.labels.o1.left": {
+    "ua": "Діаметр",
+    "en": "Diameter",
+    "es": "Diámetro"
+  },
+  "diameter.labels.o1.right": {
+    "ua": "Масштабований діаметр",
+    "en": "Scaled diameter",
+    "es": "Diámetro escalado"
+  },
+
+  "distance.labels.o1.left": {
+    "ua": "Діаметр",
+    "en": "Diameter",
+    "es": "Diámetro"
+  },
+  "distance.labels.o1.right": {
+    "ua": "Масштабований діаметр",
+    "en": "Scaled diameter",
+    "es": "Diámetro escalado"
+  },
+  "distance.labels.o2.left": {
+    "ua": "Відстань до Землі",
+    "en": "Distance to Earth",
+    "es": "Distancia a la Tierra"
+  },
+  "distance.labels.o2.right": {
+    "ua": "Масштабована відстань (радіус)",
+    "en": "Scaled distance (radius)",
+    "es": "Distancia escalada (radio)"
+  },
+
+  "luminosity.labels.o1.left": {
+    "ua": "Світність",
+    "en": "Luminosity",
+    "es": "Luminosidad"
+  },
+  "luminosity.labels.o1.right": {
+    "ua": "Діаметр (площа кола пропорційна світності)",
+    "en": "Diameter (circle area ∝ luminosity)",
+    "es": "Diámetro (área del círculo ∝ luminosidad)"
+  },
+  "mass.labels.o1.left": {
+    "ua": "Маса",
+    "en": "Mass",
+    "es": "Masa"
+  },
+  "mass.labels.o1.right": {
+    "ua": "Діаметр (площа кола пропорційна масі)",
+    "en": "Diameter (circle area ∝ mass)",
+    "es": "Diámetro (área del círculo ∝ masa)"
+  }
+
 }
 
-
-}
 
 
 
