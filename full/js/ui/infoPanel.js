@@ -3,6 +3,7 @@
 
 import { t, getCurrentLang } from '../i18n.js';
 import { getUniverseLibrary } from '../data/universe.js';
+import { formatHistoryGroupTitle, formatHistoryVariantPrefix } from './ip_text_history.js';
 
 
 let panelEl = null;
@@ -20,7 +21,7 @@ let baselineSubtitleShown = false;
 let itemSubtitleShown = false;
 
 
-const items = []; // { type:'baseline'|'item', libIndex, realValue, realUnit, scaledMeters, name?, description?, color }
+const items = []; // { type:'baseline'|'item', libIndex?, realValue?, realUnit?, scaledMeters?, name?, description?, thumbUrl?, color, uiLeftLabelKey?, uiRightLabelKey?, invisibleReason?, requiredBaselineMeters? }
 
 const LOCALES = { ua: 'uk-UA', en: 'en-US', es: 'es-ES' };
 const locale = () => LOCALES[getCurrentLang?.()] || 'uk-UA';
@@ -204,15 +205,114 @@ function render() {
   };
 
   items.forEach(it => {
+        // === Grouped History rendering ===
+    if (it.type === 'history-group') {
+      // підпис "лівий → правий" показуємо один раз для baseline/item
+if (it.groupType === 'baseline') {
+  appendSubtitleIfNeeded({
+    type: 'baseline',
+    uiLeftLabelKey: it.uiLeftLabelKey,
+    uiRightLabelKey: it.uiRightLabelKey
+  });
+}
+// Для item (О2) підзаголовок НЕ показуємо
+
+
+      // Заголовок групи
+      const row = document.createElement('div');
+      row.className = 'info-panel__row ip-history-group';
+
+      const dot = document.createElement('span');
+      dot.className = 'ip-dot';
+      dot.style.backgroundColor = it.color || 'rgba(60,60,60,0.9)';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'ip-name ip-title';
+      nameSpan.textContent = it.title || '';
+
+      const fixUrl = (u) => {
+        if (!u) return '';
+        if (/^https?:\/\//i.test(u)) return u;
+        if (u.startsWith('/')) return u;
+        if (u.startsWith('./')) return u.slice(1);
+        if (u.startsWith('../')) return '/' + u.replace(/^\.\.\//, '');
+        return '/' + u.replace(/^\/+/, '');
+      };
+      const thumbUrl = it.thumbUrl ? fixUrl(String(it.thumbUrl).trim()) : '';
+      if (thumbUrl) {
+        nameSpan.classList.add('has-thumb');
+        nameSpan.addEventListener('mouseenter', (e) => scheduleHover(e, thumbUrl));
+        nameSpan.addEventListener('mousemove', moveHover);
+        nameSpan.addEventListener('mouseleave', hideHover);
+      }
+
+      row.appendChild(dot);
+      row.appendChild(nameSpan);
+
+      // Підрядки "— початок/— завершення"
+      const subwrap = document.createElement('div');
+      subwrap.className = 'ip-subrows';
+
+      (it.variants || []).forEach(v => {
+        const sub = document.createElement('div');
+        sub.className = 'info-panel__row ip-subrow';
+
+        const pref = document.createElement('span');
+        pref.className = 'ip-variant';
+        pref.textContent = formatHistoryVariantPrefix(v.variant);
+        sub.appendChild(pref);
+
+        const real = (v.realValue != null && v.realUnit) ? `${fmtNumber(v.realValue)} ${fmtUnit(v.realUnit)}` : '';
+        const scaled = (v.scaledMeters != null) ? fmtMeters(v.scaledMeters) : '';
+        if (real || scaled) {
+          const sep = document.createTextNode(` ${real}${(real && scaled) ? ' \u2192 ' : ''}${scaled}`);
+          sub.appendChild(sep);
+        }
+
+        if (v.invisibleReason === 'tooLarge') {
+          const badge = document.createElement('span');
+          badge.className = 'ip-note ip-note--warn';
+          badge.textContent = ' • ' + t('ui.info_panel.too_large_badge');
+          sub.appendChild(badge);
+
+          if (typeof v.requiredBaselineMeters === 'number' && isFinite(v.requiredBaselineMeters)) {
+            const hint = document.createElement('span');
+            hint.className = 'ip-note';
+            const kmText = fmtMeters(v.requiredBaselineMeters);
+            const mText  = `${Math.round(v.requiredBaselineMeters).toLocaleString(locale())} ${t('unit.m')}`;
+            hint.textContent = ' — ' + t('ui.info_panel.required_baseline') + ': ' + kmText + ' (' + mText + ')';
+            sub.appendChild(hint);
+          }
+        }
+
+        subwrap.appendChild(sub);
+      });
+
+row.appendChild(subwrap);
+listEl.appendChild(row);
+
+
+      if (showDescriptions && it.description) {
+        const desc = document.createElement('div');
+        desc.className = 'info-panel__description';
+        desc.textContent = it.description;
+        listEl.appendChild(desc);
+      }
+
+      return; // пропускаємо стандартний рендер рядка
+    }
+
     const rec = (Number.isInteger(it.libIndex) && it.libIndex >= 0) ? (lib?.[it.libIndex]) : null;
 
-    const nameText = rec
-      ? (rec[`name_${lang}`] ?? rec.name_en ?? '')
-      : (it.name || '');
+    // 1) ім'я/опис — СПОЧАТКУ беремо з it (передано режимом), і лише якщо їх немає — з бібліотеки (для зворотної сумісності)
+    const nameText = (it.name && String(it.name).trim())
+      ? it.name
+      : (rec ? (rec[`name_${lang}`] ?? rec.name_en ?? '') : '');
 
-    const descText = rec
-      ? (rec[`description_${lang}`] || '')
-      : (it.description || '');
+    const descText = (it.description && String(it.description).trim())
+      ? it.description
+      : (rec ? (rec[`description_${lang}`] || '') : '');
+
 
     // Показати підпис над групою (О1 або О2), тільки якщо ключі прийшли
     appendSubtitleIfNeeded(it);
@@ -237,7 +337,9 @@ function render() {
       if (u.startsWith('../')) return '/' + u.replace(/^\.\.\//, '');
       return '/' + u.replace(/^\/+/, '');
     };
-    const thumbUrl = fixUrl((rec?.image_thumb || rec?.image || rec?.image_url || rec?.image_full || '').trim());
+    const thumbRaw = it.thumbUrl ?? rec?.image_thumb ?? rec?.image ?? rec?.image_url ?? rec?.image_full ?? '';
+    const thumbUrl = thumbRaw ? fixUrl(String(thumbRaw).trim()) : '';
+
     if (thumbUrl) {
       nameSpan.classList.add('has-thumb');
       nameSpan.addEventListener('mouseenter', (e) => scheduleHover(e, thumbUrl));
@@ -321,3 +423,106 @@ export function addResult({ libIndex, realValue, realUnit, scaledMeters, name, d
   items.push({ type: 'item', libIndex, realValue, realUnit, scaledMeters, name, description, color, uiLeftLabelKey, uiRightLabelKey, invisibleReason, requiredBaselineMeters });
   render();
 }
+// ─────────────────────────────────────────────────────────────
+// V2 API: інфопанель повністю покладається на дані режиму
+export function setBaselineResultV2({ name, description, thumbUrl, realValue, realUnit, scaledMeters, color, uiLeftLabelKey, uiRightLabelKey, invisibleReason = null, requiredBaselineMeters = null }) {
+  ensureDom();
+  const rec = {
+    type: 'baseline',
+    libIndex: -1, // ігнорується рендером, бо name/description вже передані режимом
+    name, description, thumbUrl,
+    realValue, realUnit, scaledMeters,
+    color, uiLeftLabelKey, uiRightLabelKey,
+    invisibleReason, requiredBaselineMeters
+  };
+  const idx = items.findIndex(it => it.type === 'baseline');
+  if (idx >= 0) items[idx] = rec; else items.unshift(rec);
+  render();
+}
+
+export function addResultV2({ name, description, thumbUrl, realValue, realUnit, scaledMeters, color, uiLeftLabelKey, uiRightLabelKey, invisibleReason = null, requiredBaselineMeters = null }) {
+  ensureDom();
+  items.push({
+    type: 'item',
+    libIndex: -1, // див. вище
+    name, description, thumbUrl,
+    realValue, realUnit, scaledMeters,
+    color, uiLeftLabelKey, uiRightLabelKey,
+    invisibleReason, requiredBaselineMeters
+  });
+  render();
+}
+/** === History (grouped) API === */
+export function addHistoryGroup({ id, title, color, thumbUrl = '', groupType = 'item' }) {
+  ensureDom();
+  const gid = String(id || '').trim();
+  if (!gid) return;
+  const idx = items.findIndex(it => it.type === 'history-group' && it.groupId === gid);
+  const rec = {
+    type: 'history-group',
+    groupId: gid,
+    groupType, // 'baseline' | 'item'
+    title: formatHistoryGroupTitle(title),
+    color: color || 'rgba(60,60,60,0.9)',
+    thumbUrl: String(thumbUrl || ''),
+    description: '',
+    uiLeftLabelKey: 'history.labels.o1.left',
+    uiRightLabelKey: 'history.labels.o1.right',
+    variants: []
+  };
+  if (idx >= 0) {
+    const prev = items[idx];
+    rec.variants = Array.isArray(prev.variants) ? prev.variants : [];
+    rec.description = prev.description || '';
+    items[idx] = rec;
+  } else {
+    if (groupType === 'baseline') items.unshift(rec); else items.push(rec);
+  }
+  render();
+}
+
+export function appendHistoryVariant({
+  id,
+  variant,
+  realValue = null,
+  realUnit = '',
+  scaledMeters = null,
+  invisibleReason = null,
+  requiredBaselineMeters = null
+}) {
+  ensureDom();
+  const gid = String(id || '').trim();
+  if (!gid) return;
+  const idx = items.findIndex(it => it.type === 'history-group' && it.groupId === gid);
+  if (idx < 0) return;
+
+  // Ключ унікальності: 'start' | 'end' | 'single' (для одинарних подій без діапазону)
+  const key = (variant === 'start' || variant === 'end') ? variant : 'single';
+  const rec = { variant, realValue, realUnit, scaledMeters, invisibleReason, requiredBaselineMeters };
+
+  const arr = Array.isArray(items[idx].variants) ? items[idx].variants : [];
+  const pos = arr.findIndex(v => ((v?.variant === 'start' || v?.variant === 'end') ? v.variant : 'single') === key);
+
+  if (pos >= 0) {
+    // Оновлюємо існуючий підрядок (ідемпотентно)
+    arr[pos] = rec;
+  } else {
+    // Додаємо новий підрядок
+    arr.push(rec);
+  }
+
+  items[idx].variants = arr;
+  render();
+}
+
+
+export function setHistoryGroupDescription({ id, description = '' }) {
+  ensureDom();
+  const gid = String(id || '').trim();
+  if (!gid) return;
+  const idx = items.findIndex(it => it.type === 'history-group' && it.groupId === gid);
+  if (idx < 0) return;
+  items[idx].description = String(description || '');
+  render();
+}
+

@@ -1,21 +1,20 @@
 [
   {
-    "category_en": "History",
-    "category_ua": "Історія",
-    "category_es": "Historia",
-
-    "key": "FirstHuman",
+    "category_en": "Humans",
+    "category_ua": "Люди",
+    "category_es": "Humanos",
     "name_en": "First human",
     "name_ua": "Перша людина",
     "name_es": "Primer humano",
     "description_en": "Emergence of the first anatomically modern humans.",
     "description_ua": "Поява перших анатомічно сучасних людей.",
     "description_es": "Aparición de los primeros humanos anatómicamente modernos.",
-
     "time_start": { "value": -300000,       "unit": "year" }
   },
   {
-    "key": "EarthFormation",
+    "category_en": "Planet Earth",
+    "category_ua": "Планета Земля",
+    "category_es": "Planeta Tierra",
     "name_en": "Formation of Earth",
     "name_ua": "Створення Землі",
     "name_es": "Formación de la Tierra",
@@ -25,7 +24,9 @@
     "time_start": { "value": -4540000000,  "unit": "year" }
   },
   {
-    "key": "UniverseCreation",
+    "category_en": "Planet Earth",
+    "category_ua": "Планета Земля",
+    "category_es": "Planeta Tierra",
     "name_en": "Creation of the Universe",
     "name_ua": "Створення Всесвіту",
     "name_es": "Creación del Universo",
@@ -35,7 +36,6 @@
     "time_start": { "value": -13800000000, "unit": "year" }
   },
   {
-    "key": "PyramidsBuilt",
     "name_en": "Construction of the Pyramids",
     "name_ua": "Будівництво пірамід",
     "name_es": "Construcción de las pirámides",
@@ -45,7 +45,9 @@
     "time_start": { "value": -2560,        "unit": "year" }
   },
   {
-    "key": "DinoExtinction",
+    "category_en": "Animals",
+    "category_ua": "Тварини",
+    "category_es": "Animales",
     "name_en": "Extinction of the Dinosaurs",
     "name_ua": "Вимирання динозаврів",
     "name_es": "Extinción de los dinosaurios",
@@ -55,7 +57,9 @@
     "time_start": { "value": -66000000,    "unit": "year" }
   },
   {
-    "key": "FirstLife",
+    "category_en": "Animals",
+    "category_ua": "Тварини",
+    "category_es": "Animales",
     "name_en": "Emergence of First Life",
     "name_ua": "Перше життя",
     "name_es": "Aparición de la primera vida",
@@ -65,27 +69,35 @@
     "time_start": { "value": -3500000000,  "unit": "year" }
   },
   {
-    "key": "WW2End",
-    "name_en": "End of World War II",
-    "name_ua": "Кінець Другої світової війни",
-    "name_es": "Fin de la Segunda Guerra Mundial",
+    "category_en": "Wars",
+    "category_ua": "Війни",
+    "category_es": "Guerras",
+    "name_en": "World War II",
+    "name_ua": "Друга світова",
+    "name_es": "Segunda Guerra Mundial",
     "description_en": "Surrender of Japan, marking WWII’s end in 1945.",
     "description_ua": "Капітуляція Японії, кінець Другої світової у 1945.",
     "description_es": "Rendición de Japón, fin de la II Guerra Mundial en 1945.",
-    "time_start": { "value": 1945,         "unit": "year" }
+    "time_start": { "value": 1939, "unit": "year" },
+    "time_end": { "value": 1945, "unit": "year" }
   },
   {
-    "key": "WW1End",
-    "name_en": "End of World War I",
-    "name_ua": "Кінець Першої світової війни",
-    "name_es": "Fin de la Primera Guerra Mundial",
+    "category_en": "Wars",
+    "category_ua": "Війни",
+    "category_es": "Guerras",
+    "name_en": "World War I",
+    "name_ua": "Перша світова",
+    "name_es": "Primera Guerra Mundial",
     "description_en": "Armistice signed on November 11, 1918.",
     "description_ua": "Підписання перемир’я 11 листопада 1918.",
     "description_es": "Firma del armisticio el 11 de noviembre de 1918.",
-    "time_start": { "value": 1918,         "unit": "year" }
+    "time_start": { "value": 1914, "unit": "year" },
+    "time_end": { "value": 1918, "unit": "year" }
   },
   {
-    "key": "ChristCrucifixion",
+    "category_en": "Humans",
+    "category_ua": "Люди",
+    "category_es": "Humanos",
     "name_en": "Crucifixion of Christ",
     "name_ua": "Розп’яття Христа",
     "name_es": "Crucifixión de Cristo",
@@ -95,7 +107,9 @@
     "time_start": { "value": 33,           "unit": "year" }
   },
   {
-    "key": "RomeFounded",
+    "category_en": "Events",
+    "category_ua": "Події",
+    "category_es": "Eventos",
     "name_en": "Founding of Rome",
     "name_ua": "Заснування Риму",
     "name_es": "Fundación de Roma",
@@ -105,7 +119,9 @@
     "time_start": { "value": -753,         "unit": "year" }
   },
   {
-    "key": "ColosseumBuilt",
+    "category_en": "Events",
+    "category_ua": "Події",
+    "category_es": "Eventos",
     "name_en": "Completion of the Colosseum",
     "name_ua": "Будівництво Колізею",
     "name_es": "Construcción del Coliseo",
@@ -115,7 +131,9 @@
     "time_start": { "value": 80,           "unit": "year" }
   },
   {
-    "key": "AmericaDiscovery",
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
     "name_en": "Discovery of America",
     "name_ua": "Відкриття Америки",
     "name_es": "Descubrimiento de América",
@@ -125,17 +143,21 @@
     "time_start": { "value": 1492,         "unit": "year" }
   },
   {
-    "key": "WrightFlight",
-    "name_en": "Wright Brothers’ First Flight",
-    "name_ua": "Перший політ братів Райт",
-    "name_es": "Primer vuelo de los hermanos Wright",
+    "category_en": "First Event",
+    "category_ua": "Перша подія",
+    "category_es": "Primer evento",
+    "name_en": "First Flight",
+    "name_ua": "Перший політ",
+    "name_es": "Primer vuelo",
     "description_en": "First powered flight on December 17, 1903.",
     "description_ua": "Перший політ 17 грудня 1903 р.",
     "description_es": "Primer vuelo el 17 de diciembre de 1903.",
     "time_start": { "value": 1903,         "unit": "year" }
   },
   {
-    "key": "FirstAutomobile",
+    "category_en": "First Event",
+    "category_ua": "Перша подія",
+    "category_es": "Primer evento",
     "name_en": "First Automobile",
     "name_ua": "Перший автомобіль",
     "name_es": "Primer automóvil",
@@ -145,7 +167,9 @@
     "time_start": { "value": 1886,         "unit": "year" }
   },
   {
-    "key": "WheelInvention",
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
     "name_en": "Invention of the Wheel",
     "name_ua": "Винайд колеса",
     "name_es": "Invención de la rueda",
@@ -153,5 +177,16 @@
     "description_ua": "Поява близько 3500 р. до н.е. в Месопотамії.",
     "description_es": "Aparición alrededor del 3500 a.C. en Mesopotamia.",
     "time_start": { "value": -3500,        "unit": "year" }
+  },
+  {"category_en": "Year",
+    "category_ua": "Рік",
+    "category_es": "Año",
+    "name_en": "1925",
+    "name_ua": "1925",
+    "name_es": "1925",
+    "description_en": "1925.",
+    "description_ua": "Рік 1925",
+    "description_es": "1925.",
+    "time_start": { "value": 1925, "unit": "year" }
   }
 ]

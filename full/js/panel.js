@@ -2,11 +2,10 @@
 
 'use strict';
 
-import { initUniversDiameterBlock } from './blocks/univers_diameter.js';
-import { initUniversDistanceBlock } from './blocks/univers_distance.js';
-import { initUniversLuminosityBlock } from './blocks/univers_luminosity.js';
-import { initUniversMassBlock } from './blocks/univers_mass.js';
 import { resetAllUI, resetScreenUI } from './events/reset.js';
+import { getMode } from './modes/registry.js';
+import './modes/builtin.js'; // реєструє стандартні режими (side-effect)
+
 
 /** Фабрика елементів полів лівої панелі */
 function createField(f) {
@@ -66,7 +65,7 @@ export function initLeftPanel(t) {
   console.log('🔧 initLeftPanel запущено');
 
   const panelConfig = [
-    { id: 'comparison', title: t('panel_title_comparison') },
+  /**  { id: 'comparison', title: t('panel_title_comparison') }, */
     {
       id: 'univers',
       title: t('panel_title_univers'),
@@ -266,21 +265,21 @@ export function initLeftPanel(t) {
       id: 'money', title: t('panel_title_money'),
       fields: [
         {
-          type: 'group', className: 'sector-block', children: [
+          type: 'group', className: 'sector-block object1-group', children: [
             { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-            { type: 'select', id: 'moneCategoryObject1', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'moneObject1',         placeholder: t('panel_placeholder_object1') },
+            { type: 'select', id: 'moneyCategoryObject1', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'moneyObject1',         placeholder: t('panel_placeholder_object1') },
             { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
-            { type: 'input',  id: 'moneCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'input', id: 'moneyBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
             { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
-          type: 'group', className: 'sector-block', children: [
+          type: 'group', className: 'sector-block object2-group', children: [
             { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-            { type: 'select', id: 'moneCategoryObject2', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'moneObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'select', id: 'moneyCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'moneyObject2',         placeholder: t('panel_placeholder_object2') },
             { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
@@ -326,7 +325,7 @@ export function initLeftPanel(t) {
         }
       ]
     },
-    {
+  /**   {
       id: 'other', title: t('panel_title_other'),
       fields: [
         {
@@ -357,7 +356,7 @@ export function initLeftPanel(t) {
           ]
         }
       ]
-    }
+    } */
   ];
 
   // ==== Reactivity на зміну мови (всередині initLeftPanel, щоб мати t у замиканні)
@@ -494,10 +493,12 @@ export function initLeftPanel(t) {
   });
 
   // Після рендера інітимо дані
-  initUniversDiameterBlock();
-  initUniversDistanceBlock();
-  initUniversLuminosityBlock();
-  initUniversMassBlock();
+getMode('univers_diameter')?.initBlock?.();
+getMode('univers_distance')?.initBlock?.();
+getMode('univers_luminosity')?.initBlock?.();
+getMode('univers_mass')?.initBlock?.();
+getMode('history')?.initBlock?.();
+getMode('money')?.initBlock?.();
 
 
   // ==== Авто-скидання при переході у будь-яку іншу секцію лівої панелі

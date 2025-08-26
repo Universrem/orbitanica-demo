@@ -3,7 +3,7 @@
 
 import { getCurrentLang, t } from '../i18n.js';
 import { getStore } from '../userObjects/api.js';
-import { getUniverseLibrary } from '../data/universe.js';
+import { loadUniverseLibrary, getUniverseLibrary } from '../data/universe.js';
 
 let universeLibrary = [];
 
@@ -22,6 +22,7 @@ const O1_ORDER = {
 
 /** Головна ініціалізація блоку "Відстань" */
 export async function initUniversDistanceBlock() {
+    await loadUniverseLibrary(); // гарантуємо готовність univers.json
   // 1) О1 без категорій: просто заповнити короткий список еталонів
   populateObject1Select();
 

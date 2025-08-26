@@ -753,7 +753,31 @@
     "ua": "Діаметр (площа кола пропорційна масі)",
     "en": "Diameter (circle area ∝ mass)",
     "es": "Diámetro (área del círculo ∝ masa)"
-  }
+  },
+    "history.labels.o1.left": {
+  "ua": "Рік події",
+  "en": "Event year",
+  "es": "Año del evento"
+  },
+  "history.labels.o1.right": {
+  "ua": "Часова відстань (радіус)",
+  "en": "Time distance (radius)",
+  "es": "Distancia temporal (radio)"
+  },
+  "history.range.start": { "ua": "початок", "en": "start", "es": "inicio" },
+  "history.range.end":   { "ua": "завершення", "en": "end", "es": "fin" },
+  
+"ui.money.o1.left": {
+  "ua": "Сума",
+  "en": "Amount",
+  "es": "Suma"
+},
+"ui.money.o1.right": {
+  "ua": "Діаметр (площа кола пропорційна сумі)",
+  "en": "Diameter (circle area ∝ amount)",
+  "es": "Diámetro (área del círculo ∝ suma)"
+}
+
 
 }
 

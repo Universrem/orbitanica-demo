@@ -721,3 +721,35 @@ body.modal-open { overflow: hidden; }
   color: #c0392b; /* червоний, достатньо контрастний */
   font-weight: 600;
 }
+/* === InfoPanel: History grouped view === */
+#info-panel .ip-history-group .ip-title { font-weight: 600; }
+#info-panel .ip-subrow .ip-variant { opacity: .9; margin-right: 4px; }
+/* === InfoPanel: History grouped view — compact spacing === */
+#info-panel .ip-subrow.info-panel__row { 
+  margin: 0; 
+  padding: 0; 
+  line-height: 1.15;
+}
+#info-panel .ip-subrows { 
+  margin-left: 1.2em; 
+  display: grid; 
+  gap: 2px;            /* було 4px */
+}
+/* History group: компактніше між заголовком і підрядками */
+#info-panel .ip-history-group { 
+  margin-bottom: 6px;      /* невеликий відступ перед описом/наступною подією */
+}
+#info-panel .ip-history-group .ip-subrows { 
+  margin-top: 0px;         /* малий внутрішній відступ під заголовком */
+  margin-left: 1.2em; 
+  display: grid; 
+  gap: 2px;
+}
+#info-panel .ip-subrow { 
+  margin: 0; 
+  line-height: 1.15; 
+}
+
+#info-panel .info-panel__description { 
+  margin-top: 6px; 
+}

@@ -1,9 +1,8 @@
-
 [
   {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
+    "category_en": "Amount",
+    "category_ua": "Сума",
+    "category_es": "Monto",
 
     "name_en": "One Million Dollars",
     "name_ua": "Один мільйон доларів",
@@ -13,42 +12,103 @@
     "description_ua": "Сума одного мільйона доларів США.",
     "description_es": "Cantidad de un millón de dólares estadounidenses.",
 
-    "money": { "value": 1000000,           "unit": "USD" }
+    "money": { "value": 1000000, "unit": "USD" }
   },
   {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
+    "category_en": "Amount",
+    "category_ua": "Сума",
+    "category_es": "Monto",
 
-    "name_en": "Elon Musk Net Worth 2024",
-    "name_ua": "Статки Ілона Маска 2024",
-    "name_es": "Fortuna de Elon Musk 2024",
+    "name_en": "One Billion Dollars",
+    "name_ua": "Один мільярд доларів",
+    "name_es": "Mil millones de dólares",
+
+    "description_en": "Amount of one billion US dollars.",
+    "description_ua": "Сума одного мільярда доларів США.",
+    "description_es": "Cantidad de mil millones de dólares estadounidenses.",
+
+    "money": { "value": 1000000000, "unit": "USD" }
+  },
+  {
+    "category_en": "Amount",
+    "category_ua": "Сума",
+    "category_es": "Monto",
+
+    "name_en": "One Hundred Dollars",
+    "name_ua": "Сто доларів",
+    "name_es": "Cien dólares",
+
+    "description_en": "Amount of one hundred US dollars.",
+    "description_ua": "Сума сто доларів США.",
+    "description_es": "Cantidad de cien dólares estadounidenses.",
+
+    "money": { "value": 100, "unit": "USD" }
+  },
+  {
+    "category_en": "Amount",
+    "category_ua": "Сума",
+    "category_es": "Monto",
+
+    "name_en": "One Thousand Dollars",
+    "name_ua": "Тисяча доларів",
+    "name_es": "Mil dólares",
+
+    "description_en": "Amount of one thousand US dollars.",
+    "description_ua": "Сума тисячу доларів США.",
+    "description_es": "Cantidad de mil dólares estadounidenses.",
+
+    "money": { "value": 1000, "unit": "USD" }
+  },
+  {
+    "category_en": "Amount",
+    "category_ua": "Сума",
+    "category_es": "Monto",
+
+    "name_en": "One Dollar",
+    "name_ua": "Один долар",
+    "name_es": "Un dólar",
+
+    "description_en": "Amount of one US dollar.",
+    "description_ua": "Один долар США.",
+    "description_es": "Cantidad de un dólar estadounidense.",
+
+    "money": { "value": 1, "unit": "USD" }
+  },
+
+  {
+    "category_en": "Net worth",
+    "category_ua": "Статки",
+    "category_es": "Patrimonio neto",
+
+    "name_en": "Elon Musk 2024",
+    "name_ua": "Ілон Маск 2024",
+    "name_es": "Elon Musk 2024",
 
     "description_en": "Estimated net worth of Elon Musk based on a private share sale in December 2024.",
     "description_ua": "Оцінка статків Ілона Маска на основі приватного продажу акцій у грудні 2024 року.",
-    "description_es": "Fortuna estimada de Elon Musk según una venta privada de acciones en diciembre 2024.",
+    "description_es": "Fortuna estimada de Elon Musk según una venta privada de acciones en diciembre de 2024.",
 
-    "money": { "value": 350000000000,      "unit": "USD" }
+    "money": { "value": 350000000000, "unit": "USD" }
   },
   {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
+    "category_en": "Net worth",
+    "category_ua": "Статки",
+    "category_es": "Patrimonio neto",
 
-    "name_en": "Mark Zuckerberg Net Worth 2024",
-    "name_ua": "Статки Марка Цукерберга 2024",
-    "name_es": "Fortuna de Mark Zuckerberg 2024",
+    "name_en": "Mark Zuckerberg 2024",
+    "name_ua": "Марк Цукерберг 2024",
+    "name_es": "Mark Zuckerberg 2024",
 
     "description_en": "Estimated net worth of Mark Zuckerberg as of 2024.",
     "description_ua": "Оцінка статків Марка Цукерберга станом на 2024 рік.",
     "description_es": "Fortuna estimada de Mark Zuckerberg a partir de 2024.",
 
-    "money": { "value": 184000000000,      "unit": "USD" }
+    "money": { "value": 184000000000, "unit": "USD" }
   },
   {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
+    "category_en": "GDP",
+    "category_ua": "ВВП",
+    "category_es": "PIB",
 
     "name_en": "GDP of Africa 2024",
     "name_ua": "ВВП Африки 2024",
@@ -58,12 +118,12 @@
     "description_ua": "Номінальний ВВП Африки у 2024 році.",
     "description_es": "PIB nominal de África en 2024.",
 
-    "money": { "value": 2800000000000,     "unit": "USD" }
+    "money": { "value": 2800000000000, "unit": "USD" }
   },
   {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
+    "category_en": "GDP",
+    "category_ua": "ВВП",
+    "category_es": "PIB",
 
     "name_en": "GDP of California 2024",
     "name_ua": "ВВП Каліфорнії 2024",
@@ -73,14 +133,14 @@
     "description_ua": "Номінальний ВВП штату Каліфорнія у 2024 році.",
     "description_es": "PIB nominal del estado de California en 2024.",
 
-    "money": { "value": 4100000000000,     "unit": "USD" }
+    "money": { "value": 4100000000000, "unit": "USD" }
   },
   {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
+    "category_en": "GDP",
+    "category_ua": "ВВП",
+    "category_es": "PIB",
 
-    "name_en": "GDP of the United States 2024",
+    "name_en": "GDP of the USA 2024",
     "name_ua": "ВВП США 2024",
     "name_es": "PIB de los EE. UU. 2024",
 
@@ -88,66 +148,51 @@
     "description_ua": "Номінальний ВВП США у 2024 році.",
     "description_es": "PIB nominal de Estados Unidos en 2024.",
 
-    "money": { "value": 29184890000000,    "unit": "USD" }
+    "money": { "value": 29184890000000, "unit": "USD" }
   },
   {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
+    "category_en": "Net worth",
+    "category_ua": "Статки",
+    "category_es": "Patrimonio neto",
 
-    "name_en": "Warren Buffett Net Worth 2000",
-    "name_ua": "Статки Уоррена Баффета 2000",
-    "name_es": "Fortuna de Warren Buffett 2000",
+    "name_en": "Warren Buffett 2000",
+    "name_ua": "Уоррен Баффет 2000",
+    "name_es": "Warren Buffett 2000",
 
     "description_en": "Estimated net worth of Warren Buffett around the year 2000.",
     "description_ua": "Оцінка статків Уоррена Баффета близько 2000 року.",
     "description_es": "Fortuna estimada de Warren Buffett alrededor del año 2000.",
 
-    "money": { "value": 26000000000,       "unit": "USD" }
+    "money": { "value": 26000000000, "unit": "USD" }
   },
   {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
+    "category_en": "Net worth",
+    "category_ua": "Статки",
+    "category_es": "Patrimonio neto",
 
-    "name_en": "Warren Buffett Net Worth 2024",
-    "name_ua": "Статки Уоррена Баффета 2024",
-    "name_es": "Fortuna de Warren Buffett 2024",
+    "name_en": "Warren Buffett 2024",
+    "name_ua": "Уоррен Баффет 2024",
+    "name_es": "Warren Buffett 2024",
 
     "description_en": "Estimated net worth of Warren Buffett as of mid-2024.",
     "description_ua": "Оцінка статків Уоррена Баффета станом на середину 2024 року.",
     "description_es": "Fortuna estimada de Warren Buffett a mediados de 2024.",
 
-    "money": { "value": 137400000000,     "unit": "USD" }
+    "money": { "value": 137400000000, "unit": "USD" }
   },
   {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
+    "category_en": "Net worth",
+    "category_ua": "Статки",
+    "category_es": "Patrimonio neto",
 
-    "name_en": "Total Wealth of Top 1000 Richest People 2024",
-    "name_ua": "Статки 1000 найбагатших людей світу 2024",
-    "name_es": "Fortuna de los 1000 más ricos del mundo 2024",
+    "name_en": "Top-1000 2024",
+    "name_ua": "Топ-1000 2024",
+    "name_es": "Top-1000 2024",
 
     "description_en": "Combined net worth of the world’s top 1000 richest individuals in 2024.",
     "description_ua": "Сумарні статки 1000 найбагатших людей світу у 2024 році.",
     "description_es": "Fortuna combinada de las 1000 personas más ricas del mundo en 2024.",
 
-    "money": { "value": 16000000000000,    "unit": "USD" }
-  },
-  {
-    "category_en": "Money",
-    "category_ua": "Гроші",
-    "category_es": "Dinero",
-
-    "name_en": "Global M2 Money Supply 2024",
-    "name_ua": "Кількість грошей у світі 2024",
-    "name_es": "Oferta monetaria global M2 2024",
-
-    "description_en": "Total global broad money supply (M2) in 2024.",
-    "description_ua": "Загальна пропозиція грошей у світі (M2) у 2024 році.",
-    "description_es": "Oferta monetaria global amplia (M2) en 2024.",
-
-    "money": { "value": 131000000000000,   "unit": "USD" }
+    "money": { "value": 16000000000000, "unit": "USD" }
   }
 ]
