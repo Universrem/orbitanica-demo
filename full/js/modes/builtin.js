@@ -26,3 +26,20 @@ registerMode('history',            { initBlock: initHistoryBlock,           onCa
 import { initMoneyBlock } from '../blocks/money.js';
 import { onMoneyCalculate } from '../events/money_buttons.js';
 registerMode('money', { initBlock: initMoneyBlock, onCalculate: onMoneyCalculate });
+
+import { initGeoAreaBlock } from '../blocks/geo_area.js';
+import { onGeoAreaCalculate } from '../events/geo_area_buttons.js';
+registerMode('geo_area', { initBlock: initGeoAreaBlock, onCalculate: onGeoAreaCalculate });
+
+import { initGeoPopulationBlock } from '../blocks/geo_population.js';
+import { onGeoPopulationCalculate } from '../events/geo_population_buttons.js';
+registerMode('geo_population', { initBlock: initGeoPopulationBlock, onCalculate: onGeoPopulationCalculate });
+
+import { initGeoObjectsBlock } from '../blocks/geo_objects.js';
+import { onGeoObjectsCalculate } from '../events/geo_objects_buttons.js';
+registerMode('geo_objects', { initBlock: initGeoObjectsBlock, onCalculate: onGeoObjectsCalculate });
+
+import { initMathBlock } from '../blocks/math.js';
+import { onMathCalculate } from '../events/math_buttons.js';
+registerMode('math', { initBlock: initMathBlock, onCalculate: onMathCalculate });
+

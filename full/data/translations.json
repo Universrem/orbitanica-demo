@@ -776,8 +776,74 @@
   "ua": "Діаметр (площа кола пропорційна сумі)",
   "en": "Diameter (circle area ∝ amount)",
   "es": "Diámetro (área del círculo ∝ suma)"
-}
+},
+"ui.math.o1.left": {
+  "ua": "Число",
+  "en": "Number",
+  "es": "Número"
+},
+"ui.math.o1.right": {
+  "ua": "Діаметр (площа кола пропорційна числу)",
+  "en": "Diameter (the area of the circle is proportional to the number)",
+  "es": "Diámetro (el área del círculo es proporcional al número)"
+},
+"panel_title_geo_population": {
+  "ua": "Населення",
+  "en": "Population",
+  "es": "Población"
+},
+"panel_title_geo_area": {
+  "ua": "Площа",
+  "en": "Area",
+  "es": "Área"
+},
+"panel_title_geo_objects": {
+  "ua": "Об’єкти",
+  "en": "Objects",
+  "es": "Objetos"
+},
+"ui.geo.population.o1.left":  { 
+  "ua": "Населення",      
+  "en": "Population",      
+  "es": "Población" 
+},
+"ui.geo.population.o1.right": { 
+  "ua": "Діаметр (площа кола пропорційна населенню)", 
+  "en": "Diameter (the circle area is proportional to the population)", 
+  "es": "Diámetro (el área del círculo es proporcional a la población)" 
+},
 
+"ui.geo.area.o1.left": { 
+  "ua": "Площа",          
+  "en": "Area",            
+  "es": "Área" 
+},
+"ui.geo.area.o1.right": { 
+  "ua": "Діаметр (площа кола пропорційна площі)", 
+  "en": "Diameter (the circle area is proportional to the area)", 
+  "es": "Diámetro (el área del círculo es proporcional al área)" 
+},
+
+"ui.geo.objects.o1.left": { 
+  "ua": "Довжина/висота", 
+  "en": "Length/Height",   
+  "es": "Longitud/Altura" 
+},
+"ui.geo.objects.o1.right": { 
+  "ua": "Масштабована довжина (радіус)", 
+  "en": "Scaled length (radius)", 
+  "es": "Longitud escalada (radio)" 
+},
+"panel_note_scenes": {
+  "ua": "Сцени",
+  "en": "Scenes",
+  "es": "Escenas"
+},
+"panel_note_create_scenes": {
+  "ua": "Створення сцен",
+  "en": "Create scenes",
+  "es": "Creación de escenas"
+}
 
 }
 

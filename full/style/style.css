@@ -75,10 +75,10 @@ summary {
 /* ====== ГОЛОВНІ ЗАГОЛОВКИ В ЛІВІЙ ПАНЕЛІ ====== */
 #left-panel > details > summary {
   position: relative;
-  padding-left: 1.2em;
+  padding-left: 28px;
   font-weight: 400;
   line-height: 1.5;
-  letter-spacing: 0;
+  letter-spacing: .05em;
   color: #222;
   transition: color 0.2s ease;
 }
@@ -92,6 +92,53 @@ summary {
   height: 0.2em;
   background-color: currentColor;
   border-radius: 50%;
+}
+#left-panel > details#comparison > summary::before {
+  width: 18px;
+  height: 18px;
+  background: url("../res/icons/film.png") center / contain no-repeat;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+#left-panel > details#univers > summary::before {
+  width: 18px;
+  height: 18px;
+  background: url("../res/icons/telescope.png") center / contain no-repeat;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+#left-panel > details#history > summary::before {
+  width: 18px;
+  height: 18px;
+  background: url("../res/icons/history.png") center / contain no-repeat;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+#left-panel > details#geo > summary::before {
+  width: 18px;
+  height: 18px;
+  background: url("../res/icons/globe.png") center / contain no-repeat;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+#left-panel > details#money > summary::before {
+  width: 18px;
+  height: 18px;
+  background: url("../res/icons/money.png") center / contain no-repeat;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+#left-panel > details#math > summary::before {
+  width: 18px;
+  height: 18px;
+  background: url("../res/icons/power.png") center / contain no-repeat;
+  border-radius: 0;
+  background-color: transparent;
 }
 #left-panel > details > summary:hover {
   color: #0077cc;
@@ -116,12 +163,12 @@ summary {
   margin: 0;
 }
 .section-content > details > summary {
-  padding-left: 1.8em;
+  padding-left: 42px;
   margin: 0;
   font-weight: 400;
   font-size: 1em;
   line-height: 1.5;
-  letter-spacing: 0;
+  letter-spacing: .05em;
   color: inherit;
 }
 .section-content > details > summary::before {
@@ -287,6 +334,20 @@ input::placeholder {
   line-height: 1.4;
   text-align: center;  
 }
+/* Розділювачі секцій у лівій панелі: "Сцени" / "Створення сцен" */
+#left-panel .panel-section-title {
+  display: block;
+  text-align: center;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  font-style: italic;
+  color: #222;           /* темний текст під білий фон */
+  margin: 12px 0 10px;
+  padding: 6px 6px;
+  letter-spacing: .05em;
+}
+
 #left-panel .sector-block {
   margin: 6px 0;  
   padding: 8px 12px; 
@@ -753,3 +814,11 @@ body.modal-open { overflow: hidden; }
 #info-panel .info-panel__description { 
   margin-top: 6px; 
 }
+/* Явний відступ між головними режимами (history, money, math, univers, geo, …) */
+#left-panel > details {
+  margin-bottom: 12px;     /* ← керуєш тут */
+}
+#left-panel > details:last-child {
+  margin-bottom: 8px;
+}
+

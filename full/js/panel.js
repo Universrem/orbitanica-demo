@@ -40,7 +40,10 @@ function createField(f) {
     el = document.createElement('div');
     el.id = f.id; // тут ідентичні id зустрічаються у різних підсекціях — ок для нашого апдейту текстів
     el.textContent = f.text;
-    el.classList.add('panel-note');
+    (f.className ? el.className = f.className : el.classList.add('panel-note'));
+    if (f.i18nKey) el.setAttribute('data-i18n-key', f.i18nKey);
+
+
 
   } else if (f.type === 'group') {
     el = document.createElement('div');
@@ -63,9 +66,16 @@ function createField(f) {
  */
 export function initLeftPanel(t) {
   console.log('🔧 initLeftPanel запущено');
+  const ALWAYS_OPEN_SECTIONS = new Set(); // нічого не лишаємо відкритим за замовчуванням
 
   const panelConfig = [
-  /**  { id: 'comparison', title: t('panel_title_comparison') }, */
+
+    { type: 'note', i18nKey: 'panel_note_scenes', text: t('panel_note_scenes'), className: 'panel-section-title' },
+
+    { id: 'comparison', title: t('panel_title_comparison') },
+
+    { type: 'note', i18nKey: 'panel_note_create_scenes', text: t('panel_note_create_scenes'), className: 'panel-section-title' },
+
     {
       id: 'univers',
       title: t('panel_title_univers'),
@@ -197,6 +207,8 @@ export function initLeftPanel(t) {
         }
       ]
     },
+
+
     {
       id: 'history', title: t('panel_title_history'),
       fields: [
@@ -230,26 +242,29 @@ export function initLeftPanel(t) {
       ]
     },
     {
-      id: 'math', title: t('panel_title_math'),
+  id: 'geo', title: t('panel_title_geo'),
+  children: [
+    {
+      id: 'geo_population', title: t('panel_title_geo_population'),
       fields: [
         {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-            { type: 'select', id: 'mathCategoryObject1', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'mathObject1',         placeholder: t('panel_placeholder_object1') },
-            { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
-            { type: 'input',  id: 'mathCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
-            { type: 'button', id: 'create',              text: t('panel_button_create') },
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
+            { type: 'select', id: 'geoPopCategoryObject1',    placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoPopObject1',            placeholder: t('panel_placeholder_object1') },
+            { type: 'text',   id: 'setScaleFirstObject',      text: t('note_set_scale_first_object') },
+            { type: 'input',  id: 'geoPopBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'text',   id: 'createFirstObject',        text: t('note_create_first_object') },
+            { type: 'button', id: 'create',                   text: t('panel_button_create') },
           ]
         },
         {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-            { type: 'select', id: 'mathCategoryObject2', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'mathObject2',         placeholder: t('panel_placeholder_object2') },
-            { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
-            { type: 'button', id: 'create',              text: t('panel_button_create') },
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
+            { type: 'select', id: 'geoPopCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoPopObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'text',   id: 'createSecondObject',    text: t('note_create_second_object') },
+            { type: 'button', id: 'create',                text: t('panel_button_create') },
           ]
         },
         {
@@ -261,6 +276,74 @@ export function initLeftPanel(t) {
         }
       ]
     },
+    {
+      id: 'geo_area', title: t('panel_title_geo_area'),
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
+            { type: 'select', id: 'geoAreaCategoryObject1',   placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoAreaObject1',           placeholder: t('panel_placeholder_object1') },
+            { type: 'text',   id: 'setScaleFirstObject',      text: t('note_set_scale_first_object') },
+            { type: 'input',  id: 'geoAreaBaselineDiameter',  placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'text',   id: 'createFirstObject',        text: t('note_create_first_object') },
+            { type: 'button', id: 'create',                   text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',     text: t('note_select_second_object') },
+            { type: 'select', id: 'geoAreaCategoryObject2',  placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoAreaObject2',          placeholder: t('panel_placeholder_object2') },
+            { type: 'text',   id: 'createSecondObject',      text: t('note_create_second_object') },
+            { type: 'button', id: 'create',                  text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
+            { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'geo_objects', title: t('panel_title_geo_objects'),
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
+            { type: 'select', id: 'geoObjCategoryObject1',    placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoObjObject1',            placeholder: t('panel_placeholder_object1') },
+            { type: 'text',   id: 'setScaleFirstObject',      text: t('note_set_scale_first_object') },
+            { type: 'input',  id: 'geoObjBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'text',   id: 'createFirstObject',        text: t('note_create_first_object') },
+            { type: 'button', id: 'create',                   text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
+            { type: 'select', id: 'geoObjCategoryObject2',  placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoObjObject2',          placeholder: t('panel_placeholder_object2') },
+            { type: 'text',   id: 'createSecondObject',     text: t('note_create_second_object') },
+            { type: 'button', id: 'create',                 text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
+            { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    }
+  ]
+},
+
+
     {
       id: 'money', title: t('panel_title_money'),
       fields: [
@@ -293,31 +376,32 @@ export function initLeftPanel(t) {
         }
       ]
     },
+
     {
-      id: 'geo', title: t('panel_title_geo'),
+      id: 'math', title: t('panel_title_math'),
       fields: [
         {
-          type: 'group', className: 'sector-block', children: [
+          type: 'group', className: 'sector-block object1-group', children: [
             { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-            { type: 'select', id: 'geoCategoryObject1',  placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'geoObject1',          placeholder: t('panel_placeholder_object1') },
+            { type: 'select', id: 'mathCategoryObject1', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'mathObject1',         placeholder: t('panel_placeholder_object1') },
             { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
-            { type: 'input',  id: 'geoCircleObject1',    placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'input',  id: 'mathBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
             { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
-          type: 'group', className: 'sector-block', children: [
+          type: 'group', className: 'sector-block object2-group', children: [
             { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-            { type: 'select', id: 'geoCategoryObject2',  placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'geoObject2',          placeholder: t('panel_placeholder_object2') },
+            { type: 'select', id: 'mathCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'mathObject2',         placeholder: t('panel_placeholder_object2') },
             { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'button', id: 'create',              text: t('panel_button_create') },
             { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
             { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
             { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
@@ -325,6 +409,7 @@ export function initLeftPanel(t) {
         }
       ]
     },
+
   /**   {
       id: 'other', title: t('panel_title_other'),
       fields: [
@@ -376,7 +461,7 @@ export function initLeftPanel(t) {
     });
 
     // Поля
-    document.querySelectorAll('#left-panel select, #left-panel input, #left-panel button, #left-panel .panel-note').forEach(el => {
+    document.querySelectorAll('#left-panel select, #left-panel input, #left-panel button, #left-panel .panel-note, #left-panel .panel-section-title').forEach(el => {
       const id = el.id;
       const action = el.dataset?.action || '';
 
@@ -405,14 +490,19 @@ export function initLeftPanel(t) {
         else if (action === 'reset') el.textContent = t('panel_button_reset');
         else if (action === 'create') el.textContent = t('panel_button_create');
 
-      } else if (el.classList.contains('panel-note')) {
-        if (id === 'selectFirstObject')            el.textContent = t('note_select_first_object');
-        else if (id === 'setScaleFirstObject')     el.textContent = t('note_set_scale_first_object');
-        else if (id === 'createFirstObject')       el.textContent = t('note_create_first_object');
-        else if (id === 'selectSecondObject')      el.textContent = t('note_select_second_object');
-        else if (id === 'createSecondObject')      el.textContent = t('note_create_second_object');
-        else if (id === 'visualizationControls')   el.textContent = t('note_visualization_controls');
-      }
+} else if (el.classList.contains('panel-note')) {
+  if (id === 'selectFirstObject')            el.textContent = t('note_select_first_object');
+  else if (id === 'setScaleFirstObject')     el.textContent = t('note_set_scale_first_object');
+  else if (id === 'createFirstObject')       el.textContent = t('note_create_first_object');
+  else if (id === 'selectSecondObject')      el.textContent = t('note_select_second_object');
+  else if (id === 'createSecondObject')      el.textContent = t('note_create_second_object');
+  else if (id === 'visualizationControls')   el.textContent = t('note_visualization_controls');
+} else if (el.classList.contains('panel-section-title')) {
+  const key = el.getAttribute('data-i18n-key');
+  if (key) el.textContent = t(key);
+}
+
+
     });
   };
 
@@ -423,6 +513,17 @@ export function initLeftPanel(t) {
   if (!container) return;
 
   panelConfig.forEach(sec => {
+        // Службовий рядок простого тексту між секціями
+    if (sec.type === 'note') {
+      const note = document.createElement('div');
+      note.className = sec.className || 'panel-note';
+      // зберігаємо ключ для реакції на зміну мови
+      if (sec.i18nKey) note.setAttribute('data-i18n-key', sec.i18nKey);
+      note.textContent = sec.text || '';
+      container.append(note);
+      return; // переходимо до наступного елемента panelConfig
+    }
+
     // головна секція
     const det = document.createElement('details');
     det.id = sec.id;
@@ -458,18 +559,44 @@ export function initLeftPanel(t) {
         }
 
         // Закриваємо інші підсекції, якщо відкрили цю
-        subSum.addEventListener('click', (e) => {
-          e.preventDefault();
+// Єдина поведінка для всіх підрежимів (усіх секцій):
+// - якщо клік по відкритому підрежиму → закрити його і виконати ПОВНИЙ reset
+// - якщо клік по іншому підрежиму → закрити ВСІ інші підрежими (у всій панелі),
+//   виконати ПОВНИЙ reset і відкрити цей
+// Єдина поведінка для підрежимів:
+// - клік по відкритому підрежиму → закрити його + повний reset
+// - клік по іншому підрежиму → закрити ВСІ інші підрежими і топ-рівневі режими,
+//   виконати повний reset і відкрити цей
+subSum.addEventListener('click', (e) => {
+  e.preventDefault();
 
-          // Авто-скидання при переході у інший підрежим
-          if (!subDet.open) { resetAllUI(); }
+  const wasOpen = subDet.open === true;
+  const root = document.getElementById('left-panel');
 
-          // Закриваємо всі підсекції в межах цієї секції
-          content.querySelectorAll('details').forEach(other => { other.open = false; });
+  if (root) {
+    // Закрити всі підрежими у всіх секціях
+    root.querySelectorAll('#left-panel details details').forEach(other => {
+      if (other !== subDet) other.open = false;
+    });
+    // Закрити всі топ-рівневі режими (history/money/math тощо), крім контейнерів
+const containerDet = subDet.closest('#left-panel > details');
+root.querySelectorAll('#left-panel > details').forEach(top => {
+  if (top !== containerDet) top.open = false;
+});
 
-          // Відкриваємо тільки цю
-          subDet.open = true;
-        });
+  }
+
+  if (wasOpen) {
+    subDet.open = false;
+    resetAllUI();
+    return;
+  }
+
+  resetScreenUI(); // легкий reset: НЕ чистить селекти з даними
+  subDet.open = true;
+});
+
+
 
         content.append(subDet);
       });
@@ -483,11 +610,61 @@ export function initLeftPanel(t) {
     }
 
     // Закриття інших головних секцій при відкритті цієї
-    sum.addEventListener('click', (e) => {
-      e.preventDefault();
-      document.querySelectorAll('#left-panel > details').forEach(other => { other.open = false; });
-      det.open = true;
+// Клік по головному summary
+sum.addEventListener('click', (e) => {
+  e.preventDefault();
+
+  const leftPanel = document.getElementById('left-panel');
+  const isContainer = Array.isArray(sec.children); // univers/geo: список підрежимів
+
+if (isContainer) {
+  const wasOpen = det.open === true;
+
+  // закрити всі інші топ-рівневі секції
+  document.querySelectorAll('#left-panel > details').forEach(other => {
+    if (other !== det) other.open = false;
+  });
+
+  if (wasOpen) {
+    // закриваємо контейнер + підсекції та робимо ПОВНИЙ reset
+    det.open = false;
+    det.querySelectorAll('details').forEach(d => d.open = false);
+    resetAllUI();
+  } else {
+    // відкриваємо контейнер із чистого стану
+    resetScreenUI(); // не чіпає вміст форм/випадайок
+    det.open = true;
+  }
+  return;
+}
+
+
+  // Режим без підрежимів (history/money/math/…)
+  const wasOpen = det.open === true;
+
+  if (leftPanel) {
+    // Закрити всі підрежими у всіх контейнерах
+    leftPanel.querySelectorAll('#left-panel details details').forEach(d => d.open = false);
+    // Закрити всі інші топ-рівневі режими (окрім контейнерів і цього)
+    leftPanel.querySelectorAll('#left-panel > details').forEach(other => {
+      if (other !== det && !ALWAYS_OPEN_SECTIONS.has(other.id)) other.open = false;
     });
+  }
+
+  if (wasOpen) {
+    det.open = false;
+    resetAllUI(); // клік по відкритому → закрити й повністю очистити
+    return;
+  }
+
+  resetAllUI(); // перехід з іншого режиму → повний reset
+  // Контейнери (univers/geo) лишаємо відкритими
+det.open = true; // просто відкриваємо обраний режим
+
+});
+
+
+if (ALWAYS_OPEN_SECTIONS.has(sec.id)) det.open = true;
 
     container.append(det);
   });
@@ -499,20 +676,29 @@ getMode('univers_luminosity')?.initBlock?.();
 getMode('univers_mass')?.initBlock?.();
 getMode('history')?.initBlock?.();
 getMode('money')?.initBlock?.();
-
+getMode('math')?.initBlock?.();
+getMode('geo_area')?.initBlock?.();
+getMode('geo_population')?.initBlock?.();
+getMode('geo_objects')?.initBlock?.();
 
   // ==== Авто-скидання при переході у будь-яку іншу секцію лівої панелі
   const leftPanel = document.getElementById('left-panel');
   if (leftPanel && !leftPanel.__orbitResetHookAttached) {
     leftPanel.addEventListener('click', (e) => {
-      const sum = e.target.closest('summary');
-      if (!sum || !leftPanel.contains(sum)) return;
+  const sum = e.target.closest('summary');
+  if (!sum || !leftPanel.contains(sum)) return;
 
-      const det = sum.parentElement; // <details>
-      if (det && det.tagName === 'DETAILS' && !det.open) {
-        resetScreenUI();   // тільки почистити екран, baseline і масштаб залишити
-      }
-    }, true); // capture: до перемикання open
+  const det = sum.parentElement; // <details>
+
+  // Працюємо лише для ГОЛОВНИХ секцій (#left-panel > details)
+  const isTopLevel = det && det.parentElement === leftPanel;
+
+  if (isTopLevel && det.tagName === 'DETAILS' && !det.open) {
+    // при переході між головними секціями — легкий "екранний" ресет
+    resetScreenUI();
+  }
+}, true);
+
 
     // Захист від повторного підвішування
     leftPanel.__orbitResetHookAttached = true;
