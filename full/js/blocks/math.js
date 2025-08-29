@@ -92,7 +92,7 @@ function rebuildCategorySelects(scope) {
     ph.disabled = true;
     ph.selected = true;
     ph.hidden = true;
-    ph.textContent = t('panel_placeholder_category_choose_or_enter');
+    ph.textContent = t('panel_placeholder_category');
     sel.appendChild(ph);
 
     // опції категорій (відсортовані за ключем, підписані мовою lang із фолбеками)

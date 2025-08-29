@@ -96,7 +96,7 @@ function rebuildCategorySelectsGeoPopulation(scope) {
     ph.disabled = true;
     ph.selected = true;
     ph.hidden = true;
-    ph.textContent = t('panel_placeholder_category_choose_or_enter') || t('panel_placeholder_category');
+    ph.textContent = t('panel_placeholder_category');
     sel.appendChild(ph);
 
     [...keys].sort().forEach(k => {

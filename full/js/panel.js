@@ -6,6 +6,12 @@ import { resetAllUI, resetScreenUI } from './events/reset.js';
 import { getMode } from './modes/registry.js';
 import './modes/builtin.js'; // реєструє стандартні режими (side-effect)
 
+function getIconForAction(action) {
+  if (action === 'create')     return '/full/res/icons/add.png';
+  if (action === 'calculate')  return '/full/res/icons/play.png';
+  if (action === 'reset')      return '/full/res/icons/stop.png';
+  return '';
+}
 
 /** Фабрика елементів полів лівої панелі */
 function createField(f) {
@@ -30,13 +36,36 @@ function createField(f) {
     el.id = f.id; // унікальний id потрібен для збирання даних
     el.placeholder = f.placeholder;
 
-  } else if (f.type === 'button') {
-    el = document.createElement('button');
-    // Щоб підсвічування працювало зі старим CSS, додамо і id, і data-action
-    el.id = f.id;                    // ⚠️ дубльовані id допускаємо лише для стилізації
-    el.dataset.action = f.id;        // сучасний спосіб для логіки
-    el.textContent = f.text;
-  } else if (f.type === 'text') {
+} else if (f.type === 'button') {
+  el = document.createElement('button');
+  el.className = 'icon-button';
+  // старий контракт: і id, і data-action лишаються
+  el.id = f.id;                 // ⚠️ дубльовані id залишаємо для стилів
+  el.dataset.action = f.id;     // логіка дивиться на data-action
+
+  // текст мітки беремо з f.text (він уже локалізований на момент рендера)
+  const label = String(f.text || '').trim();
+  if (label) {
+  el.setAttribute('aria-label', label);
+  // НЕ ставимо title для іконкових кнопок (щоб не було нативного тултіпа)
+  if (!el.classList.contains('icon-button')) {
+    el.title = label;
+  }
+}
+
+
+  // всередині — лише іконка
+  const img = document.createElement('img');
+  img.className = 'btn-icon';
+  img.src = getIconForAction(el.dataset.action);
+  img.alt = ''; // декоративна
+  img.setAttribute('aria-hidden', 'true');
+  el.append(img);
+  el.removeAttribute('title');
+el.querySelectorAll('[title]').forEach(n => n.removeAttribute('title'));
+}
+ 
+    else if (f.type === 'text') {
     el = document.createElement('div');
     el.id = f.id; // тут ідентичні id зустрічаються у різних підсекціях — ок для нашого апдейту текстів
     el.textContent = f.text;
@@ -88,9 +117,7 @@ export function initLeftPanel(t) {
                 { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
                 { type: 'select', id: 'diamCategoryObject1', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'diamObject1',         placeholder: t('panel_placeholder_object1') },
-                { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
                 { type: 'input',  id: 'diamCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
                 { type: 'button', id: 'create',              text: t('panel_button_create') },
               ]
             },
@@ -99,13 +126,11 @@ export function initLeftPanel(t) {
                 { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
                 { type: 'select', id: 'diamCategoryObject2', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'diamObject2',         placeholder: t('panel_placeholder_object2') },
-                { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
                 { type: 'button', id: 'create',              text: t('panel_button_create') },
               ]
             },
             {
               type: 'group', className: 'sector-block', children: [
-                { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
                 { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
                 { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
               ]
@@ -119,7 +144,6 @@ export function initLeftPanel(t) {
               type: 'group', className: 'sector-block', children: [
                 { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
                 { type: 'select', id: 'distObject1',         placeholder: t('panel_placeholder_object1') },
-                { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
                 { type: 'input',  id: 'distCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
               ]
             },
@@ -128,13 +152,11 @@ export function initLeftPanel(t) {
                 { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
                 { type: 'select', id: 'distCategoryObject2', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'distObject2',         placeholder: t('panel_placeholder_object2') },
-                { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
                 { type: 'button', id: 'create',              text: t('panel_button_create') },
               ]
             },
             {
               type: 'group', className: 'sector-block', children: [
-                { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
                 { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
                 { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
               ]
@@ -149,9 +171,7 @@ export function initLeftPanel(t) {
                 { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
                 { type: 'select', id: 'lumiCategoryObject1', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'lumiObject1',         placeholder: t('panel_placeholder_object1') },
-                { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
                 { type: 'input',  id: 'lumiCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
                 { type: 'button', id: 'create',              text: t('panel_button_create') },
               ]
             },
@@ -160,13 +180,11 @@ export function initLeftPanel(t) {
                 { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
                 { type: 'select', id: 'lumiCategoryObject2', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'lumiObject2',         placeholder: t('panel_placeholder_object2') },
-                { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
                 { type: 'button', id: 'create',              text: t('panel_button_create') },
               ]
             },
             {
               type: 'group', className: 'sector-block', children: [
-                { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
                 { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
                 { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
               ]
@@ -181,9 +199,7 @@ export function initLeftPanel(t) {
                 { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
                 { type: 'select', id: 'massCategoryObject1', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'massObject1',         placeholder: t('panel_placeholder_object1') },
-                { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
                 { type: 'input',  id: 'massCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
                 { type: 'button', id: 'create',              text: t('panel_button_create') },
               ]
             },
@@ -192,13 +208,11 @@ export function initLeftPanel(t) {
                 { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
                 { type: 'select', id: 'massCategoryObject2', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'massObject2',         placeholder: t('panel_placeholder_object2') },
-                { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
                 { type: 'button', id: 'create',              text: t('panel_button_create') },
               ]
             },
             {
               type: 'group', className: 'sector-block', children: [
-                { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
                 { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
                 { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
               ]
@@ -217,9 +231,7 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
             { type: 'select', id: 'histCategoryObject1', placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'histObject1',         placeholder: t('panel_placeholder_event1') },
-            { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
             { type: 'input',  id: 'histCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
@@ -228,13 +240,11 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
             { type: 'select', id: 'histCategoryObject2', placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'histObject2',         placeholder: t('panel_placeholder_event2') },
-            { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
             { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
             { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
           ]
@@ -252,9 +262,7 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
             { type: 'select', id: 'geoPopCategoryObject1',    placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'geoPopObject1',            placeholder: t('panel_placeholder_object1') },
-            { type: 'text',   id: 'setScaleFirstObject',      text: t('note_set_scale_first_object') },
             { type: 'input',  id: 'geoPopBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'text',   id: 'createFirstObject',        text: t('note_create_first_object') },
             { type: 'button', id: 'create',                   text: t('panel_button_create') },
           ]
         },
@@ -263,13 +271,11 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
             { type: 'select', id: 'geoPopCategoryObject2', placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'geoPopObject2',         placeholder: t('panel_placeholder_object2') },
-            { type: 'text',   id: 'createSecondObject',    text: t('note_create_second_object') },
             { type: 'button', id: 'create',                text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
             { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
             { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
           ]
@@ -284,9 +290,7 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
             { type: 'select', id: 'geoAreaCategoryObject1',   placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'geoAreaObject1',           placeholder: t('panel_placeholder_object1') },
-            { type: 'text',   id: 'setScaleFirstObject',      text: t('note_set_scale_first_object') },
             { type: 'input',  id: 'geoAreaBaselineDiameter',  placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'text',   id: 'createFirstObject',        text: t('note_create_first_object') },
             { type: 'button', id: 'create',                   text: t('panel_button_create') },
           ]
         },
@@ -295,13 +299,11 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectSecondObject',     text: t('note_select_second_object') },
             { type: 'select', id: 'geoAreaCategoryObject2',  placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'geoAreaObject2',          placeholder: t('panel_placeholder_object2') },
-            { type: 'text',   id: 'createSecondObject',      text: t('note_create_second_object') },
             { type: 'button', id: 'create',                  text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
             { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
             { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
           ]
@@ -316,9 +318,7 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
             { type: 'select', id: 'geoObjCategoryObject1',    placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'geoObjObject1',            placeholder: t('panel_placeholder_object1') },
-            { type: 'text',   id: 'setScaleFirstObject',      text: t('note_set_scale_first_object') },
             { type: 'input',  id: 'geoObjBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'text',   id: 'createFirstObject',        text: t('note_create_first_object') },
             { type: 'button', id: 'create',                   text: t('panel_button_create') },
           ]
         },
@@ -327,13 +327,11 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
             { type: 'select', id: 'geoObjCategoryObject2',  placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'geoObjObject2',          placeholder: t('panel_placeholder_object2') },
-            { type: 'text',   id: 'createSecondObject',     text: t('note_create_second_object') },
             { type: 'button', id: 'create',                 text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
             { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
             { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
           ]
@@ -349,29 +347,26 @@ export function initLeftPanel(t) {
       fields: [
         {
           type: 'group', className: 'sector-block object1-group', children: [
-            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
+            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
             { type: 'select', id: 'moneyCategoryObject1', placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'moneyObject1',         placeholder: t('panel_placeholder_object1') },
-            { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
             { type: 'input', id: 'moneyBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
-          type: 'group', className: 'sector-block object2-group', children: [
-            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
+          type: 'group', className: 'sector-block object2-group', children: [      
+            { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
             { type: 'select', id: 'moneyCategoryObject2', placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'moneyObject2',         placeholder: t('panel_placeholder_object2') },
-            { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
             { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-            { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
+            { type: 'button', id: 'reset',                 text: t('panel_button_reset') },
+
           ]
         }
       ]
@@ -385,9 +380,7 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
             { type: 'select', id: 'mathCategoryObject1', placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'mathObject1',         placeholder: t('panel_placeholder_object1') },
-            { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
             { type: 'input',  id: 'mathBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
@@ -396,13 +389,11 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
             { type: 'select', id: 'mathCategoryObject2', placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'mathObject2',         placeholder: t('panel_placeholder_object2') },
-            { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
             { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
             { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
           ]
@@ -484,13 +475,25 @@ export function initLeftPanel(t) {
       } else if (el.tagName === 'INPUT') {
         el.placeholder = t('panel_placeholder_input_diameter');
 
-      } else if (el.tagName === 'BUTTON') {
-        // 🔹 Тепер через data-action
-        if (action === 'calculate') el.textContent = t('panel_button_calculate');
-        else if (action === 'reset') el.textContent = t('panel_button_reset');
-        else if (action === 'create') el.textContent = t('panel_button_create');
+} else if (el.tagName === 'BUTTON') {
+  const action = el.dataset?.action || '';
+  let label = '';
+  if (action === 'calculate') label = t('panel_button_calculate');
+  else if (action === 'reset') label = t('panel_button_reset');
+  else if (action === 'create') label = t('panel_button_create');
 
-} else if (el.classList.contains('panel-note')) {
+if (label) {
+  el.setAttribute('aria-label', label);
+  if (!el.classList.contains('icon-button')) {
+    el.title = label;
+  }
+}
+
+
+}
+
+
+else if (el.classList.contains('panel-note')) {
   if (id === 'selectFirstObject')            el.textContent = t('note_select_first_object');
   else if (id === 'setScaleFirstObject')     el.textContent = t('note_set_scale_first_object');
   else if (id === 'createFirstObject')       el.textContent = t('note_create_first_object');

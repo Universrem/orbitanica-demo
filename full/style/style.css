@@ -184,14 +184,14 @@ summary {
 /* ====== ЕЛЕМЕНТИ ФОРМИ В ЛІВІЙ ПАНЕЛІ ====== */
 #left-panel .section-content select,
 #left-panel .section-content input,
-#left-panel .section-content button {
+#left-panel .section-content button:not(.icon-button) {
   height: 30px;
   padding: 0 8px;
   font-size: 0.8rem;
   color: #000000;  
-  border: 1px solid #000000;
+  border: 1px solid hsl(0, 0%, 95%);
   border-radius: 4px;
-  background-color: #fff;
+  background-color: #f7f7f7;
   line-height: 30px;
 }
 
@@ -200,33 +200,33 @@ summary {
 }
 
 /* Кнопка "Розрахувати": рамка зелена завжди; фон стає зеленим у стані .is-active */
-.section-content :is(button#calculate, button[data-action="calculate"]) {
+.section-content :is(button#calculate, button[data-action="calculate"]):not(.icon-button) {
   border: 1px solid green;
   background: #fff;
   color: #000;
   transition: background-color .18s ease, color .18s ease;
 }
-#left-panel :is(button#calculate, button[data-action="calculate"]).is-active {
+#left-panel :is(button#calculate, button[data-action="calculate"]):not(.icon-button).is-active {
   background: rgb(107, 172, 107);
   color: #fff;
 }
-#left-panel :is(button#calculate, button[data-action="calculate"]).is-active:hover {
+#left-panel :is(button#calculate, button[data-action="calculate"]):not(.icon-button).is-active:hover {
   background: rgb(107, 172, 107);
   color: #fff;
 }
 
 /* Кнопка "Скинути": рамка червона завжди; фон стає червоним у стані .is-active */
-.section-content :is(button#reset, button[data-action="reset"]) {
+.section-content :is(button#reset, button[data-action="reset"]):not(.icon-button) {
   border: 1px solid red;
   background: #fff;
   color: #000;
   transition: background-color .18s ease, color .18s ease;
 }
-#left-panel :is(button#reset, button[data-action="reset"]).is-active {
+#left-panel :is(button#reset, button[data-action="reset"]):not(.icon-button).is-active {
   background: rgb(255, 125, 125);
   color: #fff;
 }
-#left-panel :is(button#reset, button[data-action="reset"]).is-active:hover {
+#left-panel :is(button#reset, button[data-action="reset"]):not(.icon-button).is-active:hover {
   background: rgb(255, 125, 125);
   color: #fff;
 }
@@ -234,7 +234,7 @@ summary {
 /* ====== ЕФЕКТ ПРИ НАВЕДЕННІ КУРСОРА ====== */
 #left-panel .section-content select:hover,
 #left-panel .section-content input:hover,
-#left-panel .section-content button:hover {
+#left-panel .section-content button:not(.icon-button):hover {
   background-color: #f9f9f9;       
   cursor: pointer;                
 }
@@ -242,7 +242,7 @@ summary {
 /* ====== СТИЛЬ ДЛЯ НЕАКТИВНИХ ПОЛІВ І КНОПОК ====== */
 #left-panel .section-content select:disabled,
 #left-panel .section-content input:disabled,
-#left-panel .section-content button:disabled {
+#left-panel .section-content button:not(.icon-button):disabled {
   background-color: #eee;
   color: #999;
   border-color: #ccc;
@@ -326,14 +326,13 @@ input::placeholder {
 
 /* ====== Тексти-підказки в лівій панелі ====== */
 #left-panel .panel-note {
-  margin: 0.6em 0 0.3em 0;
-  font-style: italic;
-  font-weight: normal;
-  font-size: 0.8em;
-  color: #bababa;
-  line-height: 1.4;
-  text-align: center;  
+  color: #000000;          /* чорний */
+  font-weight: 600;     /* жирний */
+  font-size: 14px;
+  display: inline-block;
+  margin-left: 93px;
 }
+
 /* Розділювачі секцій у лівій панелі: "Сцени" / "Створення сцен" */
 #left-panel .panel-section-title {
   display: block;
@@ -351,19 +350,18 @@ input::placeholder {
 #left-panel .sector-block {
   margin: 6px 0;  
   padding: 8px 12px; 
-  border: 1px solid #ddd;
+  border: 1px solid #ffffff;
   border-radius: 6px;
   background-color: #ffffff;
 }
-#left-panel .sector-block select,
-#left-panel .sector-block input,
-#left-panel .sector-block button {
+#left-panel .sector-block :is(select, input, button):not(.icon-button) {
   display: block;
   margin: 6px auto;
   max-width: 90%;
   width: 100%;
   box-sizing: border-box;
 }
+
 hr {
   border: none;
   border-top: 2px solid #1947b2;
@@ -821,4 +819,174 @@ body.modal-open { overflow: hidden; }
 #left-panel > details:last-child {
   margin-bottom: 8px;
 }
+
+/* База іконки-кнопки: без рамки/фону, компактна (для "Створити") */
+#left-panel button.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 50%;
+  line-height: 1;
+  transition: transform .12s ease;
+  transform-origin: center;
+  position: relative;
+}
+/* === Підказки для іконок у лівій панелі — зліва від кнопки === */
+#left-panel button.icon-button { position: relative; }
+
+#left-panel button.icon-button::after,
+#left-panel button.icon-button::before {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s ease;
+  z-index: 5;
+  content: "";
+}
+
+/* Тіло підказки ліворуч, по вертикалі по центру кнопки */
+#left-panel button.icon-button:hover::after {
+  top: 50%;
+  right: calc(100% + 10px);     /* ← зліва від кнопки */
+  transform: translateY(-50%);  /* вертикальне центрування */
+
+  padding: 6px 8px;
+  max-width: 220px;
+  white-space: nowrap;
+  background: #fff;
+  color: #111;
+  border: 1px solid rgba(0,0,0,.2);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+  font: 500 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  opacity: 1;
+}
+
+/* Стрілочка біля правого краю тултіпа (вказує на кнопку) */
+#left-panel button.icon-button:hover::before {
+  top: 50%;
+  right: calc(100% + 5px);
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-left: 1px solid rgba(0,0,0,.2);
+  border-top: 1px solid rgba(0,0,0,.2);
+  transform: translateY(-50%) rotate(45deg);
+  opacity: 1;
+}
+
+/* Джерело тексту підказки — беремо з aria-label або data-tip */
+#left-panel button.icon-button[aria-label]:hover::after { content: attr(aria-label); }
+#left-panel button.icon-button[data-tip]:hover::after   { content: attr(data-tip); }
+/* (БІЛЬШЕ НЕ ЧИТАЄМО title, щоб не дублювати нативну підказку) */
+
+#left-panel button.icon-button:hover {
+  transform: scale(1.10);
+}
+
+#left-panel button.icon-button .btn-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* === ІКОНКОВІ СТАРТ/РЕСЕТ v2: більші кнопки, менший сектор, без рамки === */
+/* === Start/Reset: вертикально по центру (лише коли обидві є) === */
+#left-panel .sector-block:has(> button.icon-button[data-action="calculate"]):has(> button.icon-button[data-action="reset"]) {
+  display: flex;
+  flex-direction: column;  /* одна над одною */
+  align-items: center;     /* по центру */
+  gap: 16px;               /* відстань між ними */
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* прибираємо зовнішні відступи, щоб не заважали gap */
+#left-panel .sector-block:has(> button.icon-button[data-action="calculate"]):has(> button.icon-button[data-action="reset"]) > button.icon-button {
+  margin: 0;
+}
+
+/* 1) Збільшуємо розмір сектора саме для Start/Reset (працює і без .controls-row) */
+#left-panel .sector-block button.icon-button[data-action="calculate"],
+#left-panel .sector-block button.icon-button[data-action="reset"] {
+  width: 42px;
+  height: 42px;
+}
+
+/* 2) Розмір самої іконки всередині */
+#left-panel .sector-block button.icon-button[data-action="calculate"] .btn-icon,
+#left-panel .sector-block button.icon-button[data-action="reset"] .btn-icon {
+  width: 42px;      /* під 160×160 кнопки виглядає збалансовано */
+  height: 42px;
+  display: block;
+  flex: 0 0 auto;
+  object-fit: contain; /* для <img> */
+}
+
+/* 3) Сектор з кнопками: робимо компактним і прибираємо рамку/фон тільки тут */
+#left-panel .sector-block:has(button.icon-button[data-action="calculate"]) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 100px;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* === ІКОНКА «СТВОРИТИ»: розмір + розміщення без впливу на інші елементи === */
+
+/* 1) Базовий розмір кнопки-іконки "Створити" (середній, менше ніж Start/Reset) */
+#left-panel button.icon-button[data-action="create"] {
+  width: 16px;
+  height: 16px;
+}
+
+/* 2) Розмір самої піктограми всередині кнопки "Створити" */
+#left-panel button.icon-button[data-action="create"] .btn-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+/* 3) Якщо сектор містить ТІЛЬКИ кнопку "Створити" (без select/input) — центруємо та робимо компактним, без рамки */
+#left-panel .sector-block:has(> button.icon-button[data-action="create"]):not(:has(select)):not(:has(input)) {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* 4) Невеликий зовнішній відступ з обох боків, якщо "Створити" стоїть в ряд із іншими елементами */
+#left-panel button.icon-button[data-action="create"] {
+  margin: 0px 0px;
+}
+/* Зсув "Створити" вправо на фіксований відступ від лівого краю сектора */
+#left-panel .sector-block:has(> button.icon-button[data-action="create"]) {
+  width: 100%; /* щоб був простір, і відступ був видимий */
+}
+
+/* міняй число під себе: 40px, 80px, 120px тощо */
+#left-panel .sector-block:has(> button.icon-button[data-action="create"]) > button.icon-button[data-action="create"] {
+  margin-left: 175px;
+}
+
+
 

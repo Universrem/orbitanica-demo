@@ -564,9 +564,9 @@
     "es": "Reiniciar"
   },
   "note_select_first_object": {
-    "ua": "Виберіть перший обʼєкт",
-    "en": "Select the first object",
-    "es": "Seleccione el primer objeto"
+    "ua": "О1",
+    "en": "О1",
+    "es": "О1"
   },
   "note_set_scale_first_object": {
     "ua": "Задайте масштаб першого обʼєкта",
@@ -579,9 +579,9 @@
     "es": "O cree el primer objeto"
   },
   "note_select_second_object": {
-    "ua": "Виберіть другий обʼєкт",
-    "en": "Select the second object",
-    "es": "Seleccione el segundo objeto"
+    "ua": "О2",
+    "en": "О2",
+    "es": "О2"
   },
   "note_create_second_object": {
     "ua": "Або створіть другий обʼєкт",
