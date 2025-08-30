@@ -12,6 +12,7 @@
 import { t, getCurrentLang } from '../i18n.js';
 import { loadMoneyLibrary, getMoneyLibrary } from '../data/money_lib.js';
 import { getStore } from '../userObjects/api.js';
+import { attachO1QuickSuggest } from '../utils/o1QuickSuggest.js';
 
 // ─────────────────────────────────────────────────────────────
 // Утіліти
@@ -199,6 +200,8 @@ export async function initMoneyBlock() {
   // плейсхолдер для інпута діаметра
   const base = scope.querySelector('#moneyBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) base.placeholder = t('panel_placeholder_input_diameter');
+  if (base) attachO1QuickSuggest({ inputEl: base });
+
 
   // зміна категорій → оновити відповідний список об’єктів
   scope.querySelector('#moneyCategoryObject1')?.addEventListener('change', () => {

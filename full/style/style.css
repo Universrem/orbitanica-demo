@@ -988,5 +988,25 @@ body.modal-open { overflow: hidden; }
   margin-left: 175px;
 }
 
+/* —— O1 Quick Suggest (popover) —— */
+.o1qs-popover{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.12);
+  border-radius:10px;
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+  padding:6px;
+  max-height:320px;
+  overflow:auto;
+  overscroll-behavior: contain; /* не прокручувати сторінку, коли вперлись у край */
+  -webkit-overflow-scrolling: touch;
+}
+.o1qs-item{
+  display:block; width:100%; text-align:left;
+  padding:8px 10px; border:0; background:transparent; cursor:pointer;
+  border-radius:8px; font-size:13px;
+}
+.o1qs-item:hover{ background:#f2f6ff; }
+
+
 
 

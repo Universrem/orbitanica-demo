@@ -12,6 +12,7 @@
 import { t, getCurrentLang } from '../i18n.js';
 import { loadGeoLibrary, getGeoLibrary } from '../data/geo_lib.js';
 import { getStore } from '../userObjects/api.js';
+import { attachO1QuickSuggest } from '../utils/o1QuickSuggest.js';
 
 // ─────────────────────────────────────────────────────────────
 // Утіліти
@@ -196,6 +197,7 @@ export async function initGeoObjectsBlock() {
 
   const base = scope.querySelector('#geoObjBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) base.placeholder = t('panel_placeholder_input_diameter');
+  if (base) attachO1QuickSuggest({ inputEl: base });
 
   scope.querySelector('#geoObjCategoryObject1')?.addEventListener('change', () => {
     rebuildObjectsSelectGeoObjects(scope, '.object1-group', '#geoObjCategoryObject1', '#geoObjObject1');

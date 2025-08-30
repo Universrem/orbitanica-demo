@@ -12,6 +12,7 @@
 import { t, getCurrentLang } from '../i18n.js';
 import { loadMathLibrary, getMathLibrary } from '../data/math_lib.js';
 import { getStore } from '../userObjects/api.js';
+import { attachO1QuickSuggest } from '../utils/o1QuickSuggest.js';
 
 // ─────────────────────────────────────────────────────────────
 // Утіліти
@@ -199,6 +200,7 @@ export async function initMathBlock() {
   // плейсхолдер для інпута діаметра
   const base = scope.querySelector('#mathBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) base.placeholder = t('panel_placeholder_input_diameter');
+  if (base) attachO1QuickSuggest({ inputEl: base });
 
   // зміна категорій → оновити відповідний список об’єктів
   scope.querySelector('#mathCategoryObject1')?.addEventListener('change', () => {

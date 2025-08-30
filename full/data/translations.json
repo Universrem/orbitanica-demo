@@ -843,7 +843,31 @@
   "ua": "Створення сцен",
   "en": "Create scenes",
   "es": "Creación de escenas"
-}
+},
+"o1_quick_examples": { "ua": "Приклади", "en": "Examples", "es": "Ejemplos" },
+
+"o1_example_h2_molecule_0_1nm":     { "ua": "Молекула H₂ (0.1 нм)",            "en": "H₂ molecule (0.1 nm)",            "es": "Molécula H₂ (0.1 nm)" },
+"o1_example_virus_100nm":           { "ua": "Вірус (100 нм)",                  "en": "Virus (100 nm)",                  "es": "Virus (100 nm)" },
+"o1_example_bacterium_1um":         { "ua": "Бактерія (1 мкм)",                "en": "Bacterium (1 µm)",                "es": "Bacteria (1 µm)" },
+"o1_example_cell_30um":             { "ua": "Клітина (30 мкм)",                "en": "Cell (30 µm)",                    "es": "Célula (30 µm)" },
+"o1_example_hair_70um":             { "ua": "Волосина (70 мкм)",               "en": "Human hair (70 µm)",              "es": "Cabello humano (70 µm)" },
+
+"o1_example_sand_grain_0_5mm":      { "ua": "Пісчинка (0.5 мм)",               "en": "Grain of sand (0.5 mm)",          "es": "Grano de arena (0.5 mm)" },
+"o1_example_mm_1":                  { "ua": "1 мм",                            "en": "1 mm",                            "es": "1 mm" },
+"o1_example_cm_1":                  { "ua": "1 см",                            "en": "1 cm",                            "es": "1 cm" },
+"o1_example_coin_25mm":             { "ua": "Монета (25 мм)",                  "en": "Coin (25 mm)",                    "es": "Moneda (25 mm)" },
+"o1_example_tennis_ball_6_7cm":     { "ua": "Тенісний м’яч (6.70 см)",         "en": "Tennis ball (6.70 cm)",           "es": "Pelota de tenis (6.70 cm)" },
+"o1_example_cm_10":                 { "ua": "10 см",                           "en": "10 cm",                           "es": "10 cm" },
+"o1_example_soccer_ball_22cm":      { "ua": "Футбольний м’яч (22 см)",         "en": "Soccer ball (22 cm)",             "es": "Balón de fútbol (22 cm)" },
+"o1_example_basketball_24cm":       { "ua": "Баскетбольний м’яч (24 см)",      "en": "Basketball (24 cm)",              "es": "Balón de baloncesto (24 cm)" },
+"o1_example_person_footprint_75cm": { "ua": "Місце для 1 людини (~75 см)",     "en": "One person footprint (~75 cm)",   "es": "Espacio por persona (~75 cm)" },
+
+"o1_example_m_1":                   { "ua": "1 м",                             "en": "1 m",                             "es": "1 m" },
+"o1_example_car_length_4_5m":       { "ua": "Автомобіль (4.5 м)",              "en": "Car length (4.5 m)",              "es": "Coche (4.5 m)" },
+"o1_example_m_10":                  { "ua": "10 м",                            "en": "10 m",                            "es": "10 m" },
+"o1_example_bus_length_12m":        { "ua": "Автобус (12 м)",                  "en": "Bus length (12 m)",               "es": "Autobús (12 m)" },
+"o1_example_soccer_field_105m":     { "ua": "Футбольне поле (105 м)",          "en": "Soccer field (105 m)",            "es": "Campo de fútbol (105 m)" }
+
 
 }
 
