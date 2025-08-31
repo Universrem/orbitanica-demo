@@ -224,33 +224,34 @@ export function initLeftPanel(t) {
 
 
     {
-      id: 'history', title: t('panel_title_history'),
-      fields: [
-        {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-            { type: 'select', id: 'histCategoryObject1', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'histObject1',         placeholder: t('panel_placeholder_event1') },
-            { type: 'input',  id: 'histCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'button', id: 'create',              text: t('panel_button_create') },
-          ]
-        },
-        {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-            { type: 'select', id: 'histCategoryObject2', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'histObject2',         placeholder: t('panel_placeholder_event2') },
-            { type: 'button', id: 'create',              text: t('panel_button_create') },
-          ]
-        },
-        {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-            { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
-          ]
-        }
+  id: 'history', title: t('panel_title_history'),
+  fields: [
+    {
+      type: 'group', className: 'sector-block object1-group', children: [
+        { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
+        { type: 'select', id: 'histCategoryObject1', placeholder: t('panel_placeholder_category') },
+        { type: 'select', id: 'histObject1',         placeholder: t('panel_placeholder_event1') },
+        { type: 'input',  id: 'historyBaselineDiameter', placeholder: t('panel_placeholder_input_diameter') },
+        { type: 'button', id: 'create',              text: t('panel_button_create') },
       ]
     },
+    {
+      type: 'group', className: 'sector-block object2-group', children: [
+        { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
+        { type: 'select', id: 'histCategoryObject2', placeholder: t('panel_placeholder_category') },
+        { type: 'select', id: 'histObject2',         placeholder: t('panel_placeholder_event2') },
+        { type: 'button', id: 'create',              text: t('panel_button_create') },
+      ]
+    },
+    {
+      type: 'group', className: 'sector-block', children: [
+        { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+        { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+      ]
+    }
+  ]
+},
+
     {
   id: 'geo', title: t('panel_title_geo'),
   children: [

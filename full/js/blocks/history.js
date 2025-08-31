@@ -1,141 +1,239 @@
-// full/js/blocks/univers_history.js
+// full/js/blocks/history.js
 'use strict';
 
-import { getCurrentLang, t } from '../i18n.js';
+/**
+ * Еталонний блок режиму «Історія» (UI).
+ * - чекає завантаження history-бібліотеки;
+ * - будує селекти категорій і об’єктів (О1/О2);
+ * - слухає orbit:ui-reset / user-objects-* / languageChanged;
+ * - не рахує нічого і не лізе в інші режими.
+ */
+
+import { t, getCurrentLang } from '../i18n.js';
+import { loadHistoryLibrary, getHistoryLibrary } from '../data/history_lib.js';
 import { getStore } from '../userObjects/api.js';
-import { loadHistoryLibrary, getHistoryLibrary } from '../data/data_history.js';
+import { attachO1QuickSuggest } from '../utils/o1QuickSuggest.js';
 
-export async function initHistoryBlock() {
+// ─────────────────────────────────────────────────────────────
+// Утіліти
 
-  await loadHistoryLibrary();
-  updateCategories();
-  rebuildObjectsForSelectedCategories();
+const norm = s => String(s ?? '').trim();
+const low  = s => norm(s).toLowerCase();
 
-  // слухачі змін категорій
-  ['histCategoryObject1', 'histCategoryObject2'].forEach(id => {
-    const sel = document.getElementById(id);
-    if (sel && !sel.__histBound) {
-      sel.addEventListener('change', rebuildObjectsForSelectedCategories);
-      sel.__histBound = true;
-    }
-  });
+function pickLang(rec, base, lang) {
+  if (!rec) return '';
+  const a = rec[`${base}_${lang}`];
+  const b = rec[`${base}_en`];
+  const c = rec[`${base}_ua`];
+  const d = rec[`${base}_es`];
+  const e = rec[base];
+  return norm(a || b || c || d || e || '');
 }
 
-function updateCategories() {
-  const lang = getCurrentLang();
-  const lib = getHistoryLibrary() || [];
-  const cats = new Set();
+// ключ категорії (узгоджений з адаптером)
+function getCatKey(rec) {
+  return low(rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
+}
 
-  // з офіційної бібліотеки
-  lib.forEach(o => {
-    const c = o?.[`category_${lang}`];
-    const hasTime = Number.isFinite(readYear(o, 'time_start')) || Number.isFinite(readYear(o, 'time_end'));
-    if (c && hasTime) cats.add(c);
+// Канонічний вибір лейбла категорії без словників:
+// точна мова → en → ua → es → базове поле → key
+function getCategoryLabelByKey(lib, key, lang) {
+  const k = String(key || '').trim().toLowerCase();
+  const rows = Array.isArray(lib) ? lib.filter(r => getCatKey(r) === k) : [];
+  if (rows.length === 0) return norm(key);
+
+  const prefs = [`category_${lang}`, 'category_en', 'category_ua', 'category_es', 'category'];
+  for (const field of prefs) {
+    for (const r of rows) {
+      const v = r && r[field] ? String(r[field]).trim() : '';
+      if (v) return v;
+    }
+  }
+  return norm(key);
+}
+
+function clearSelect(sel) {
+  if (!sel) return;
+  while (sel.firstChild) sel.removeChild(sel.firstChild);
+}
+
+function addOption(sel, value, label) {
+  const opt = document.createElement('option');
+  opt.value = value;
+  opt.textContent = label;
+  sel.appendChild(opt);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Побудова списків
+
+function rebuildCategorySelects(scope) {
+  const lib  = getHistoryLibrary() || [];
+  const lang = getCurrentLang?.() || 'ua';
+  const sel1 = scope.querySelector('#histCategoryObject1') || scope.querySelector('.object1-group .category-select');
+  const sel2 = scope.querySelector('#histCategoryObject2') || scope.querySelector('.object2-group .category-select');
+
+  const selects = [sel1, sel2].filter(Boolean);
+  if (!selects.length) return;
+
+  const keys = new Set();
+  lib.forEach(rec => {
+    const k = getCatKey(rec);
+    if (k) keys.add(k);
   });
 
-  // з користувацьких
-  try {
-    const store = getStore();
-    const user = store?.list?.('history') || [];
-    user.forEach(o => {
-      const c = o?.category_i18n?.[lang] || o?.category;
-      const yS = o?.attrs?.time_start, yE = o?.attrs?.time_end;
-      const hasTime = Number.isFinite(yS) || Number.isFinite(yE);
-      if (c && hasTime) cats.add(c);
-    });
-  } catch {}
+  selects.forEach(sel => {
+    const keep = norm(sel.value);
+    clearSelect(sel);
 
-  const list = Array.from(cats).sort((a, b) => a.localeCompare(b, 'uk'));
-
-  ['histCategoryObject1', 'histCategoryObject2'].forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    const prev = sel.value;
-    sel.innerHTML = '';
-
+    // placeholder (disabled + selected + hidden — як в інших режимах)
     const ph = document.createElement('option');
-    ph.value = ''; ph.disabled = true; ph.selected = true; ph.hidden = true;
+    ph.value = '';
+    ph.disabled = true;
+    ph.selected = true;
+    ph.hidden = true;
     ph.textContent = t('panel_placeholder_category');
     sel.appendChild(ph);
 
-    list.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c; opt.textContent = c;
-      sel.appendChild(opt);
+    // опції категорій (відсортовані за ключем, підписані мовою lang із фолбеками)
+    [...keys].sort().forEach(k => {
+      const label = getCategoryLabelByKey(lib, k, lang);
+      addOption(sel, k, label);
     });
 
-    if (prev && list.includes(prev)) sel.value = prev;
+    // відновити вибір
+    if (keep && [...keys].includes(keep)) sel.value = keep;
   });
 }
 
-function repopulateObjectsSelect(selectId, category, placeholderKey) {
-  const lang = getCurrentLang();
-  const lib = getHistoryLibrary() || [];
-  const store = getStore?.();
+function rebuildObjectsSelect(scope, groupSelector, catSelector, objSelector) {
+  const lib  = getHistoryLibrary() || [];
+  const lang = getCurrentLang?.() || 'ua';
 
-  const sel = document.getElementById(selectId);
-  if (!sel) return;
+  const group  = scope.querySelector(groupSelector);
+  const catSel = scope.querySelector(catSelector);
+  const objSel = scope.querySelector(objSelector);
+  if (!group || !objSel) return;
 
-  const prev = sel.value;
-  sel.innerHTML = '';
+  const catKey = low(catSel?.value || '');
 
+  // офіційні об’єкти цієї категорії
+  const official = catKey ? lib.filter(rec => getCatKey(rec) === catKey) : [];
+
+  // юзерські (за текстовою категорією відповідною до поточної мови)
+  const store = getStore();
+  let userItems = [];
+  if (catKey && typeof store?.list === 'function') {
+    const catLabel = getCategoryLabelByKey(lib, catKey, lang);
+    const all = store.list('history') || [];
+    userItems = all.filter(o => low(o?.category || o?.category_i18n?.[o?.originalLang]) === low(catLabel));
+  }
+
+  const keep = norm(objSel.value);
+  clearSelect(objSel);
+
+  // placeholder об’єкта: окремо для О1/О2 — як у всіх режимах
   const ph = document.createElement('option');
-  ph.value = ''; ph.disabled = true; ph.selected = true; ph.hidden = true;
-  ph.textContent = t(placeholderKey);
-  sel.appendChild(ph);
-
-  const out = [];
+  ph.value = '';
+  ph.disabled = true;
+  ph.selected = true;
+  ph.hidden = true;
+  const isO1 = groupSelector.includes('object1') || objSelector.toLowerCase().includes('object1');
+  ph.textContent = isO1
+    ? t('panel_placeholder_object1')
+    : t('panel_placeholder_object2');
+  objSel.appendChild(ph);
 
   // офіційні
-  lib.forEach(o => {
-    const ok = o && o[`category_${lang}`] === category &&
-      (Number.isFinite(readYear(o, 'time_start')) || Number.isFinite(readYear(o, 'time_end')));
-    if (!ok) return;
-    out.push({ name: o[`name_${lang}`], source: 'lib' });
+  official.forEach(rec => {
+    const name = pickLang(rec, 'name', lang);
+    if (name) addOption(objSel, name, name);
   });
 
-  // користувацькі
-  try {
-    const user = store?.list?.('history') || [];
-    user.forEach(o => {
-      const ok = o && (o.category === category || o.category_i18n?.[lang] === category) &&
-        (Number.isFinite(o?.attrs?.time_start) || Number.isFinite(o?.attrs?.time_end));
-      if (!ok) return;
-      out.push({ name: o.name || o.name_i18n?.[lang], source: 'user' });
-    });
-  } catch {}
-
-  out.sort((a, b) => a.name.localeCompare(b.name, 'uk'));
-
-  out.forEach(it => {
-    const opt = document.createElement('option');
-    opt.value = it.name;
-    opt.textContent = it.source === 'user' ? `${it.name} •` : it.name;
-    sel.appendChild(opt);
+  // юзерські
+  userItems.forEach(u => {
+    const name = norm(u?.name || u?.name_i18n?.[u?.originalLang]);
+    if (!name) return;
+    addOption(objSel, name, name + ' ' + (t?.('ui.user_mark') || '(user)'));
   });
 
-  if (prev) {
-    for (let i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].value === prev) { sel.value = prev; break; }
-    }
+  if (keep) objSel.value = keep;
+}
+
+// локальне очищення форми при orbit:ui-reset
+function resetHistoryForm(scope) {
+  if (!scope) return;
+
+  // розблокувати О1 (на випадок якщо десь блокувався)
+  scope.querySelector('.object1-group')?.classList.remove('is-locked');
+  scope.querySelectorAll('.object1-group select, .object1-group input').forEach(el => {
+    el.disabled = false;
+    el.classList.remove('is-invalid');
+  });
+
+  // інпут ДІАМЕТРА базового кола О1-start + плейсхолдер
+  const base = scope.querySelector('#historyBaselineDiameter');
+  if (base) {
+    base.placeholder = t('panel_placeholder_input_diameter');
+    base.value = '';
   }
+
+  // перебудувати селекти
+  rebuildCategorySelects(scope);
+  rebuildObjectsSelect(scope, '.object1-group', '#histCategoryObject1', '#histObject1');
+  rebuildObjectsSelect(scope, '.object2-group', '#histCategoryObject2', '#histObject2');
 }
 
-function rebuildForSlot(slot) {
-  const catId = slot === 'object1' ? 'histCategoryObject1' : 'histCategoryObject2';
-  const objId = slot === 'object1' ? 'histObject1'         : 'histObject2';
-  const cat = document.getElementById(catId)?.value || '';
-  repopulateObjectsSelect(objId, cat, slot === 'object1' ? 'panel_placeholder_object1' : 'panel_placeholder_object2');
-}
-function rebuildObjectsForSelectedCategories() {
-  rebuildForSlot('object1');
-  rebuildForSlot('object2');
+// ─────────────────────────────────────────────────────────────
+// Публічний ініціалізатор
+
+export async function initHistoryBlock() {
+  await loadHistoryLibrary();
+
+  const scope = document.getElementById('history');
+  if (!scope) return;
+
+  // стартове заповнення
+  rebuildCategorySelects(scope);
+  rebuildObjectsSelect(scope, '.object1-group', '#histCategoryObject1', '#histObject1');
+  rebuildObjectsSelect(scope, '.object2-group', '#histCategoryObject2', '#histObject2');
+
+  // плейсхолдер для інпута ДІАМЕТРА (О1-start) + підказка-швидкий вибір
+  const base = scope.querySelector('#historyBaselineDiameter');
+  if (base) base.placeholder = t('panel_placeholder_input_diameter');
+  if (base) attachO1QuickSuggest({ inputEl: base });
+
+  // зміна категорій → оновити відповідний список об’єктів
+  scope.querySelector('#histCategoryObject1')?.addEventListener('change', () => {
+    rebuildObjectsSelect(scope, '.object1-group', '#histCategoryObject1', '#histObject1');
+  });
+  scope.querySelector('#histCategoryObject2')?.addEventListener('change', () => {
+    rebuildObjectsSelect(scope, '.object2-group', '#histCategoryObject2', '#histObject2');
+  });
+
+  // події юзерських об'єктів → повна перебудова
+  const rebuildAll = () => {
+    rebuildCategorySelects(scope);
+    rebuildObjectsSelect(scope, '.object1-group', '#histCategoryObject1', '#histObject1');
+    rebuildObjectsSelect(scope, '.object2-group', '#histCategoryObject2', '#histObject2');
+  };
+  document.addEventListener('user-objects-added', rebuildAll);
+  document.addEventListener('user-objects-changed', rebuildAll);
+  document.addEventListener('user-objects-removed', rebuildAll);
+
+  // ЗМІНА МОВИ ПІД ЧАС СЕСІЇ (повна сумісність)
+  const onLangChange = () => rebuildAll();
+  document.addEventListener('languageChanged', onLangChange);
+  window.addEventListener('languageChanged', onLangChange);
+  document.addEventListener('lang-changed', onLangChange);
+  window.addEventListener('lang-changed', onLangChange);
+
+  // системний Reset → локально очистити форму/стан режиму
+  window.addEventListener('orbit:ui-reset', () => resetHistoryForm(scope));
+  document.addEventListener('orbit:ui-reset', () => resetHistoryForm(scope));
+
+  console.log('[mode:history] init OK');
 }
 
-// локальний хелпер
-function readYear(obj, key) {
-  const v = obj?.[key];
-  if (typeof v === 'number') return v;
-  if (v && typeof v.value === 'number') return v.value;
-  return null;
-}
+// (опційно для тестів)
+export { rebuildCategorySelects, rebuildObjectsSelect, resetHistoryForm };
