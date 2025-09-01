@@ -113,7 +113,7 @@ export function initLeftPanel(t) {
           id: 'univers_diameter', title: t('panel_title_univers_diameter'),
           fields: [
             {
-              type: 'group', className: 'sector-block', children: [
+              type: 'group', className: 'sector-block object1-group', children: [
                 { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
                 { type: 'select', id: 'diamCategoryObject1', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'diamObject1',         placeholder: t('panel_placeholder_object1') },
@@ -122,7 +122,7 @@ export function initLeftPanel(t) {
               ]
             },
             {
-              type: 'group', className: 'sector-block', children: [
+              type: 'group', className: 'sector-block object2-group', children: [
                 { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
                 { type: 'select', id: 'diamCategoryObject2', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'diamObject2',         placeholder: t('panel_placeholder_object2') },
@@ -141,14 +141,14 @@ export function initLeftPanel(t) {
           id: 'univers_distance', title: t('panel_title_univers_distance'),
           fields: [
             {
-              type: 'group', className: 'sector-block', children: [
+              type: 'group', className: 'sector-block object1-group', children: [
                 { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
                 { type: 'select', id: 'distObject1',         placeholder: t('panel_placeholder_object1') },
                 { type: 'input',  id: 'distCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
               ]
             },
             {
-              type: 'group', className: 'sector-block', children: [
+              type: 'group', className: 'sector-block object2-group', children: [
                 { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
                 { type: 'select', id: 'distCategoryObject2', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'distObject2',         placeholder: t('panel_placeholder_object2') },
@@ -167,7 +167,7 @@ export function initLeftPanel(t) {
           id: 'univers_luminosity', title: t('panel_title_univers_luminosity'),
           fields: [
             {
-              type: 'group', className: 'sector-block', children: [
+              type: 'group', className: 'sector-block object1-group', children: [
                 { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
                 { type: 'select', id: 'lumiCategoryObject1', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'lumiObject1',         placeholder: t('panel_placeholder_object1') },
@@ -176,7 +176,7 @@ export function initLeftPanel(t) {
               ]
             },
             {
-              type: 'group', className: 'sector-block', children: [
+              type: 'group', className: 'sector-block object2-group', children: [
                 { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
                 { type: 'select', id: 'lumiCategoryObject2', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'lumiObject2',         placeholder: t('panel_placeholder_object2') },
@@ -195,7 +195,7 @@ export function initLeftPanel(t) {
           id: 'univers_mass', title: t('panel_title_univers_mass'),
           fields: [
             {
-              type: 'group', className: 'sector-block', children: [
+              type: 'group', className: 'sector-block object1-group', children: [
                 { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
                 { type: 'select', id: 'massCategoryObject1', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'massObject1',         placeholder: t('panel_placeholder_object1') },
@@ -204,7 +204,7 @@ export function initLeftPanel(t) {
               ]
             },
             {
-              type: 'group', className: 'sector-block', children: [
+              type: 'group', className: 'sector-block object2-group', children: [
                 { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
                 { type: 'select', id: 'massCategoryObject2', placeholder: t('panel_placeholder_category') },
                 { type: 'select', id: 'massObject2',         placeholder: t('panel_placeholder_object2') },

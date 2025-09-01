@@ -1,76 +1,107 @@
 // full/js/calc/calculate_luminosity.js
 'use strict';
 
-import { addGeodesicCircle } from '../globe/circles.js';
+/**
+ * Калькулятор для режиму «Світність».
+ * Лише математика. Жодного DOM, i18n чи рендера.
+ *
+ * Правило масштабу: площа кола ∝ світності.
+ * Формула для порівняння (О2 відносно О1):
+ *   D2 = D1 * sqrt(L2 / L1)   ⇒   r2 = (D1/2) * sqrt(L2 / L1)
+ *
+ * Експорти:
+ *  - setLuminosityBaseline({ valueReal, unit, circleDiameterMeters, color }) → { currentScaleArea }
+ *  - addLuminosityCircle({ valueReal, unit, color }) → { id, scaledRadiusMeters, tooLarge, requiredBaselineMeters }
+ *  - resetLuminosityScale()
+ *  - getLuminosityScale()
+ */
 
-// Стан режиму "Світність"
-let currentScale = null;          // S = Dmap(O1) / sqrt(Lreal(O1))
-let __baselineId = null;
-let __baselineL1 = null;          // світність О1 (в L☉)
+// Середній радіус Землі (м)
+const EARTH_RADIUS_M = 6371008.8;
+// Граничний геодезичний радіус (антипод): π·R_earth
+const LIM_RADIUS = Math.PI * EARTH_RADIUS_M;
 
-// Константи сфери Землі
-const R_EARTH = 6_371_000;           // м
-const LIM_RADIUS = Math.PI * R_EARTH; // максимально допустимий радіус кола на мапі (антипод)
-const EPS_M = 1;                      // м
+let __idSeq = 1;
 
-// скидання масштабу при глобальному reset
-window.addEventListener('orbit:ui-reset', () => {
-  currentScale = null;
-  __baselineId = null;
-  __baselineL1 = null;
-});
+/** Внутрішній baseline */
+let __baseline = {
+  valueReal: NaN,           // L1 (Вт)
+  unit: 'W',
+  circleDiameterMeters: 0,  // D1 (м)
+  color: undefined
+};
 
-// База (О1): фіксуємо масштаб і, якщо можна, малюємо довідкове коло
-export function setLuminosityBaseline(realL, realUnit, circleDiameterMeters, color = 'rgba(255,0,0,0.8)') {
-  __baselineId = null;
-  currentScale = null;
-  __baselineL1 = null;
+/** Поточний «масштаб площі»: скільки м² кола на 1 Вт світності */
+let __currentScaleArea = 0;
 
-  const L1 = Number(realL);
-  const Dm = Number(circleDiameterMeters);
-  if (!isFinite(L1) || L1 <= 0 || !isFinite(Dm) || Dm <= 0) return null;
-
-  const sqrtL1 = Math.sqrt(L1);
-  currentScale = Dm / sqrtL1;
-  __baselineL1 = L1;
-
-  const r = Dm / 2;
-  if (r > LIM_RADIUS + EPS_M) return null;
-
-  try {
-    __baselineId = addGeodesicCircle(r, color, __baselineId);
-    return __baselineId;
-  } catch {
-    return null;
-  }
+/** Площа кола за діаметром */
+function circleAreaByD(d) {
+  const D = Number(d);
+  if (!Number.isFinite(D) || D <= 0) return 0;
+  return Math.PI * (D * D) / 4;
 }
 
-// О2: масштабуємо діаметр за світністю, малюємо коло (або підказуємо межу)
-export function addLuminosityCircle(realL2, realUnit, color = 'rgba(0,128,255,0.8)') {
-  if (currentScale == null || !(currentScale > 0)) {
-    return { id: null, scaledDiameterMeters: null, tooLarge: false, requiredBaselineMeters: null };
-  }
-  const L2 = Number(realL2);
-  if (!isFinite(L2) || L2 <= 0) {
-    return { id: null, scaledDiameterMeters: null, tooLarge: false, requiredBaselineMeters: null };
+/**
+ * Встановити базову величину (О1) і обчислити масштаб площі.
+ * @returns {{ currentScaleArea: number }}
+ */
+export function setLuminosityBaseline({ valueReal, unit = 'W', circleDiameterMeters = 0, color } = {}) {
+  const l1 = Number(valueReal);
+  const d1 = Number(circleDiameterMeters);
+
+  __baseline.valueReal = Number.isFinite(l1) && l1 > 0 ? l1 : NaN;
+  __baseline.unit = unit || 'W';
+  __baseline.circleDiameterMeters = Number.isFinite(d1) && d1 >= 0 ? d1 : 0;
+  __baseline.color = color;
+
+  // Масштаб площі: A1 / L1 (нуль, якщо щось невалідне)
+  const A1 = circleAreaByD(__baseline.circleDiameterMeters);
+  __currentScaleArea = (Number.isFinite(l1) && l1 > 0 && A1 > 0) ? (A1 / l1) : 0;
+
+  return { currentScaleArea: __currentScaleArea };
+}
+
+/**
+ * Додати коло для О2.
+ * Повертає геодезичний радіус у метрах для рендера.
+ * @returns {{ id:number, scaledRadiusMeters:number, tooLarge:boolean, requiredBaselineMeters:number }}
+ */
+export function addLuminosityCircle({ valueReal, unit = 'W', color } = {}) {
+  const l2 = Number(valueReal);
+  const l1 = __baseline.valueReal;
+  const d1 = __baseline.circleDiameterMeters;
+
+  // Якщо дані невалідні — повертаємо нульовий результат
+  if (!Number.isFinite(l2) || l2 <= 0 || !Number.isFinite(l1) || l1 <= 0 || d1 <= 0) {
+    return { id: __idSeq++, scaledRadiusMeters: 0, tooLarge: false, requiredBaselineMeters: 0 };
   }
 
-  const scaledDiameterMeters = currentScale * Math.sqrt(L2);
+  // r2 = (D1/2) * sqrt(L2/L1)
+  const r2 = (d1 / 2) * Math.sqrt(l2 / l1);
 
-  // Перевірка межі (антипод)
-  if ((scaledDiameterMeters / 2) > (LIM_RADIUS + EPS_M)) {
-    let requiredBaselineMeters = null;
-    if (isFinite(__baselineL1) && __baselineL1 > 0) {
-      // Dmap1_req = (2πR) / sqrt(L2/L1) = (2πR) * sqrt(L1/L2)
-      requiredBaselineMeters = (2 * Math.PI * R_EARTH) * Math.sqrt(__baselineL1 / L2);
-    }
-    return { id: null, scaledDiameterMeters, tooLarge: true, requiredBaselineMeters };
+  // Позначаємо «занадто велике коло», якщо r2 ≥ π·R_earth (антипод)
+  const tooLarge = r2 >= LIM_RADIUS;
+
+  // Якщо занадто велике, підкажемо який D1 потрібен, аби помістилось:
+  //   r2 = (D1/2)*sqrt(L2/L1) < LIM_RADIUS  ⇒  D1 < 2 * LIM_RADIUS * sqrt(L1 / L2)
+  let requiredBaselineMeters = 0;
+  if (tooLarge) {
+    requiredBaselineMeters = 2 * LIM_RADIUS * Math.sqrt(l1 / l2);
   }
 
-  try {
-    const id = addGeodesicCircle(scaledDiameterMeters / 2, color);
-    return { id, scaledDiameterMeters, tooLarge: false, requiredBaselineMeters: null };
-  } catch {
-    return { id: null, scaledDiameterMeters: null, tooLarge: false, requiredBaselineMeters: null };
-  }
+  return {
+    id: __idSeq++,
+    scaledRadiusMeters: r2,
+    tooLarge,
+    requiredBaselineMeters
+  };
+}
+
+export function resetLuminosityScale() {
+  __baseline = { valueReal: NaN, unit: 'W', circleDiameterMeters: 0, color: undefined };
+  __currentScaleArea = 0;
+}
+
+export function getLuminosityScale() {
+  return __currentScaleArea;
 }

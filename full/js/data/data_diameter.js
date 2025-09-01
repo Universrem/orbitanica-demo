@@ -1,175 +1,235 @@
 // full/js/data/data_diameter.js
 'use strict';
 
+/**
+ * Адаптер даних для режиму «Діаметр» (еталон «Гроші»).
+ * Завдання:
+ *  - прочитати вибір користувача з DOM (контейнер режиму);
+ *  - знайти об’єкти у univers-бібліотеці або серед юзерських;
+ *  - привести діаметри до метрів через централізований конвертер;
+ *  - повернути StandardData (без мережі і без рендера).
+ *
+ * Експорт:
+ *  - getDiameterData(scope?): StandardData
+ */
+
 import { getCurrentLang } from '../i18n.js';
+import { getUniversLibrary } from './univers_lib.js';
 import { getStore } from '../userObjects/api.js';
-import { getUniverseLibrary } from './universe.js';
+import { convertToBase, getBaseUnit } from '../utils/unit_converter.js';
 
-// ── хелпери читання діаметра з різних форматів ─────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// Утіліти
 
-function diamVal(o) {
-  if (!o) return null;
-  if (typeof o.diameter === 'number') return o.diameter; // старий формат
-  if (o.diameter && typeof o.diameter.value === 'number') return o.diameter.value; // новий формат
+const norm = s => String(s ?? '').trim();
+const low  = s => norm(s).toLowerCase();
+
+function pickLang(rec, base, lang) {
+  if (!rec) return '';
+  const a = rec[`${base}_${lang}`];
+  const b = rec[`${base}_en`];
+  const c = rec[`${base}_ua`];
+  const d = rec[`${base}_es`];
+  const e = rec[base];
+  return norm(a || b || c || d || e || '');
+}
+
+// ключ категорії (узгоджено з блоками)
+function getCatKey(rec) {
+  return low(rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
+}
+
+// конвертація довжини → метри через централізований конвертер
+function toMetersViaConverter(value, unit) {
+  const v = Number(value);
+  if (!Number.isFinite(v)) return NaN;
+  const u = (unit && String(unit)) || getBaseUnit('distance') || 'm';
+  try {
+    // база 'distance' = метри
+    return convertToBase(v, u, 'distance');
+  } catch {
+    return NaN;
+  }
+}
+
+// Прочитати діаметр у метрах з офіційного чи юзерського запису
+function readDiameterMeters(source) {
+  // 1) офіційний формат univers: { diameter: { value, unit } }
+  if (source?.diameter && typeof source.diameter === 'object') {
+    const vm = toMetersViaConverter(source.diameter.value, source.diameter.unit || 'm');
+    if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
+  }
+
+  // 2) юзерський через модалку: attrs.diameter { value, unit }
+  if (source?.attrs?.diameter && typeof source.attrs.diameter === 'object') {
+    const vm = toMetersViaConverter(
+      source.attrs.diameter.value,
+      source.attrs.diameter.unit || source.unit || 'm'
+    );
+    if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
+  }
+
+  // 3) можливі плоскі поля (сумісність)
+  if (source && typeof source === 'object') {
+    const vm = toMetersViaConverter(
+      source.diameterValue ?? source.value ?? source.diameter,
+      source.unit ?? (source.diameter && source.diameter.unit) ?? 'm'
+    );
+    if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
+  }
+
+  return { valueReal: NaN, unit: 'm' };
+}
+
+// Діаметр базового кола О1 (м)
+function readBaselineDiameterMeters(scope) {
+  const root = scope || document;
+  const a = root?.querySelector('#diamCircleObject1, [data-field="baseline-diameter"]');
+  if (a) {
+    const v = Number(a.value);
+    if (Number.isFinite(v) && v >= 0) return v;
+  }
+  return 0;
+}
+
+function getVal(scope, sel) {
+  const root = scope || document;
+  const el = root?.querySelector(sel);
+  return el ? norm(el.value) : '';
+}
+
+// офіційний запис у бібліотеці: спершу звузити по категорії, потім шукати за назвою (будь-якою мовою)
+// повертає { obj, libIndex } або null
+function findOfficial(lib, { category, name }) {
+  if (!Array.isArray(lib)) return null;
+
+  const catKey = low(category);
+  let rows = lib;
+  if (catKey) rows = rows.filter(rec => getCatKey(rec) === catKey);
+
+  const needle = low(name);
+  if (needle) {
+    for (let i = 0; i < rows.length; i++) {
+      const o = rows[i];
+      const n_en = low(o?.name_en);
+      const n_ua = low(o?.name_ua);
+      const n_es = low(o?.name_es);
+      const n    = low(o?.name);
+      if ([n_en, n_ua, n_es, n].some(v => v && v === needle)) {
+        const li = lib.indexOf(o);
+        return { obj: o, libIndex: li >= 0 ? li : i };
+      }
+    }
+    // фолбек: шукати по всій бібліотеці лише за назвою
+    for (let i = 0; i < lib.length; i++) {
+      const o = lib[i];
+      const n_en = low(o?.name_en);
+      const n_ua = low(o?.name_ua);
+      const n_es = low(o?.name_es);
+      const n    = low(o?.name);
+      if ([n_en, n_ua, n_es, n].some(v => v && v === needle)) {
+        return { obj: o, libIndex: i };
+      }
+    }
+    return null;
+  }
+
+  if (rows.length > 0) {
+    const o = rows[0];
+    const li = lib.indexOf(o);
+    return { obj: o, libIndex: li >= 0 ? li : 0 };
+  }
   return null;
 }
 
-function diamUnit(o) {
-  if (!o) return null;
-  if (o.diameter && typeof o.diameter.unit === 'string') return o.diameter.unit; // новий формат
-  if (o.unit) return o.unit;                 // старі можливі поля
-  if (o.diameter_unit) return o.diameter_unit;
-  if (o.diameterUnit)  return o.diameterUnit;
-  return 'km';
-}
+// юзерський об’єкт зі стора (точне співпадіння назви+категорії) з фолбеком
+function findUser(store, { category, name }) {
+  if (!store) return null;
 
-// ОПИС для юзер-об’єкта з урахуванням мов
-function userDesc(u, lang) {
-  return (typeof u?.description === 'string' && u.description)
-      || u?.description_i18n?.[lang]
-      || u?.description_i18n?.[u?.originalLang]
-      || '';
-}
-
-// ── головна функція ─────────────────────────────────────────────────────────
-
-/** Повертає дані для розрахунку масштабування діаметра */
-export function getDiameterData() {
-  const lang = getCurrentLang();
-  const universeLibrary = getUniverseLibrary();
-
-  const category1 = document.getElementById('diamCategoryObject1')?.value;
-  const object1   = document.getElementById('diamObject1')?.value;
-  const input1    = parseFloat(document.getElementById('diamCircleObject1')?.value);
-
-  const category2 = document.getElementById('diamCategoryObject2')?.value;
-  const object2   = document.getElementById('diamObject2')?.value;
-
-  if (!category1 || !object1 || isNaN(input1)) {
-    return null; // Об'єкт 1 обов'язковий; Об'єкт 2 — опціональний
+  // пріоритетно — getByName('diameter', ...)
+  if (typeof store.getByName === 'function') {
+    const hit = store.getByName('diameter', name, category);
+    if (hit) return hit;
   }
+  // фолбек через list('diameter')
+  if (typeof store.list === 'function') {
+    const all = store.list('diameter') || [];
+    const nName = low(name);
+    const nCat  = low(category);
+    const hit = all.find(o => low(o?.name || o?.name_i18n?.[o?.originalLang]) === nName &&
+                              low(o?.category || o?.category_i18n?.[o?.originalLang]) === nCat);
+    if (hit) return hit;
+  }
+  return null;
+}
 
+// ─────────────────────────────────────────────────────────────
+// Експорт
 
-  // 1) спочатку шукаємо серед КОРИСТУВАЦЬКИХ (пріоритет при однакових назвах)
+/**
+ * Зібрати StandardData для calc та інфопанелі (режим «Діаметр»).
+ * @param {HTMLElement} [scope] - опційно: контейнер підсекції режиму (details#univers_diameter)
+ */
+export function getDiameterData(scope) {
+  const lang  = getCurrentLang?.() || 'ua';
+  const lib   = getUniversLibrary();
   const store = getStore();
 
-  let idx1 = -1, idx2 = -1;
-  let obj1 = null, obj2 = null;
+  // вибір користувача (підтримуємо і #id, і класи-групи як в еталоні)
+  const catO1  = getVal(scope, '#diamCategoryObject1, .object1-group .category-select');
+  const catO2  = getVal(scope, '#diamCategoryObject2, .object2-group .category-select');
+  const nameO1 = getVal(scope, '#diamObject1,         .object1-group .object-select');
+  const nameO2 = getVal(scope, '#diamObject2,         .object2-group .object-select');
 
-  const u1 = store.getByName('diameter', object1, category1);
-  if (u1) {
-    obj1 = {
-      user: true,
-      name:
-        u1.name ||
-        u1.name_i18n?.[lang] ||
-        u1.name_i18n?.[u1.originalLang] || '',
-      category:
-        u1.category ||
-        u1.category_i18n?.[lang] ||
-        u1.category_i18n?.[u1.originalLang] || '',
-      diameter: {
-        value: u1.attrs?.diameter?.value,
-        unit:  u1.attrs?.diameter?.unit
-      },
-      description: userDesc(u1, lang)
-    };
-  }
+  const baselineDiameterMeters = readBaselineDiameterMeters(scope);
 
-  const u2 = store.getByName('diameter', object2, category2);
-  if (u2) {
-    obj2 = {
-      user: true,
-      name:
-        u2.name ||
-        u2.name_i18n?.[lang] ||
-        u2.name_i18n?.[u2.originalLang] || '',
-      category:
-        u2.category ||
-        u2.category_i18n?.[lang] ||
-        u2.category_i18n?.[u2.originalLang] || '',
-      diameter: {
-        value: u2.attrs?.diameter?.value,
-        unit:  u2.attrs?.diameter?.unit
-      },
-      description: userDesc(u2, lang)
-    };
-  }
+  // офіційні/юзерські об’єкти
+  let off1 = findOfficial(lib, { category: catO1, name: nameO1 });
+  if (!off1 && nameO1) off1 = findOfficial(lib, { category: '', name: nameO1 });
+  const obj1 = off1?.obj || findUser(store, { category: catO1, name: nameO1 });
 
-  // 2) якщо юзер-варіант не знайдено — беремо з офіційної бібліотеки
-  if (!obj1) {
-    idx1 = universeLibrary.findIndex(o => o[`name_${lang}`] === object1);
-    if (idx1 >= 0) obj1 = universeLibrary[idx1];
-  }
-  if (!obj2) {
-    idx2 = universeLibrary.findIndex(o => o[`name_${lang}`] === object2);
-    if (idx2 >= 0) obj2 = universeLibrary[idx2];
-  }
+  let off2 = findOfficial(lib, { category: catO2, name: nameO2 });
+  if (!off2 && nameO2) off2 = findOfficial(lib, { category: '', name: nameO2 });
+  const obj2 = off2?.obj || findUser(store, { category: catO2, name: nameO2 });
 
-  // 3) якщо взяли офіційний, але в нього немає значення діаметра — падаємо на юзерський (якщо є)
-  if (obj1 && !obj1.user && diamVal(obj1) == null && u1) {
-    obj1 = {
-      user: true,
-      name:
-        u1.name ||
-        u1.name_i18n?.[lang] ||
-        u1.name_i18n?.[u1.originalLang] || '',
-      category:
-        u1.category ||
-        u1.category_i18n?.[lang] ||
-        u1.category_i18n?.[u1.originalLang] || '',
-      diameter: {
-        value: u1.attrs?.diameter?.value,
-        unit:  u1.attrs?.diameter?.unit
-      },
-      description: userDesc(u1, lang)
-    };
-    idx1 = -1;
-  }
-  if (obj2 && !obj2.user && diamVal(obj2) == null && u2) {
-    obj2 = {
-      user: true,
-      name:
-        u2.name ||
-        u2.name_i18n?.[lang] ||
-        u2.name_i18n?.[u2.originalLang] || '',
-      category:
-        u2.category ||
-        u2.category_i18n?.[lang] ||
-        u2.category_i18n?.[u2.originalLang] || '',
-      diameter: {
-        value: u2.attrs?.diameter?.value,
-        unit:  u2.attrs?.diameter?.unit
-      },
-      description: userDesc(u2, lang)
-    };
-    idx2 = -1;
-  }
+  // локалізація
+  const name1 = obj1 ? pickLang(obj1, 'name', lang)        : nameO1;
+  const cat1  = obj1 ? pickLang(obj1, 'category', lang)    : catO1;
+  const desc1 = obj1 ? pickLang(obj1, 'description', lang) : '';
 
-  if (!obj1) return null; // без О2 допускаємо розрахунок
+  const name2 = obj2 ? pickLang(obj2, 'name', lang)        : nameO2;
+  const cat2  = obj2 ? pickLang(obj2, 'category', lang)    : catO2;
+  const desc2 = obj2 ? pickLang(obj2, 'description', lang) : '';
 
+  // значення у метрах
+  const { valueReal: d1m, unit: u1 } = readDiameterMeters(obj1);
+  const { valueReal: d2m, unit: u2 } = readDiameterMeters(obj2);
 
-  // 4) фінальний об’єкт для інфопанелі й розрахунку
+  // стандартний пакет
   return {
+    modeId: 'diameter',
     object1: {
-      libIndex: idx1,
-      name: obj1.user ? obj1.name : obj1[`name_${lang}`],
-      category: obj1.user ? obj1.category : obj1[`category_${lang}`],
-      diameterReal: diamVal(obj1),
-      unit: diamUnit(obj1),
-      diameterScaled: input1,
-      description: obj1.user ? (obj1.description || '') : (obj1[`description_${lang}`] || '')
+      name: name1,
+      category: cat1,
+      description: desc1,
+      kind: 'object',
+      diameterReal: Number.isFinite(d1m) ? d1m : NaN, // у метрах
+      unit: u1 || 'm',
+      diameterScaled: baselineDiameterMeters,          // базовий діаметр О1 (м)
+      color: undefined,
+      libIndex: off1?.libIndex ?? -1,
+      userId: obj1?.id || obj1?._id || undefined
     },
-    object2: obj2 ? {
-      libIndex: idx2,
-      name: obj2.user ? obj2.name : obj2[`name_${lang}`],
-      category: obj2.user ? obj2.category : obj2[`category_${lang}`],
-      diameterReal: diamVal(obj2),
-      unit: diamUnit(obj2),
-      description: obj2.user ? (obj2.description || '') : (obj2[`description_${lang}`] || '')
-    } : null
+    object2: {
+      name: name2,
+      category: cat2,
+      description: desc2,
+      kind: 'object',
+      diameterReal: Number.isFinite(d2m) ? d2m : NaN, // у метрах
+      unit: u2 || 'm',
+      color: undefined,
+      libIndex: off2?.libIndex ?? -1,
+      userId: obj2?.id || obj2?._id || undefined
+    }
   };
 }
-
-
-

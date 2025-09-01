@@ -1,101 +1,107 @@
 // full/js/calc/calculate_mass.js
 'use strict';
 
-import { convertUnit } from '../utils/unit_converter.js';
-import { addGeodesicCircle } from '../globe/circles.js';
-
-// Стан режиму "Маса" (A-вариант: D ∝ √M)
-let currentScale = null;          // S = Dmap(O1) / sqrt(Mreal_kg(O1))
-let __baselineId = null;
-let __baselineM1kg = null;        // маса О1 (в кг)
-
-// Константи сфери Землі
-const R_EARTH = 6_371_000;            // м
-const LIM_RADIUS = Math.PI * R_EARTH; // максимально допустимий радіус кола на мапі (антипод)
-const EPS_M = 1;                       // м
-
-// Скидання стану при глобальному reset
-window.addEventListener('orbit:ui-reset', () => {
-  currentScale = null;
-  __baselineId = null;
-  __baselineM1kg = null;
-});
-
 /**
- * База (О1): фіксуємо масштаб і, якщо можна, малюємо довідкове коло.
- * Масштаб: S = Dmap1 / sqrt(M1_kg)
+ * Калькулятор для режиму «Маса».
+ * Лише математика. Жодного DOM, i18n чи рендера.
  *
- * @param {number} realM1           Реальна маса О1
- * @param {string} realUnit1        Одиниця маси (наприклад: "kg", "M⊕", "M♃", "M☉", "t")
- * @param {number} circleDiameterMeters Діаметр базового кола на мапі (м)
- * @param {string} color            Колір базового кола
- * @returns {string|null}           id намальованого кола або null (якщо занадто велике)
+ * Правило масштабу: площа кола ∝ масі.
+ * Формула для порівняння (О2 відносно О1):
+ *   D2 = D1 * sqrt(M2 / M1)   ⇒   r2 = (D1/2) * sqrt(M2 / M1)
+ *
+ * Експорти:
+ *  - setMassBaseline({ valueReal, unit, circleDiameterMeters, color }) → { currentScaleArea }
+ *  - addMassCircle({ valueReal, unit, color }) → { id, scaledRadiusMeters, tooLarge, requiredBaselineMeters }
+ *  - resetMassScale()
+ *  - getMassScale()
  */
-export function setMassBaseline(realM1, realUnit1, circleDiameterMeters, color = 'rgba(255,0,0,0.8)') {
-  __baselineId = null;
-  currentScale = null;
-  __baselineM1kg = null;
 
-  const M1kg = Number(convertUnit(realM1, realUnit1, 'kg', 'mass'));
-  const Dm = Number(circleDiameterMeters);
+// Середній радіус Землі (м)
+const EARTH_RADIUS_M = 6371008.8;
+// Граничний геодезичний радіус (антипод): π·R_earth
+const LIM_RADIUS = Math.PI * EARTH_RADIUS_M;
 
-  if (!isFinite(M1kg) || M1kg <= 0 || !isFinite(Dm) || Dm <= 0) return null;
+let __idSeq = 1;
 
-  const sqrtM1 = Math.sqrt(M1kg);
-  currentScale = Dm / sqrtM1;
-  __baselineM1kg = M1kg;
+/** Внутрішній baseline */
+let __baseline = {
+  valueReal: NaN,           // M1 (у базовій одиниці маси)
+  unit: 'M⊕',               // лише довідковий підпис; обчислення йдуть по valueReal
+  circleDiameterMeters: 0,  // D1 (м)
+  color: undefined
+};
 
-  const r = Dm / 2;
-  if (r > LIM_RADIUS + EPS_M) return null;
+/** Поточний «масштаб площі»: скільки м² кола на 1 базову одиницю маси */
+let __currentScaleArea = 0;
 
-  try {
-    __baselineId = addGeodesicCircle(r, color, __baselineId);
-    return __baselineId;
-  } catch {
-    return null;
-  }
+/** Площа кола за діаметром */
+function circleAreaByD(d) {
+  const D = Number(d);
+  if (!Number.isFinite(D) || D <= 0) return 0;
+  return Math.PI * (D * D) / 4;
 }
 
 /**
- * О2: масштабуємо діаметр за масою і малюємо коло (або повертаємо підказку про межу).
- * Dmap2 = S * sqrt(M2_kg)
- *
- * Якщо (Dmap2/2) > πR + EPS → НЕ малюємо, повертаємо:
- *  - tooLarge = true
- *  - requiredBaselineMeters = діаметр базового кола О1 (на мапі), за якого О2 став би рівно антиподом.
- *    Це МАКСИМАЛЬНО дозволений діаметр О1: Dmap1_req = (2πR) * sqrt(M1 / M2).
- *
- * @param {number} realM2     Реальна маса О2
- * @param {string} realUnit2  Одиниця маси О2
- * @param {string} color      Колір кола О2
- * @returns {{id:string|null, scaledDiameterMeters:number|null, tooLarge:boolean, requiredBaselineMeters:number|null}}
+ * Встановити базову величину (О1) і обчислити масштаб площі.
+ * @returns {{ currentScaleArea: number }}
  */
-export function addMassCircle(realM2, realUnit2, color = 'rgba(0,128,255,0.8)') {
-  if (currentScale == null || !(currentScale > 0)) {
-    return { id: null, scaledDiameterMeters: null, tooLarge: false, requiredBaselineMeters: null };
+export function setMassBaseline({ valueReal, unit = 'M⊕', circleDiameterMeters = 0, color } = {}) {
+  const m1 = Number(valueReal);
+  const d1 = Number(circleDiameterMeters);
+
+  __baseline.valueReal = Number.isFinite(m1) && m1 > 0 ? m1 : NaN;
+  __baseline.unit = unit || 'M⊕';
+  __baseline.circleDiameterMeters = Number.isFinite(d1) && d1 >= 0 ? d1 : 0;
+  __baseline.color = color;
+
+  // Масштаб площі: A1 / M1 (нуль, якщо щось невалідне)
+  const A1 = circleAreaByD(__baseline.circleDiameterMeters);
+  __currentScaleArea = (Number.isFinite(m1) && m1 > 0 && A1 > 0) ? (A1 / m1) : 0;
+
+  return { currentScaleArea: __currentScaleArea };
+}
+
+/**
+ * Додати коло для О2.
+ * Повертає геодезичний радіус у метрах для рендера.
+ * @returns {{ id:number, scaledRadiusMeters:number, tooLarge:boolean, requiredBaselineMeters:number }}
+ */
+export function addMassCircle({ valueReal, unit = 'M⊕', color } = {}) {
+  const m2 = Number(valueReal);
+  const m1 = __baseline.valueReal;
+  const d1 = __baseline.circleDiameterMeters;
+
+  // Якщо дані невалідні — повертаємо нульовий результат
+  if (!Number.isFinite(m2) || m2 <= 0 || !Number.isFinite(m1) || m1 <= 0 || d1 <= 0) {
+    return { id: __idSeq++, scaledRadiusMeters: 0, tooLarge: false, requiredBaselineMeters: 0 };
   }
 
-  const M2kg = Number(convertUnit(realM2, realUnit2, 'kg', 'mass'));
-  if (!isFinite(M2kg) || M2kg <= 0) {
-    return { id: null, scaledDiameterMeters: null, tooLarge: false, requiredBaselineMeters: null };
+  // r2 = (D1/2) * sqrt(M2/M1)
+  const r2 = (d1 / 2) * Math.sqrt(m2 / m1);
+
+  // Позначаємо «занадто велике коло», якщо r2 ≥ π·R_earth (антипод)
+  const tooLarge = r2 >= LIM_RADIUS;
+
+  // Якщо занадто велике, підкажемо який D1 потрібен, аби помістилось:
+  //   r2 = (D1/2)*sqrt(M2/M1) < LIM_RADIUS  ⇒  D1 < 2 * LIM_RADIUS * sqrt(M1 / M2)
+  let requiredBaselineMeters = 0;
+  if (tooLarge) {
+    requiredBaselineMeters = 2 * LIM_RADIUS * Math.sqrt(m1 / m2);
   }
 
-  const scaledDiameterMeters = currentScale * Math.sqrt(M2kg);
+  return {
+    id: __idSeq++,
+    scaledRadiusMeters: r2,
+    tooLarge,
+    requiredBaselineMeters
+  };
+}
 
-  // Перевірка межі (антипод)
-  if ((scaledDiameterMeters / 2) > (LIM_RADIUS + EPS_M)) {
-    let requiredBaselineMeters = null;
-    if (isFinite(__baselineM1kg) && __baselineM1kg > 0) {
-      // Dmap1_req = (2πR) * sqrt(M1 / M2)
-      requiredBaselineMeters = (2 * Math.PI * R_EARTH) * Math.sqrt(__baselineM1kg / M2kg);
-    }
-    return { id: null, scaledDiameterMeters, tooLarge: true, requiredBaselineMeters };
-  }
+export function resetMassScale() {
+  __baseline = { valueReal: NaN, unit: 'M⊕', circleDiameterMeters: 0, color: undefined };
+  __currentScaleArea = 0;
+}
 
-  try {
-    const id = addGeodesicCircle(scaledDiameterMeters / 2, color);
-    return { id, scaledDiameterMeters, tooLarge: false, requiredBaselineMeters: null };
-  } catch {
-    return { id: null, scaledDiameterMeters: null, tooLarge: false, requiredBaselineMeters: null };
-  }
+export function getMassScale() {
+  return __currentScaleArea;
 }

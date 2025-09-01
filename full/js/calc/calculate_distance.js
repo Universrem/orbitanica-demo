@@ -1,117 +1,109 @@
 // full/js/calc/calculate_distance.js
 'use strict';
 
-import { convertUnit } from '../utils/unit_converter.js';
-import { addGeodesicCircle } from '../globe/circles.js';
+/**
+ * Калькулятор для режиму «Відстань».
+ * Лише математика. Жодного DOM, i18n чи рендера.
+ *
+ * Правило масштабу (лінійне): D1 (м) відповідає realDiameter(O1) (у баз. од. distance, напр. км).
+ * Масштаб (метрів на 1 базову одиницю відстані):
+ *   k = D1 / realDiameter(O1)
+ *
+ * Для О2 використовуємо distance_to_earth (у баз. од.). Радіус кола:
+ *   r2 = k * distance_to_earth(O2)
+ *
+ * Експорти:
+ *  - setDistanceBaseline({ valueReal, unit, circleDiameterMeters, color }) → { currentLinearScale }
+ *      valueReal — реальний діаметр О1 у базових одиницях (напр. км)
+ *  - addDistanceCircle({ valueReal, unit, color }) → { id, scaledRadiusMeters, tooLarge, requiredBaselineMeters }
+ *      valueReal — distance_to_earth О2 у базових одиницях (напр. км)
+ *  - resetDistanceScale()
+ *  - getDistanceScale() → поточний масштаб (м на 1 базову од.)
+ */
 
-// Окремий стан ДЛЯ РЕЖИМУ "ВІДСТАНЬ"
-let currentScale = null;               // S = Dmap(O1) / Dreal(O1)
-let __baselineId = null;               // id намальованого базового кола (якщо воно в межах)
-let __baselineRealDiameterMeters = null; // реальний діаметр О1 (у метрах) — потрібен для порога "антиподу"
+// Середній радіус Землі (м)
+const EARTH_RADIUS_M = 6371008.8;
+// Граничний геодезичний радіус (антипод): π·R_earth
+const LIM_RADIUS = Math.PI * EARTH_RADIUS_M;
 
-// Константи сфери Землі
-const R_EARTH = 6_371_000;           // м
-const LIM_RADIUS = Math.PI * R_EARTH; // радіус на карті, що відповідає антиподу
-const EPS_M = 1;                      // м, допуск на рівність/похибку
+let __idSeq = 1;
 
-// Скидання стану при глобальному UI reset
-window.addEventListener('orbit:ui-reset', () => {
-  currentScale = null;
-  __baselineId = null;
-  __baselineRealDiameterMeters = null;
-});
+/** Внутрішній baseline */
+let __baseline = {
+  valueReal: NaN,           // реальний діаметр О1 у базових одиницях (напр. км)
+  unit: 'km',               // довідковий підпис; у формулах не використовується
+  circleDiameterMeters: 0,  // D1 (м)
+  color: undefined
+};
 
-export function getDistanceScale() {
-  return currentScale;
+/** Поточний лінійний масштаб: метрів на 1 базову одиницю (k = D1 / realDiameter) */
+let __currentLinearScale = 0;
+
+/**
+ * Встановити базову величину (О1) і обчислити лінійний масштаб.
+ * @returns {{ currentLinearScale: number }}
+ */
+export function setDistanceBaseline({ valueReal, unit = 'km', circleDiameterMeters = 0, color } = {}) {
+  const realDiameterBase = Number(valueReal);
+  const d1 = Number(circleDiameterMeters);
+
+  __baseline.valueReal = Number.isFinite(realDiameterBase) && realDiameterBase > 0 ? realDiameterBase : NaN;
+  __baseline.unit = unit || 'km';
+  __baseline.circleDiameterMeters = Number.isFinite(d1) && d1 >= 0 ? d1 : 0;
+  __baseline.color = color;
+
+  // k = D1 / realDiameter(O1)  (м на 1 базову од.)
+  __currentLinearScale =
+    (Number.isFinite(__baseline.valueReal) && __baseline.valueReal > 0 && d1 > 0)
+      ? (d1 / __baseline.valueReal)
+      : 0;
+
+  return { currentLinearScale: __currentLinearScale };
+}
+
+/**
+ * Додати коло для О2.
+ * valueReal — distance_to_earth у базових одиницях (напр. км)
+ * Повертає геодезичний радіус у метрах для рендера.
+ * @returns {{ id:number, scaledRadiusMeters:number, tooLarge:boolean, requiredBaselineMeters:number }}
+ */
+export function addDistanceCircle({ valueReal, unit = 'km', color } = {}) {
+  const distBase = Number(valueReal);
+  const d1 = __baseline.circleDiameterMeters;
+  const realDiameterBase = __baseline.valueReal;
+
+  // Якщо дані невалідні — повертаємо нульовий результат
+  if (!Number.isFinite(distBase) || distBase <= 0 || !Number.isFinite(realDiameterBase) || realDiameterBase <= 0 || d1 <= 0) {
+    return { id: __idSeq++, scaledRadiusMeters: 0, tooLarge: false, requiredBaselineMeters: 0 };
+    }
+
+  // r2 = k * distance_to_earth = (D1 / realDiameter) * dist
+  const r2 = __currentLinearScale * distBase;
+
+  // Позначаємо «занадто велике коло», якщо r2 ≥ π·R_earth (антипод)
+  const tooLarge = r2 >= LIM_RADIUS;
+
+  // Якщо занадто велике, підкажемо який D1 потрібен, аби помістилось:
+  //   r2 = (D1 / realDiameter) * dist < LIM_RADIUS
+  //   ⇒ D1 < LIM_RADIUS * realDiameter / dist
+  let requiredBaselineMeters = 0;
+  if (tooLarge) {
+    requiredBaselineMeters = (LIM_RADIUS * realDiameterBase) / distBase;
+  }
+
+  return {
+    id: __idSeq++,
+    scaledRadiusMeters: r2,
+    tooLarge,
+    requiredBaselineMeters
+  };
 }
 
 export function resetDistanceScale() {
-  currentScale = null;
-  __baselineId = null;
-  __baselineRealDiameterMeters = null;
+  __baseline = { valueReal: NaN, unit: 'km', circleDiameterMeters: 0, color: undefined };
+  __currentLinearScale = 0;
 }
 
-/**
- * Встановлює базовий масштаб для режиму "Відстань" і (якщо можливо) малює коло О1.
- * @param {number} realDiameterVal      Реальний діаметр О1
- * @param {string} realDiameterUnit     Одиниця (напр., "km")
- * @param {number} circleDiameterMeters Діаметр базового кола на мапі (м)
- * @param {string} color                Колір базового кола
- * @returns {string|null}               id намальованого кола або null (якщо занадто велике)
- */
-export function setDistanceBaseline(realDiameterVal, realDiameterUnit, circleDiameterMeters, color) {
-  // 1) Підрахунок масштабу
-  const realMeters = Number(convertUnit(realDiameterVal, realDiameterUnit, 'm', 'diameter'));
-  const circleDM = Number(circleDiameterMeters);
-
-  __baselineId = null;
-  __baselineRealDiameterMeters = null;
-  currentScale = null;
-
-  if (!isFinite(realMeters) || realMeters <= 0 || !isFinite(circleDM) || circleDM <= 0) {
-    return null;
-  }
-
-  currentScale = circleDM / realMeters;
-  __baselineRealDiameterMeters = realMeters;
-
-  // 2) Межа візуалізації базового кола: якщо радіус > πR — НЕ малюємо (масштаб залишається)
-  const r = circleDM / 2;
-  if (r > LIM_RADIUS + EPS_M) {
-    return null; // інфопанель покаже базу, але без геометрії
-  }
-
-  // 3) Малюємо базове коло (як довідкове), якщо воно в межах
-  try {
-    __baselineId = addGeodesicCircle(r, color, __baselineId);
-  } catch {
-    __baselineId = null;
-  }
-  return __baselineId;
-}
-
-/**
- * Додає коло для О2 у режимі "Відстань".
- * Радіус кола на мапі = (реальна відстань до Землі) × S.
- *
- * Якщо радіус >= πR + EPS — НІЧОГО не малюємо, а повертаємо:
- *  - tooLarge = true
- *  - requiredBaselineMeters = діаметр базового кола О1 (на мапі), за якого О2 став би рівно антиподом.
- *
- * @param {number} realDistanceVal   Реальна відстань до Землі (О2)
- * @param {string} realDistanceUnit  Одиниця (напр., "km", "AU", "ly", ...)
- * @param {string} color             Колір кола О2
- * @returns {{id:string|null, scaledRadiusMeters:number|null, tooLarge:boolean, requiredBaselineMeters:number|null}}
- */
-export function addDistanceCircle(realDistanceVal, realDistanceUnit, color) {
-  if (currentScale == null || !(currentScale > 0)) {
-    return { id: null, scaledRadiusMeters: null, tooLarge: false, requiredBaselineMeters: null };
-  }
-
-  const realDistMeters = Number(convertUnit(realDistanceVal, realDistanceUnit, 'm', 'distance'));
-  if (!isFinite(realDistMeters) || realDistMeters <= 0) {
-    return { id: null, scaledRadiusMeters: null, tooLarge: false, requiredBaselineMeters: null };
-  }
-
-  const scaledRadiusMeters = realDistMeters * currentScale;
-
-  // Перевірка порогу антиподу
-  if (scaledRadiusMeters > LIM_RADIUS + EPS_M) {
-    // Потрібний базовий діаметр О1 на мапі, щоб О2 став рівно антиподом:
-    // S_req = (πR) / realDistMeters
-    // Dmap1_req = S_req * realDiameter1 = (πR * realDiameter1) / realDistMeters
-    let requiredBaselineMeters = null;
-    if (isFinite(__baselineRealDiameterMeters) && __baselineRealDiameterMeters > 0) {
-      requiredBaselineMeters = (Math.PI * R_EARTH * __baselineRealDiameterMeters) / realDistMeters;
-    }
-    return { id: null, scaledRadiusMeters, tooLarge: true, requiredBaselineMeters };
-  }
-
-  // В межах — малюємо
-  try {
-    const id = addGeodesicCircle(scaledRadiusMeters, color);
-    return { id, scaledRadiusMeters, tooLarge: false, requiredBaselineMeters: null };
-  } catch {
-    return { id: null, scaledRadiusMeters: null, tooLarge: false, requiredBaselineMeters: null };
-  }
+export function getDistanceScale() {
+  return __currentLinearScale;
 }

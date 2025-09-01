@@ -264,5 +264,37 @@
     "mass":     null,
     "luminosity": null,
     "distance_to_earth": { "value": 4.4e23,  "unit": "km" }
-  }
+  },
+  {
+  "category_en": "Solar System",
+  "category_ua": "Сонячна система",
+  "category_es": "Sistema Solar",
+  "name_en": "Solar System (to Oort Cloud)",
+  "name_ua": "Сонячна система (до Оорта)",
+  "name_es": "Sistema Solar (hasta la Nube de Oort)",
+  "description_en": "Approximate full extent of the Sun’s gravitational influence, out to the outer Oort Cloud.",
+  "description_ua": "Орієнтовна повна межа впливу гравітації Сонця — до зовнішньої хмари Оорта.",
+  "description_es": "Extensión total aproximada de la influencia gravitatoria del Sol, hasta la nube de Oort externa.",
+  "diameter": { "value": 2.991957414e13, "unit": "km" },
+  "mass": null,
+  "luminosity": null,
+  "distance_to_earth": null
+},
+{
+  "category_en": "Galaxy",
+  "category_ua": "Галактика",
+  "category_es": "Galaxia",
+  "name_en": "Milky Way",
+  "name_ua": "Чумацький Шлях",
+  "name_es": "Vía Láctea",
+  "description_en": "The barred spiral galaxy that contains our Solar System.",
+  "description_ua": "Перетинчата спіральна галактика, у якій розташована Сонячна система.",
+  "description_es": "La galaxia espiral barrada que contiene nuestro Sistema Solar.",
+  "diameter": { "value": 9.99999211e17, "unit": "km" },
+  "mass": null,
+  "luminosity": null,
+  "distance_to_earth": null
+}
+
+
 ]
