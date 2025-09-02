@@ -51,28 +51,53 @@
 <body>
 
 <header id="top-bar">
-  <div id="lang-menu" class="lang-free">
-  <button id="lang-button" aria-haspopup="listbox" aria-expanded="false" title="Мова / Language">
-    <img src="/full/res/language_change.png" alt="" class="lang-globe">
-    <span id="lang-current">UA</span>
-  </button>
-  <ul id="lang-dropdown" role="listbox" hidden>
-    <li data-lang="ua" role="option">
-      <img src="/full/res/ua.svg" alt="UA" class="lang-flag"> Українська
-    </li>
-    <li data-lang="en" role="option">
-      <img src="/full/res/en.svg" alt="EN" class="lang-flag"> English
-    </li>
-    <li data-lang="es" role="option">
-      <img src="/full/res/es.svg" alt="ES" class="lang-flag"> Español
-    </li>
-  </ul>
-</div>
+  <!-- ЛІВО: бренд -->
+  <div id="brand" aria-label="Orbitanica">
+    <img class="brand-logo" src="res/brand/logo-name.svg" alt="">
+    <span class="brand-title">Orbitanica</span>
+  </div>
 
+  <!-- ЦЕНТР: дії топ-блоку -->
   <div id="top-actions">
     <span class="wip-pill" data-i18n-key="wip_notice_short"></span>
   </div>
+
+  <!-- ПРАВО: іконки + мовне меню (мова — крайня справа) -->
+  <div id="right-rail" aria-label="Швидкі дії та мова">
+    <button class="top-icon-button" id="btn-blog" aria-label="Блог">
+      <img class="top-icon" src="/full/res/icons/blog.png" alt="">
+    </button>
+    <button class="top-icon-button" id="btn-faq" aria-label="FAQ">
+      <img class="top-icon" src="/full/res/icons/help.png" alt="">
+    </button>
+    <button class="top-icon-button" id="btn-settings" aria-label="Налаштування">
+      <img class="top-icon" src="/full/res/icons/settings.png" alt="">
+    </button>
+    <button class="top-icon-button" id="btn-user" aria-label="Кабінет">
+      <img class="top-icon" src="/full/res/icons/user.png" alt="">
+    </button>
+
+    <div id="lang-menu" class="lang-free">
+      <button id="lang-button" aria-haspopup="listbox" aria-expanded="false" title="Мова / Language">
+        <img src="/full/res/language_change.png" alt="" class="lang-globe">
+        <span id="lang-current">UA</span>
+      </button>
+      <ul id="lang-dropdown" role="listbox" hidden>
+        <li data-lang="ua" role="option">
+          <img src="/full/res/ua.svg" alt="UA" class="lang-flag"> Українська
+        </li>
+        <li data-lang="en" role="option">
+          <img src="/full/res/en.svg" alt="EN" class="lang-flag"> English
+        </li>
+        <li data-lang="es" role="option">
+          <img src="/full/res/es.svg" alt="ES" class="lang-flag"> Español
+        </li>
+      </ul>
+    </div>
+  </div>
 </header>
+
+
 
 <div id="main-content"> 
     <aside id="left-panel">

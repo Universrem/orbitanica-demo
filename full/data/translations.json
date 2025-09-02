@@ -686,10 +686,10 @@
     "en": "Enter object name",
     "es": "Ingrese el nombre del objeto"
   },
-  "wip_notice_short": {
-  "ua": "Розробка: деякі функції тимчасово недоступні",
-  "en": "Work in progress: some features are temporarily unavailable",
-  "es": "En desarrollo: algunas funciones no están disponibles temporalmente"
+"wip_notice_short": {
+  "ua": "Обмежений функціонал.\nТестуємо й налаштовуємо роботу.\nДодаємо нові функції.",
+  "en": "Limited functionality.\nWe’re testing and fine-tuning.\nNew features are being added.",
+  "es": "Funcionalidad limitada.\nEstamos probando y ajustando.\nAñadimos nuevas funciones."
 },
 "ui.info_panel.too_large_badge": {
   "ua": "Не відображається на глобусі.",
