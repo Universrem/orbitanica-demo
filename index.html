@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Orbitanica</title>
-  <meta name="description" content="Orbitanica helps intuitively grasp the scale of sizes, time, and distance by turning abstract values into simple and meaningful visual experiences.">
+  <meta name="description" content="Orbitanica is an interactive globe that turns sizes, distances, and time into simple circles on the map. Pick a center and intuitively grasp real-world scale.">
   <meta property="og:image" content="https://orbitanica.org/res/preview.png">
   <!-- Open Graph for social media -->
   <meta property="og:title" content="Orbitanica – Compare to Understand">
@@ -19,13 +19,14 @@
   <meta name="twitter:description" content="Orbitanica transforms abstract sizes, time, and distances into a visual experience you can intuitively imagine and feel.">
   <meta name="twitter:image" content="https://orbitanica.org/res/preview.png">
 
-  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
-  <link rel="stylesheet" href="./style/style.css">
+  <link rel="stylesheet" href="/style/style.css">
+
   <link rel="canonical" href="https://orbitanica.org/">
 
   <!-- Google tag (gtag.js) -->
@@ -34,169 +35,85 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-KJSKXHQTKL');
   </script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "itemListElement": [
-      {
-        "@type": "SiteNavigationElement",
-        "position": 1,
-        "name": "Full version",
-        "url": "https://orbitanica.org/full/"
-      },
-      {
-        "@type": "SiteNavigationElement",
-        "position": 2,
-        "name": "Idea",
-        "url": "https://orbitanica.org/idea/"
-      }
-    ]
-  }
-  </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Orbitanica",
+  "url": "https://orbitanica.org/"
+}
+</script>
+
 </head>
 <body>
 
-  <!-- Блок 1: Вступ з фоновим зображенням -->
-  <section id="intro">
-  <!-- 🔹 Перемикач мови залишається зверху -->
-  <div id="lang-switch">
-  <a href="/full/" class="nav-link-primary" data-i18n-key="go_full_version">Перейти до повної версії</a>
-  <span id="scroll-to-features" class="scroll-button" data-i18n-key="scroll_to_features"></span>
-  <span id="scroll-to-scaling" class="scroll-button" data-i18n-key="scroll_to_scaling"></span>
-  <span id="scroll-to-about" class="scroll-button" data-i18n-key="scroll_to_about"></span>
-  <a href="/idea/" class="scroll-button" data-i18n-key="nav_idea"></a>
-  <img src="./res/ua.svg" alt="UA" class="lang-icon lang-option active" data-lang="ua">
-    <img src="./res/en.svg" alt="EN" class="lang-icon lang-option"        data-lang="en">
-    <img src="./res/es.svg" alt="ES" class="lang-icon lang-option"        data-lang="es">
-</div>
+<header id="top-bar">
+  <!-- ЛІВО: бренд -->
+  <div id="brand" aria-label="Orbitanica">
+    <img class="brand-logo" src="res/brand/logo-name.svg" alt="">
+    <span class="brand-title">Orbitanica</span>
+  </div>
 
+  <!-- ЦЕНТР: дії топ-блоку -->
+  <div id="top-actions">
+    <span class="wip-pill" data-i18n-key="wip_notice_short"></span>
+  </div>
 
-  <!-- 🔸 Центрований контент -->
-  <div class="intro-center">
-    <div class="intro-notice">
-      <h1 data-i18n-key="intro_title"></h1>
-    </div>
+  <!-- ПРАВО: іконки + мовне меню (мова — крайня справа) -->
+  <div id="right-rail" aria-label="Швидкі дії та мова">
+    <a class="top-icon-button" id="btn-blog" href="/blog/" aria-label="Блог">
+  <img class="top-icon" src="/res/icons/blog.png" alt="Блог">
+</a>
+    <button class="top-icon-button" id="btn-faq" aria-label="FAQ">
+      <img class="top-icon" src="/res/icons/help.png" alt="">
+    </button>
+    <button class="top-icon-button" id="btn-settings" aria-label="Налаштування">
+      <img class="top-icon" src="/res/icons/settings.png" alt="">
+    </button>
+    <button class="top-icon-button" id="btn-user" aria-label="Кабінет">
+      <img class="top-icon" src="/res/icons/user.png" alt="">
+    </button>
 
-    <div class="intro-overlay">
-      <p data-i18n-key="intro_subtitle"></p>
+    <div id="lang-menu" class="lang-free">
+      <button id="lang-button" aria-haspopup="listbox" aria-expanded="false" title="Мова / Language">
+        <img src="/res/language_change.png" alt="" class="lang-globe">
+        <span id="lang-current">UA</span>
+      </button>
+      <ul id="lang-dropdown" role="listbox" hidden>
+        <li data-lang="ua" role="option">
+          <img src="/res/ua.svg" alt="UA" class="lang-flag"> Українська
+        </li>
+        <li data-lang="en" role="option">
+          <img src="/res/en.svg" alt="EN" class="lang-flag"> English
+        </li>
+        <li data-lang="es" role="option">
+          <img src="/res/es.svg" alt="ES" class="lang-flag"> Español
+        </li>
+      </ul>
     </div>
   </div>
-</section>
+</header>
 
-  <!-- Блок 2: Інструкція -->
-  <section id="howto">
-    <h2 data-i18n-key="howto_title"></h2>
-    <ul class="howto-steps">
-      <li data-i18n-key="howto_step1"></li>
-      <li data-i18n-key="howto_step2"></li>
-      <li data-i18n-key="howto_step3"></li>
-    </ul>
-  </section>
 
-  <!-- Блок 3: Інтерактивна демо-зона -->
-  <section id="demo">
-    <div id="sidebar">
-  <div id="category-list">
-    <!-- Категорії і пари вставляються динамічно через JS -->
+
+<div id="main-content"> 
+    <aside id="left-panel">
+    </aside>
+
+    <section id="globe-container">
+      <a
+        class="osm-attribution"
+        href="https://www.openstreetmap.org/copyright"
+        target="_blank"
+        rel="noopener"
+        style="position:absolute; right:8px; bottom:8px; font-size:12px; line-height:1.2; background:rgba(255,255,255,0.75); padding:2px 6px; border-radius:4px; text-decoration:none; color:#222; z-index:1000; pointer-events:auto;"
+      >© OpenStreetMap contributors</a>
+    </section>
+
   </div>
-</div>
-
-    <div id="content">
-      <div id="globus"></div>
-      <div id="info-panel" class="hidden"></div>
-    </div>
-    
-  </section>
-
-  <!-- Блок 4: Що буде у повній версії -->
-<section id="features">
-  <h2 data-i18n-key="features_title"></h2>
-  <div class="features-columns">
-    <ul class="features-list">
-      <li>
-        <span data-i18n-key="features_1"></span>
-        <div class="features-desc" data-i18n-key="features_1_desc"></div>
-      </li>
-      <li>
-        <span data-i18n-key="features_2"></span>
-        <div class="features-desc" data-i18n-key="features_2_desc"></div>
-      </li>
-      <li>
-        <span data-i18n-key="features_3"></span>
-        <div class="features-desc" data-i18n-key="features_3_desc"></div>
-      </li>
-      <li>
-        <span data-i18n-key="features_4"></span>
-        <div class="features-desc" data-i18n-key="features_4_desc"></div>
-      </li>
-      <li>
-        <span data-i18n-key="features_5"></span>
-        <div class="features-desc" data-i18n-key="features_5_desc"></div>
-      </li>
-    </ul>
-    <ul class="features-list">
-      <li>
-        <span data-i18n-key="features_6"></span>
-        <div class="features-desc" data-i18n-key="features_6_desc"></div>
-      </li>
-      <li>
-        <span data-i18n-key="features_7"></span>
-        <div class="features-desc" data-i18n-key="features_7_desc"></div>
-      </li>
-      <li>
-        <span data-i18n-key="features_8"></span>
-        <div class="features-desc" data-i18n-key="features_8_desc"></div>
-      </li>
-      <li>
-        <span data-i18n-key="features_9"></span>
-        <div class="features-desc" data-i18n-key="features_9_desc"></div>
-      </li>
-      <li>
-        <span data-i18n-key="features_10"></span>
-        <div class="features-desc" data-i18n-key="features_10_desc"></div>
-      </li>
-    </ul>
-  </div>
-</section>
-<section id="scaling-methods">
-  <h2 data-i18n-key="scaling_methods_title"></h2>
-  <p data-i18n-key="scaling_overview"></p>
-
-  <h3 data-i18n-key="scaling_diameter_distance_title"></h3>
-  <p data-i18n-key="scaling_diameter_distance_desc"></p>
-
-  <h3 data-i18n-key="scaling_time_intervals_title"></h3>
-  <p data-i18n-key="scaling_time_intervals_desc"></p>
-
-  <h3 data-i18n-key="scaling_areas_volumes_title"></h3>
-  <p data-i18n-key="scaling_areas_volumes_desc"></p>
-
-  <h3 data-i18n-key="scaling_quantitative_indicators_title"></h3>
-  <p data-i18n-key="scaling_quantitative_indicators_desc"></p>
-</section>
-<!-- Блок “Про нас” -->
-<section id="about-us" class="section about-us">
-
-  <p class="about-youtube">
-    <a href="https://www.youtube.com/@orbitanica" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
-      <img src="./res/youtube-icon.svg" alt="YouTube" width="40" height="40" />
-    </a>
-  </p>
-
-  <p class="about-email" data-i18n-key="orbitanica.info@gmail.com"></p>
-
-  <p class="about-description" data-i18n-key="join_us_paragraph"></p>
-</section>
-
-
-
-  <script type="module" src="./main.js"></script>
+  <div id="modal-root"></div>
+  <script type="module" src="/js/main.js"></script>
 </body>
 </html>
-
-
-

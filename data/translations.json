@@ -466,13 +466,447 @@
   "en": "← Back to main",
   "es": "← Volver al inicio"
 },
-"go_full_version": {
-  "ua": "Перейти до повної версії",
-  "en": "Go to full version",
-  "es": "Ir a la versión completa"
+
+  "panel_title_comparison": {
+    "ua": "Порівняння",
+    "en": "Comparison",
+    "es": "Comparación"
+  },
+  "panel_title_univers": {
+    "ua": "Всесвіт",
+    "en": "Universe",
+    "es": "Universo"
+  },
+  "panel_title_univers_diameter": {
+    "ua": "Діаметр",
+    "en": "Diameter",
+    "es": "Diámetro"
+  },
+  "panel_title_univers_distance": {
+    "ua": "Відстань",
+    "en": "Distance",
+    "es": "Distancia"
+  },
+  "panel_title_univers_luminosity": {
+    "ua": "Світність",
+    "en": "Luminosity",
+    "es": "Luminosidad"
+  },
+  "panel_title_univers_mass": {
+    "ua": "Маса",
+    "en": "Mass",
+    "es": "Masa"
+  },
+  "panel_title_history": {
+    "ua": "Історія",
+    "en": "History",
+    "es": "Historia"
+  },
+  "panel_title_math": {
+    "ua": "Математика",
+    "en": "Mathematics",
+    "es": "Matemáticas"
+  },
+  "panel_title_money": {
+    "ua": "Гроші",
+    "en": "Money",
+    "es": "Dinero"
+  },
+  "panel_title_geo": {
+    "ua": "Географія",
+    "en": "Geography",
+    "es": "Geografía"
+  },
+  "panel_title_other": {
+    "ua": "Інше",
+    "en": "Other",
+    "es": "Otro"
+  },
+  "panel_placeholder_category": {
+  "ua": "Виберіть категорію",
+  "en": "Select category",
+  "es": "Seleccione categoría"
+},
+"panel_placeholder_object1": {
+  "ua": "Оберіть перший об'єкт",
+  "en": "Select object 1",
+  "es": "Seleccione objeto 1"
+},
+"panel_placeholder_object2": {
+  "ua": "Оберіть другий об'єкт",
+  "en": "Select object 2",
+  "es": "Seleccione objeto 2"
+},
+"panel_placeholder_event1": {
+  "ua": "Оберіть першу подію",
+  "en": "Select event 1",
+  "es": "Seleccione evento 1"
+},
+"panel_placeholder_event2": {
+  "ua": "Оберіть другу подію",
+  "en": "Select event 2",
+  "es": "Seleccione evento 2"
+},
+"panel_placeholder_input_diameter": {
+  "ua": "Задайте діаметр",
+  "en": "Set diameter",
+  "es": "Ingresar diámetro"
+},
+
+  "panel_button_calculate": {
+    "ua": "Старт",
+    "en": "Start",
+    "es": "Iniciar"
+  },
+  "panel_button_reset": {
+    "ua": "Скинути",
+    "en": "Reset",
+    "es": "Reiniciar"
+  },
+  "note_select_first_object": {
+    "ua": "О1",
+    "en": "О1",
+    "es": "О1"
+  },
+  "note_set_scale_first_object": {
+    "ua": "Задайте масштаб першого обʼєкта",
+    "en": "Set the scale of the first object",
+    "es": "Establezca la escala del primer objeto"
+  },
+  "note_create_first_object": {
+    "ua": "Або створіть перший обʼєкт",
+    "en": "Or create the first object",
+    "es": "O cree el primer objeto"
+  },
+  "note_select_second_object": {
+    "ua": "О2",
+    "en": "О2",
+    "es": "О2"
+  },
+  "note_create_second_object": {
+    "ua": "Або створіть другий обʼєкт",
+    "en": "Or create the second object",
+    "es": "O cree el segundo objeto"
+  },
+  "note_visualization_controls": {
+    "ua": "Керування візуалізацією",
+    "en": "Visualization controls",
+    "es": "Controles de visualización"
+  },
+  "panel_button_create": {
+  "ua": "Створити",
+  "en": "Create",
+  "es": "Crear"
+},
+  "label.real_diameter": {
+    "ua": "Реальний діаметр",
+    "en": "Real diameter",
+    "es": "Diámetro real"
+  },
+  "label.scaled_diameter": {
+    "ua": "Масштабований діаметр",
+    "en": "Scaled diameter",
+    "es": "Diámetro escalado"
+  },
+
+  "ui.info_panel.title": {
+    "ua": "Результати масштабування",
+    "en": "Scaling results",
+    "es": "Resultados de escala"
+  },
+  "ui.info_panel.toggle_show": {
+    "ua": "+опис",
+    "en": "+description",
+    "es": "+descripción"
+  },
+  "ui.info_panel.toggle_hide": {
+    "ua": "–опис",
+    "en": "–description",
+    "es": "–descripción"
+  },
+  "ui.info_panel.descriptions": {
+    "ua": "Описи",
+    "en": "Descriptions",
+    "es": "Descripciones"
+  },
+  
+  "create_modal_title_diameter": {
+    "ua": "Новий об’єкт — Діаметри",
+    "en": "New Object — Diameters",
+    "es": "Nuevo objeto — Diámetros"
+  },
+  "field_category": {
+    "ua": "Категорія",
+    "en": "Category",
+    "es": "Categoría"
+  },
+  "field_name": {
+    "ua": "Назва",
+    "en": "Name",
+    "es": "Nombre"
+  },
+  "field_value": {
+    "ua": "Значення",
+    "en": "Value",
+    "es": "Valor"
+  },
+  "field_unit": {
+    "ua": "Одиниця",
+    "en": "Unit",
+    "es": "Unidad"
+  },
+  "field_description": {
+    "ua": "Опис (необов’язково)",
+    "en": "Description (optional)",
+    "es": "Descripción (opcional)"
+  },
+  "field_image": {
+    "ua": "Фото (скоро)",
+    "en": "Image (soon)",
+    "es": "Imagen (pronto)"
+  },
+  "btn_create": {
+    "ua": "Створити",
+    "en": "Create",
+    "es": "Crear"
+  },
+  "btn_cancel": {
+    "ua": "Скасувати",
+    "en": "Cancel",
+    "es": "Cancelar"
+  },
+  
+  "panel_placeholder_category_choose_or_enter": {
+    "ua": "Виберіть або введіть категорію",
+    "en": "Choose or enter a category",
+    "es": "Elige o escribe una categoría"
+  },
+  "panel_placeholder_enter_object_name": {
+    "ua": "Введіть назву об’єкта",
+    "en": "Enter object name",
+    "es": "Ingrese el nombre del objeto"
+  },
+"wip_notice_short": {
+  "ua": "Обмежений функціонал.\nТестуємо й налаштовуємо роботу.\nДодаємо нові функції.",
+  "en": "Limited functionality.\nWe’re testing and fine-tuning.\nNew features are being added.",
+  "es": "Funcionalidad limitada.\nEstamos probando y ajustando.\nAñadimos nuevas funciones."
+},
+"ui.info_panel.too_large_badge": {
+  "ua": "Не відображається на глобусі.",
+  "en": "Not shown on the globe.",
+  "es": "No se muestra en el globo."
+},
+"ui.info_panel.required_baseline": {
+  "ua": "Максимальний діаметр Об'єкта 1 для відображення",
+  "en": "Maximum Object 1 circle diameter to display",
+  "es": "Diámetro máximo del Objeto 1 para visualizar"
+},
+
+  "diameter.labels.o1.left": {
+    "ua": "Діаметр",
+    "en": "Diameter",
+    "es": "Diámetro"
+  },
+  "diameter.labels.o1.right": {
+    "ua": "Масштабований діаметр",
+    "en": "Scaled diameter",
+    "es": "Diámetro escalado"
+  },
+
+  "distance.labels.o1.left": {
+    "ua": "Діаметр",
+    "en": "Diameter",
+    "es": "Diámetro"
+  },
+  "distance.labels.o1.right": {
+    "ua": "Масштабований діаметр",
+    "en": "Scaled diameter",
+    "es": "Diámetro escalado"
+  },
+  "distance.labels.o2.left": {
+    "ua": "Відстань до Землі",
+    "en": "Distance to Earth",
+    "es": "Distancia a la Tierra"
+  },
+  "distance.labels.o2.right": {
+    "ua": "Масштабована відстань (радіус)",
+    "en": "Scaled distance (radius)",
+    "es": "Distancia escalada (radio)"
+  },
+
+  "luminosity.labels.o1.left": {
+    "ua": "Світність",
+    "en": "Luminosity",
+    "es": "Luminosidad"
+  },
+  "luminosity.labels.o1.right": {
+    "ua": "Діаметр (площа кола пропорційна світності)",
+    "en": "Diameter (circle area ∝ luminosity)",
+    "es": "Diámetro (área del círculo ∝ luminosidad)"
+  },
+  "mass.labels.o1.left": {
+    "ua": "Маса",
+    "en": "Mass",
+    "es": "Masa"
+  },
+  "mass.labels.o1.right": {
+    "ua": "Діаметр (площа кола пропорційна масі)",
+    "en": "Diameter (circle area ∝ mass)",
+    "es": "Diámetro (área del círculo ∝ masa)"
+  },
+    "history.labels.o1.left": {
+  "ua": "Рік події",
+  "en": "Event year",
+  "es": "Año del evento"
+  },
+  "history.labels.o1.right": {
+  "ua": "Часова відстань (радіус)",
+  "en": "Time distance (radius)",
+  "es": "Distancia temporal (radio)"
+  },
+  "history.range.start": { "ua": "початок", "en": "start", "es": "inicio" },
+  "history.range.end":   { "ua": "завершення", "en": "end", "es": "fin" },
+  
+"ui.money.o1.left": {
+  "ua": "Сума",
+  "en": "Amount",
+  "es": "Suma"
+},
+"ui.money.o1.right": {
+  "ua": "Діаметр (площа кола пропорційна сумі)",
+  "en": "Diameter (circle area ∝ amount)",
+  "es": "Diámetro (área del círculo ∝ suma)"
+},
+"ui.math.o1.left": {
+  "ua": "Число",
+  "en": "Number",
+  "es": "Número"
+},
+"ui.math.o1.right": {
+  "ua": "Діаметр (площа кола пропорційна числу)",
+  "en": "Diameter (the area of the circle is proportional to the number)",
+  "es": "Diámetro (el área del círculo es proporcional al número)"
+},
+"panel_title_geo_population": {
+  "ua": "Населення",
+  "en": "Population",
+  "es": "Población"
+},
+"panel_title_geo_area": {
+  "ua": "Площа",
+  "en": "Area",
+  "es": "Área"
+},
+"panel_title_geo_objects": {
+  "ua": "Об’єкти",
+  "en": "Objects",
+  "es": "Objetos"
+},
+"ui.geo.population.o1.left":  { 
+  "ua": "Населення",      
+  "en": "Population",      
+  "es": "Población" 
+},
+"ui.geo.population.o1.right": { 
+  "ua": "Діаметр (площа кола пропорційна населенню)", 
+  "en": "Diameter (the circle area is proportional to the population)", 
+  "es": "Diámetro (el área del círculo es proporcional a la población)" 
+},
+
+"ui.geo.area.o1.left": { 
+  "ua": "Площа",          
+  "en": "Area",            
+  "es": "Área" 
+},
+"ui.geo.area.o1.right": { 
+  "ua": "Діаметр (площа кола пропорційна площі)", 
+  "en": "Diameter (the circle area is proportional to the area)", 
+  "es": "Diámetro (el área del círculo es proporcional al área)" 
+},
+
+"ui.geo.objects.o1.left": { 
+  "ua": "Довжина/висота", 
+  "en": "Length/Height",   
+  "es": "Longitud/Altura" 
+},
+"ui.geo.objects.o1.right": { 
+  "ua": "Масштабована довжина (радіус)", 
+  "en": "Scaled length (radius)", 
+  "es": "Longitud escalada (radio)" 
+},
+"panel_note_scenes": {
+  "ua": "Сцени",
+  "en": "Scenes",
+  "es": "Escenas"
+},
+"panel_note_create_scenes": {
+  "ua": "Створення сцен",
+  "en": "Create scenes",
+  "es": "Creación de escenas"
+},
+"o1_quick_examples": { "ua": "Приклади", "en": "Examples", "es": "Ejemplos" },
+
+"o1_example_h2_molecule_0_1nm":     { "ua": "Молекула H₂ (0.1 нм)",            "en": "H₂ molecule (0.1 nm)",            "es": "Molécula H₂ (0.1 nm)" },
+"o1_example_virus_100nm":           { "ua": "Вірус (100 нм)",                  "en": "Virus (100 nm)",                  "es": "Virus (100 nm)" },
+"o1_example_bacterium_1um":         { "ua": "Бактерія (1 мкм)",                "en": "Bacterium (1 µm)",                "es": "Bacteria (1 µm)" },
+"o1_example_cell_30um":             { "ua": "Клітина (30 мкм)",                "en": "Cell (30 µm)",                    "es": "Célula (30 µm)" },
+"o1_example_hair_70um":             { "ua": "Волосина (70 мкм)",               "en": "Human hair (70 µm)",              "es": "Cabello humano (70 µm)" },
+
+"o1_example_sand_grain_0_5mm":      { "ua": "Пісчинка (0.5 мм)",               "en": "Grain of sand (0.5 mm)",          "es": "Grano de arena (0.5 mm)" },
+"o1_example_mm_1":                  { "ua": "1 мм",                            "en": "1 mm",                            "es": "1 mm" },
+"o1_example_cm_1":                  { "ua": "1 см",                            "en": "1 cm",                            "es": "1 cm" },
+"o1_example_coin_25mm":             { "ua": "Монета (25 мм)",                  "en": "Coin (25 mm)",                    "es": "Moneda (25 mm)" },
+"o1_example_tennis_ball_6_7cm":     { "ua": "Тенісний м’яч (6.70 см)",         "en": "Tennis ball (6.70 cm)",           "es": "Pelota de tenis (6.70 cm)" },
+"o1_example_cm_10":                 { "ua": "10 см",                           "en": "10 cm",                           "es": "10 cm" },
+"o1_example_soccer_ball_22cm":      { "ua": "Футбольний м’яч (22 см)",         "en": "Soccer ball (22 cm)",             "es": "Balón de fútbol (22 cm)" },
+"o1_example_basketball_24cm":       { "ua": "Баскетбольний м’яч (24 см)",      "en": "Basketball (24 cm)",              "es": "Balón de baloncesto (24 cm)" },
+"o1_example_person_footprint_75cm": { "ua": "Місце для 1 людини (~75 см)",     "en": "One person footprint (~75 cm)",   "es": "Espacio por persona (~75 cm)" },
+
+"o1_example_m_1":                   { "ua": "1 м",                             "en": "1 m",                             "es": "1 m" },
+"o1_example_car_length_4_5m":       { "ua": "Автомобіль (4.5 м)",              "en": "Car length (4.5 m)",              "es": "Coche (4.5 m)" },
+"o1_example_m_10":                  { "ua": "10 м",                            "en": "10 m",                            "es": "10 m" },
+"o1_example_bus_length_12m":        { "ua": "Автобус (12 м)",                  "en": "Bus length (12 m)",               "es": "Autobús (12 m)" },
+"o1_example_soccer_field_105m":     { "ua": "Футбольне поле (105 м)",          "en": "Soccer field (105 m)",            "es": "Campo de fútbol (105 m)" },
+
+"blog_title": {
+  "ua": "Межі уяви та рішення Orbitanica",
+  "en": "Limits of Imagination and Orbitanica’s Solution",
+  "es": "Límites de la Imaginación y la Solución de Orbitanica"
+},
+"blog_description": {
+  "ua": "Тут ви знайдете наукові дослідження, цитати та короткі пояснення, що розкривають людські труднощі з уявленням великих і малих чисел, часових і просторових масштабів. Ми пояснюємо, чому традиційні числа лишаються лише символами і як просторовий підхід Orbitanica повертає їм зміст, перетворюючи величини на візуальний досвід.",
+  "en": "Here you will find scientific studies, quotations, and concise explanations that reveal the human difficulties in grasping very large or very small numbers and temporal or spatial scales. We explain why conventional numbers remain mere symbols and how Orbitanica’s spatial approach restores their meaning, turning magnitudes into a visual experience.",
+  "es": "Aquí encontrará estudios científicos, citas y breves explicaciones que revelan las dificultades humanas para comprender números muy grandes o muy pequeños, y las escalas temporales y espaciales. Explicamos por qué los números convencionales siguen siendo solo símbolos y cómo el enfoque espacial de Orbitanica les devuelve su significado, transformando las magnitudes en una experiencia visual."
+},
+"blog_nav_title": {
+  "ua": "Зміст",
+  "en": "Contents",
+  "es": "Contenido"
+},
+"blog_entry_1_title": {
+  "ua": "Побачити масштаб: «Powers of Ten» (1977)",
+  "en": "Seeing Scale: “Powers of Ten” (1977)",
+  "es": "Ver la escala: «Powers of Ten» (1977)"
+},
+"blog_entry_1_text": {
+  "ua": "Фільм «Powers of Ten» (1977) за дві хвилини проводить нас крізь 24 порядки величини — від атомного ядра до меж видимого Всесвіту — і показує, як різко змінюється наше уявлення, коли кожен крок дорівнює десятикратному збільшенню або зменшенню масштабу. Стрічку визнано культурно, історично й естетично значимою: у 1998 році її включили до Національного реєстру фільмів Бібліотеки Конґресу США.\n\nOrbitanica розвиває цю ідею далі: ми дозволяємо обирати будь-який об’єкт для масштабування — від діаметра клітини до відстані між галактиками — та будь-яку точку на планеті як центр порівняння. Таким чином те саме «кіно про масштаби» стає інтерактивним досвідом, персоналізованим для кожного користувача.",
+  "en": "The film “Powers of Ten” (1977) takes us through 24 orders of magnitude in just two minutes—from an atomic nucleus to the edge of the observable universe—and shows how dramatically our perception shifts when each step changes the scale by a factor of ten. The short is recognized as culturally, historically, and aesthetically significant: in 1998 it was added to the National Film Registry of the U.S. Library of Congress.\n\nOrbitanica takes this idea further: it lets you choose any quantity to scale—from the diameter of a cell to the distance between galaxies—and any location on Earth as the center of comparison. In this way, the same “movie about scale” becomes an interactive, personalized experience for every user.",
+  "es": "La película «Powers of Ten» (1977) nos conduce a través de 24 órdenes de magnitud en solo dos minutos—desde el núcleo atómico hasta el borde del universo observable—y muestra cómo cambia drásticamente nuestra percepción cuando cada paso multiplica o divide la escala por diez. El cortometraje está reconocido como cultural, histórica y estéticamente significativo: en 1998 fue incluido en el Registro Nacional de Películas de la Biblioteca del Congreso de EE. UU.\n\nOrbitanica lleva esta idea más allá: permite elegir cualquier magnitud para escalar—desde el diámetro de una célula hasta la distancia entre galaxias—y cualquier punto del planeta como centro de comparación. Así, la misma “película sobre la escala” se convierte en una experiencia interactiva y personalizada para cada usuario."
+},
+"blog_date_1": {
+  "ua": "1 серпня 2025",
+  "en": "1 August 2025",
+  "es": "1 de agosto de 2025"
+}
+
 }
 
 
-}
+
+
+
+
+
+
 
 

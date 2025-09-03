@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbitanica-blog</title>
+  <meta name="description" content="Why do we struggle to feel large numbers and scales? Orbitanica reveals the reasons and offers a spatial approach to perceive them differently.">
+  <meta property="og:image" content="https://orbitanica.org/res/preview.png">
+  <!-- Open Graph for social media -->
+  <meta property="og:title" content="Orbitanica – Compare to Understand">
+  <meta property="og:description" content="Orbitanica transforms abstract sizes, time, and distances into a visual experience you can intuitively imagine and feel.">
+  <meta property="og:url" content="https://orbitanica.org/blog/">
+  <meta property="og:type" content="website">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Orbitanica – Compare to Understand">
+  <meta name="twitter:description" content="Orbitanica transforms abstract sizes, time, and distances into a visual experience you can intuitively imagine and feel.">
+  <meta name="twitter:image" content="https://orbitanica.org/res/preview.png">
+  
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="stylesheet" href="/style/style.css">
+  <link rel="canonical" href="https://orbitanica.org/blog/">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KJSKXHQTKL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-KJSKXHQTKL');
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Orbitanica", "item": "https://orbitanica.org/" },
+      { "@type": "ListItem", "position": 2, "name": "blog", "item": "https://orbitanica.org/blog/" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Секція 1: Верхня панель -->
+  <header id="top-bar">
+  <!-- ЛІВО: бренд -->
+  <div id="brand" aria-label="Orbitanica">
+    <img class="brand-logo" src="../res/brand/logo-name.svg" alt="">
+    <span class="brand-title">Orbitanica</span>
+  </div>
+
+  <!-- ПРАВО: іконки + мовне меню (мова — крайня справа) -->
+  <div id="right-rail" aria-label="Швидкі дії та мова">
+    <a class="top-icon-button" id="btn-blog" href="/" aria-label="Блог">
+  <img class="top-icon" src="/res/icons/back.png" alt="Блог">
+</a>
+
+
+    <div id="lang-menu" class="lang-free">
+      <button id="lang-button" aria-haspopup="listbox" aria-expanded="false" title="Мова / Language">
+        <img src="/res/language_change.png" alt="" class="lang-globe">
+        <span id="lang-current">UA</span>
+      </button>
+      <ul id="lang-dropdown" role="listbox" hidden>
+        <li data-lang="ua" role="option">
+          <img src="/res/ua.svg" alt="UA" class="lang-flag"> Українська
+        </li>
+        <li data-lang="en" role="option">
+          <img src="/res/en.svg" alt="EN" class="lang-flag"> English
+        </li>
+        <li data-lang="es" role="option">
+          <img src="/res/es.svg" alt="ES" class="lang-flag"> Español
+        </li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+
+
+
+  <!-- Секція 2: Опис блогу -->
+  <section id="blog-intro">
+    <h1 data-i18n-key="blog_title"></h1>
+    <p data-i18n-key="blog_description"></p>
+  </section>
+
+<!-- Секція 3: Блог – список і записи -->
+<div id="blog-container">
+  <!-- Ліва колонка: заголовки статей -->
+  <aside id="blog-sidebar">
+    <h3 class="blog-nav-title" data-i18n-key="blog_nav_title"></h3>
+    <ul class="blog-nav">
+      <li><a href="#post-1" data-i18n-key="blog_entry_1_title"></a></li>
+      <!-- додайте нові <li> … для post-2, post-3 тощо -->
+    </ul>
+  </aside>
+
+  <!-- Права колонка: самі записи -->
+  <section id="blog-entries">
+    <article class="blog-entry" id="post-1">
+      <h2 data-i18n-key="blog_entry_1_title"></h2>
+      <div class="video-wrapper">
+        <iframe
+          src="https://www.youtube.com/embed/0fKBhvDjuy0"
+          title="Powers of Ten (1977)"
+          loading="lazy"
+          allowfullscreen></iframe>
+      </div>
+      <p data-i18n-key="blog_entry_1_text"></p>
+      <div class="blog-date" data-i18n-key="blog_date_1"></div>
+    </article>
+  </section>
+</div>
+
+
+<!-- Блок “Про нас” -->
+<section id="about-us" class="section about-us">
+  <p class="about-youtube">
+    <a href="https://www.youtube.com/@orbitanica" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+      <img src="/res/youtube-icon.svg" alt="YouTube" width="40" height="40" />
+    </a>
+  </p>
+  <p class="about-email" data-i18n-key="orbitanica.info@gmail.com"></p>
+  <p class="about-description" data-i18n-key="join_us_paragraph"></p>
+</section>
+  <script type="module" src="/js/i18n.js"></script>
+  <script type="module" src="/js/ui/langMenu.js"></script>
+</body>
+</html>
+
+
