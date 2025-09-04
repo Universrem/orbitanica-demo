@@ -101,7 +101,8 @@ export function initLeftPanel(t) {
 
     { type: 'note', i18nKey: 'panel_note_scenes', text: t('panel_note_scenes'), className: 'panel-section-title' },
 
-    { id: 'comparison', title: t('panel_title_comparison') },
+    { id: 'scene_day', title: t('panel_title_scene_day') },
+    { id: 'interesting', title: t('panel_title_interesting') },
 
     { type: 'note', i18nKey: 'panel_note_create_scenes', text: t('panel_note_create_scenes'), className: 'panel-section-title' },
 

@@ -467,10 +467,15 @@
   "es": "← Volver al inicio"
 },
 
-  "panel_title_comparison": {
-    "ua": "Порівняння",
-    "en": "Comparison",
-    "es": "Comparación"
+  "panel_title_interesting": {
+    "ua": "Цікаві сцени",
+    "en": "Interesting scenes",
+    "es": "Escenas interesantes"
+  },
+  "panel_title_scene_day": {
+    "ua": "Сцена дня",
+    "en": "Scene of the day",
+    "es": "Escena del día"
   },
   "panel_title_univers": {
     "ua": "Всесвіт",

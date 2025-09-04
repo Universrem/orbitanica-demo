@@ -259,7 +259,14 @@ summary {
   background-color: currentColor;
   border-radius: 50%;
 }
-#left-panel > details#comparison > summary::before {
+#left-panel > details#scene_day> summary::before {
+  width: 18px;
+  height: 18px;
+  background: url("../res/icons/star.png") center / contain no-repeat;
+  border-radius: 0;
+  background-color: transparent;
+}
+#left-panel > details#interesting> summary::before {
   width: 18px;
   height: 18px;
   background: url("../res/icons/film.png") center / contain no-repeat;
