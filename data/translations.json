@@ -902,8 +902,46 @@
   "ua": "1 серпня 2025",
   "en": "1 August 2025",
   "es": "1 de agosto de 2025"
-}
-
+},
+  "ui.topbar.sign_in": {
+    "ua": "Увійти",
+    "en": "Sign in",
+    "es": "Iniciar sesión"
+  },
+  "ui.topbar.sign_out": {
+    "ua": "Вийти",
+    "en": "Sign out",
+    "es": "Cerrar sesión"
+  },
+  "ui.cancel": { "ua": "Скасувати", "en": "Cancel", "es": "Cancelar" },
+  "auth.dialog.title": { "ua": "Увійти", "en": "Sign in", "es": "Iniciar sesión" },
+  "auth.field.email": { "ua": "Електронна адреса", "en": "Email address", "es": "Correo electrónico" },
+  "auth.button.send_link": {
+    "ua": "Надіслати лист для входу",
+    "en": "Send sign-in link",
+    "es": "Enviar enlace de acceso"
+  },
+  "auth.note.sent_body": {
+    "ua": "Ми надішлемо захищене одноразове посилання.",
+    "en": "We’ll email you a secure one-time link.",
+    "es": "Te enviaremos un enlace seguro de un solo uso."
+  },
+  "auth.error.invalid_email": {
+    "ua": "Введіть коректну адресу.",
+    "en": "Please enter a valid email.",
+    "es": "Introduce un correo válido."
+  },
+  "auth.error.generic": { "ua": "Щось пішло не так. Спробуйте ще раз.", "en": "Something went wrong. Please try again.", "es": "Algo salió mal. Vuelve a intentarlo." },
+  "ui.topbar.my_scenes": { "ua": "Мої сцени", "en": "My scenes", "es": "Mis escenas" },
+  "ui.topbar.save_scene": { "ua": "Зберегти сцену", "en": "Save scene", "es": "Guardar escena" },
+  "scenes.empty": { "ua": "Поки немає сцен.", "en": "No scenes yet.", "es": "Aún no hay escenas." },
+  "scenes.untitled": { "ua": "Без назви", "en": "Untitled", "es": "Sin título" },
+  "scenes.open": { "ua": "Відкрити", "en": "Open", "es": "Abrir" },
+  "scenes.delete": { "ua": "Видалити", "en": "Delete", "es": "Eliminar" },
+  "scenes.share": { "ua": "Поділитися лінком", "en": "Share link", "es": "Compartir enlace" },
+  "scenes.make_public": { "ua": "Зробити публічною", "en": "Make public", "es": "Hacer pública" },
+  "scenes.make_private": { "ua": "Зробити приватною", "en": "Make private", "es": "Hacer privada" },
+  "scenes.link_copied": { "ua": "Лінк скопійовано", "en": "Link copied", "es": "Enlace copiado" }
 }
 
 
