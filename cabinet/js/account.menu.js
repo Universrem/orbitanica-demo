@@ -5,6 +5,97 @@
 
 import { t } from '/js/i18n.js';
 import { signInWithEmail, signOut, getUserEmail, watchAuth } from '/cabinet/js/cloud/auth.cloud.js';
+// Експортований відкривач модалки входу (без глобалів/вікон)
+export function openCabinetSignInDialog() {
+  openSignInModal(async (value, setError, close) => {
+    try {
+      await signInWithEmail(value);
+      close();
+    } catch (err) {
+      setError(err?.message || t('auth.error.generic'));
+    }
+  });
+}
+
+// ——— Модалка вводу email ———
+// Перенесено у верхній рівень модуля, щоб її могли викликати інші модулі через експорт вище
+function openSignInModal(onSubmit /* (email, setError, close) */) {
+  closeSignInModal();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'cab-auth-overlay';
+  overlay.className = 'cab-modal-overlay';
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeSignInModal(); });
+
+  const box = document.createElement('div');
+  box.className = 'cab-modal';
+  box.setAttribute('role','dialog');
+  box.setAttribute('aria-modal','true');
+  box.setAttribute('aria-label', t('auth.dialog.title'));
+
+  const h = document.createElement('h3');
+  h.className = 'cab-modal-title';
+  h.textContent = t('auth.dialog.title');
+
+  const input = document.createElement('input');
+  input.type = 'email';
+  input.className = 'cab-input';
+  input.placeholder = t('auth.field.email');
+
+  const hint = document.createElement('div');
+  hint.className = 'cab-hint';
+  hint.textContent = t('auth.note.sent_body');
+
+  const err = document.createElement('div');
+  err.className = 'cab-error';
+  err.hidden = true;
+
+  const row = document.createElement('div');
+  row.className = 'cab-row';
+
+  const btnCancel = document.createElement('button');
+  btnCancel.className = 'cab-btn';
+  btnCancel.textContent = t('ui.cancel');
+  btnCancel.addEventListener('click', closeSignInModal);
+
+  const btnSend = document.createElement('button');
+  btnSend.className = 'cab-btn cab-primary';
+  btnSend.textContent = t('auth.button.send_link');
+
+  function setError(msg){ err.textContent = msg || ''; err.hidden = !msg; }
+  function close(){ closeSignInModal(); }
+
+  btnSend.addEventListener('click', async () => {
+    setError('');
+    const val = (input.value || '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      setError(t('auth.error.invalid_email'));
+      input.focus();
+      return;
+    }
+    btnSend.disabled = true;
+    try { await onSubmit(val, setError, close); }
+    finally { btnSend.disabled = false; }
+  });
+
+  box.appendChild(h);
+  box.appendChild(input);
+  box.appendChild(hint);
+  box.appendChild(err);
+  box.appendChild(row);
+
+  row.appendChild(btnCancel);
+  row.appendChild(btnSend);
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  input.focus();
+}
+
+function closeSignInModal() {
+  const el = document.getElementById('cab-auth-overlay');
+  if (el) el.remove();
+}
 
 // Іконки (поклади /res/icons/user-auth.png; гість використовує чинний user.png)
 const ICON_GUEST = '/res/icons/user.png';
@@ -84,17 +175,11 @@ document.addEventListener('DOMContentLoaded', () => {
       b.className = 'cab-item';
       b.setAttribute('role','menuitem');
       b.textContent = t('ui.topbar.sign_in');
-      b.addEventListener('click', () => {
-        hide(el);
-        openSignInModal(async (value, setError, close) => {
-          try {
-            await signInWithEmail(value);
-            close();
-          } catch (err) {
-            setError(err?.message || t('auth.error.generic'));
-          }
-        });
-      });
+b.addEventListener('click', () => {
+  hide(el);
+  openCabinetSignInDialog();
+});
+
       el.appendChild(b);
     } else {
       // Sign out (email)
@@ -110,88 +195,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ——— Модалка вводу email ———
-  function openSignInModal(onSubmit /* (email, setError, close) */) {
-    closeSignInModal();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'cab-auth-overlay';
-    overlay.className = 'cab-modal-overlay';
-    overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeSignInModal(); });
-
-    const box = document.createElement('div');
-    box.className = 'cab-modal';
-    box.setAttribute('role','dialog');
-    box.setAttribute('aria-modal','true');
-    box.setAttribute('aria-label', t('auth.dialog.title'));
-
-    const h = document.createElement('h3');
-    h.className = 'cab-modal-title';
-    h.textContent = t('auth.dialog.title');
-
-    const input = document.createElement('input');
-    input.type = 'email';
-    input.className = 'cab-input';
-    input.placeholder = t('auth.field.email');
-
-    const hint = document.createElement('div');
-    hint.className = 'cab-hint';
-    hint.textContent = t('auth.note.sent_body');
-
-    const err = document.createElement('div');
-    err.className = 'cab-error';
-    err.hidden = true;
-
-    const row = document.createElement('div');
-    row.className = 'cab-row';
-
-    const btnCancel = document.createElement('button');
-    btnCancel.className = 'cab-btn';
-    btnCancel.textContent = t('ui.cancel') || 'Cancel';
-    btnCancel.addEventListener('click', closeSignInModal);
-
-    const btnSend = document.createElement('button');
-    btnSend.className = 'cab-btn cab-primary';
-    btnSend.textContent = t('auth.button.send_link');
-
-    function setError(msg){
-      err.textContent = msg || '';
-      err.hidden = !msg;
-    }
-    function close(){ closeSignInModal(); }
-
-    btnSend.addEventListener('click', async () => {
-      setError('');
-      const val = (input.value || '').trim();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
-        setError(t('auth.error.invalid_email'));
-        input.focus();
-        return;
-      }
-      btnSend.disabled = true;
-      try {
-        await onSubmit(val, setError, close);
-      } finally {
-        btnSend.disabled = false;
-      }
-    });
-
-    row.appendChild(btnCancel);
-    row.appendChild(btnSend);
-
-    box.appendChild(h);
-    box.appendChild(input);
-    box.appendChild(hint);
-    box.appendChild(err);
-    box.appendChild(row);
-
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
-    input.focus();
-  }
-
-  function closeSignInModal() {
-    const el = document.getElementById('cab-auth-overlay');
-    if (el) el.remove();
-  }
 });
