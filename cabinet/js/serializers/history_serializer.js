@@ -1,6 +1,6 @@
 // /cabinet/js/serializers/history_serializer.js
-// Серіалізатор режиму «Історія». Без залежності від порядку завантаження файлів:
-// якщо місток (saveScene) ще не ініціалізований — кладемося в чергу.
+// Серіалізатор режиму «Історія» з підтримкою масиву О2 (history.o2s).
+// Працює незалежно від порядку завантаження: якщо місток ще не готовий — стає в чергу.
 
 import { getCurrentLang } from '/js/i18n.js';
 
@@ -37,23 +37,65 @@ import { getCurrentLang } from '/js/i18n.js';
     return Number.isFinite(n) ? n : null;
   }
 
-  // ---------- serializer ----------
-  const serializer = function serializeHistoryScene() {
-    // Поточні вибори у формі режиму «Історія»
-    const cat1 = readSelectInfo('histCategoryObject1');
-    const obj1 = readSelectInfo('histObject1');
+  // Уніфікація одного елемента О2
+  function normO2(x) {
+    if (!x) return null;
+    const categoryKey = (x.categoryKey ?? x.category ?? null);
+    const objectId    = (x.objectId ?? x.id ?? null);
+    const name        = (x.name ?? x.label ?? null);
+    if (!categoryKey || !objectId) return null;
+    return {
+      categoryKey: String(categoryKey),
+      objectId: String(objectId),
+      name: name ? String(name) : null
+    };
+  }
+
+  // Масив О2: спершу офіційний стан, інакше — фолбек на поточні селекти (1 елемент)
+  function readO2Array() {
+    try {
+      if (typeof window?.orbit?.getHistorySelectedO2s === 'function') {
+        const fromState = window.orbit.getHistorySelectedO2s();
+        if (!Array.isArray(fromState)) {
+          console.warn('[history_serializer] getHistorySelectedO2s() must return array; got:', typeof fromState);
+        } else {
+          const norm = fromState.map(normO2).filter(Boolean);
+          if (norm.length) return norm;
+        }
+      }
+    } catch (err) {
+      console.warn('[history_serializer] Error reading O2 from state:', err);
+    }
+
+    // Фолбек: поточний вибір у випадайках → масив із 1 елемента або порожній
     const cat2 = readSelectInfo('histCategoryObject2');
     const obj2 = readSelectInfo('histObject2');
+    const one = normO2({ categoryKey: cat2.value, objectId: obj2.value, name: obj2.label });
+    return one ? [one] : [];
+  }
 
-    // Базовий діаметр (метри) — задає масштаб сцени для О1
+  // ---------- serializer ----------
+  const serializer = function serializeHistoryScene() {
+    // О1
+    const cat1 = readSelectInfo('histCategoryObject1');
+    const obj1 = readSelectInfo('histObject1');
     const baselineMeters = readNumberOrNull('historyBaselineDiameter');
 
-    // Мінімальний каркас сцени для БД
-    return {
-      version: 1,
+    // О2 (масив)
+    const o2s = readO2Array();
+
+    // Мінімальна валідність: має бути О1 та хоча б один О2
+    if (!obj1.value || o2s.length === 0) {
+      console.warn('[history_serializer] Incomplete data: need O1 and at least one O2');
+      return null;
+    }
+
+    // Сцена
+    const scene = {
+      version: 2,                               // формат із масивом o2s
       lang: getCurrentLang?.() || 'en',
       mode: 'history',
-      center: getCenterOrNull(), // {lat, lon} або null
+      center: getCenterOrNull(),                // {lat, lon} або null
       history: {
         o1: {
           categoryKey: cat1.value,
@@ -61,13 +103,13 @@ import { getCurrentLang } from '/js/i18n.js';
           objectId: obj1.value,
           baselineDiameterMeters: baselineMeters
         },
-        o2: {
-          categoryKey: cat2.value,
-          name: obj2.label,
-          objectId: obj2.value
-        }
+        o2s                                      // новий масив усіх О2
       }
     };
+
+    // Увага: legacy-поле history.o2 більше НЕ додаємо (щоб не було плутанини).
+
+    return scene;
   };
 
   // ---------- реєстрація / черга ----------

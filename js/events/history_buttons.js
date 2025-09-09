@@ -34,11 +34,39 @@ import {
 // Лічильник сценових елементів О2 (накопичувально в межах сесії)
 let historyResultSeq = 0;
 
+// [NEW] Список обраних О2 (накопичується під час створення сцени)
+const __historySelectedO2s = [];
+
+// [NEW] Додати один О2 до списку (без побічних ефектів)
+function __pushSelectedO2(item) {
+  try {
+    const categoryKey = String(item?.object2?.category || '').trim();
+    const name = String(item?.object2?.name || '').trim();
+    const objectId = String(item?.object2?.userId || item?.object2?.name || '').trim(); // офіційний id або fallback=назва
+    if (!categoryKey || !objectId) return;
+    __historySelectedO2s.push({ categoryKey, objectId, name: name || null });
+  } catch (_) {}
+}
+
+// [NEW] Очистити список (на нову сцену / Reset)
+function __resetSelectedO2s() {
+  __historySelectedO2s.length = 0;
+}
+
+// [NEW] Публічний геттер для серіалізатора
+try {
+  (window.orbit ||= {});
+  window.orbit.getHistorySelectedO2s = () => __historySelectedO2s.slice();
+} catch (_) {}
+
+
 // Скидання лічильника на глобальний UI-RESET
 try {
-  window.addEventListener('orbit:ui-reset', () => {
-    historyResultSeq = 0;
-  });
+window.addEventListener('orbit:ui-reset', () => {
+  historyResultSeq = 0;
+  __resetSelectedO2s();
+});
+
 } catch {}
 
 /**
@@ -233,6 +261,8 @@ export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) 
       });
     }
   }
+  // [NEW] Запам'ятати щойно доданий О2 для збереження сцени
+  __pushSelectedO2(data);
 
   // Логи
   console.log(
