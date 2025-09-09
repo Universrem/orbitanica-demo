@@ -931,17 +931,35 @@
     "en": "Please enter a valid email.",
     "es": "Introduce un correo válido."
   },
-  "auth.error.generic": { "ua": "Щось пішло не так. Спробуйте ще раз.", "en": "Something went wrong. Please try again.", "es": "Algo salió mal. Vuelve a intentarlo." },
-  "ui.topbar.my_scenes": { "ua": "Мої сцени", "en": "My scenes", "es": "Mis escenas" },
-  "ui.topbar.save_scene": { "ua": "Зберегти сцену", "en": "Save scene", "es": "Guardar escena" },
-  "scenes.empty": { "ua": "Поки немає сцен.", "en": "No scenes yet.", "es": "Aún no hay escenas." },
-  "scenes.untitled": { "ua": "Без назви", "en": "Untitled", "es": "Sin título" },
-  "scenes.open": { "ua": "Відкрити", "en": "Open", "es": "Abrir" },
-  "scenes.delete": { "ua": "Видалити", "en": "Delete", "es": "Eliminar" },
-  "scenes.share": { "ua": "Поділитися лінком", "en": "Share link", "es": "Compartir enlace" },
-  "scenes.make_public": { "ua": "Зробити публічною", "en": "Make public", "es": "Hacer pública" },
-  "scenes.make_private": { "ua": "Зробити приватною", "en": "Make private", "es": "Hacer privada" },
-  "scenes.link_copied": { "ua": "Лінк скопійовано", "en": "Link copied", "es": "Enlace copiado" }
+  "auth.error.generic":           { "ua": "Щось пішло не так. Спробуйте ще раз.", "en": "Something went wrong. Please try again.", "es": "Algo salió mal. Vuelve a intentarlo." },
+  "ui.topbar.my_scenes":          { "ua": "Мої сцени", "en": "My scenes", "es": "Mis escenas" },
+  "ui.topbar.save_scene":         { "ua": "Зберегти сцену", "en": "Save scene", "es": "Guardar escena" },
+  "scenes.empty":                 { "ua": "Поки немає сцен.", "en": "No scenes yet.", "es": "Aún no hay escenas." },
+  "scenes.untitled":              { "ua": "Без назви", "en": "Untitled", "es": "Sin título" },
+  "scenes.open":                  { "ua": "Відкрити", "en": "Open", "es": "Abrir" },
+  "scenes.delete":                { "ua": "Видалити", "en": "Delete", "es": "Eliminar" },
+  "scenes.share":                 { "ua": "Поділитися лінком", "en": "Share link", "es": "Compartir enlace" },
+  "scenes.make_public":           { "ua": "Зробити публічною", "en": "Make public", "es": "Hacer pública" },
+  "scenes.make_private":          { "ua": "Зробити приватною", "en": "Make private", "es": "Hacer privada" },
+  "scenes.link_copied":           { "ua": "Лінк скопійовано", "en": "Link copied", "es": "Enlace copiado" },
+  
+  "cab_save_title":               { "ua": "Зберегти сцену", "en": "Save scene", "es": "Guardar escena" },
+  "cab_save_field_title":         { "ua": "Назва*", "en": "Title*", "es": "Título*" },
+  "cab_save_field_desc":          { "ua": "Опис", "en": "Description", "es": "Descripción" },
+  "cab_save_field_public":        { "ua": "Публічна", "en": "Public", "es": "Pública" },
+  "cab_save_btn_cancel":          { "ua": "Скасувати", "en": "Cancel", "es": "Cancelar" },
+  "cab_save_btn_save":            { "ua": "Зберегти", "en": "Save", "es": "Guardar" },
+  "cab_save_error_need_title":    { "ua": "Введіть назву сцени", "en": "Enter a title", "es": "Introduce un título" },
+  "cab_save_progress":            { "ua": "Збереження...", "en": "Saving...", "es": "Guardando..." },
+  "cab_save_done_title":          { "ua": "Сцену збережено", "en": "Scene saved", "es": "Escena guardada" },
+  "cab_save_done_hint":           { "ua": "Коротке посилання:", "en": "Short link:", "es": "Enlace corto:" },
+  "cab_save_btn_copy":            { "ua": "Скопіювати", "en": "Copy", "es": "Copiar" },
+  "cab_save_btn_copied":          { "ua": "Скопійовано", "en": "Copied", "es": "Copiado" },
+  "cab_save_btn_close":           { "ua": "Закрити", "en": "Close", "es": "Cerrar" },
+  "cab_save_not_supported_title": { "ua": "Збереження цього режиму ще не під’єднане", "en": "Saving for this mode isn’t wired yet", "es": "Aún no conectado para este modo" },
+  "cab_save_not_supported_body":  { "ua": "Додамо серіалізатор режиму і все запрацює. Наразі підтримано «Історія».", "en": "Add a serializer for this mode and it will work. Currently ‘History’ is supported.", "es": "Añade un serializador para este modo y funcionará. Actualmente se admite «Historia»." }
+
+
 }
 
 
