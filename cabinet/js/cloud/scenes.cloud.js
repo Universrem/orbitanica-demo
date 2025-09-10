@@ -149,3 +149,71 @@ export async function ensureShortLink(sceneId) {
   }
   throw new Error('Failed to generate unique short code');
 }
+// === Public feeds: scene of the day / interesting / all public ===
+
+// 1) One active scene of the day (or null)
+export async function getSceneOfDay() {
+  const { data, error } = await supabase
+    .from('scene_picks')
+    .select(`
+      created_at,
+      scene:scene_id (
+        id, owner_id, is_public, created_at, updated_at,
+        title, description, mode, query
+      )
+    `)
+    .eq('type', 'day')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (error) throw error;
+  return (data && data[0]) ? data[0].scene : null;
+}
+
+// 2) Curated "interesting" list (rank ASC NULLS LAST, then created_at DESC)
+export async function listInteresting({ limit = 20 } = {}) {
+  const { data, error } = await supabase
+    .from('scene_picks')
+    .select(`
+      rank,
+      created_at,
+      scene:scene_id (
+        id, owner_id, is_public, created_at, updated_at,
+        title, description, mode, query
+      )
+    `)
+    .eq('type', 'interesting')
+    .eq('is_active', true)
+    .order('rank', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+
+  // повертаємо плоский масив сцен; rank додаємо як scene._pick_rank (не ламає схему scenes)
+  return (data || []).map(row => {
+    const scene = row.scene || null;
+    if (scene) scene._pick_rank = row.rank;
+    return scene;
+  }).filter(Boolean);
+}
+
+// 3) All public scenes (newest first) with pagination
+export async function listAllPublic({ limit = 30, offset = 0 } = {}) {
+  const start = offset;
+  const end = offset + limit - 1;
+
+  const { data, error } = await supabase
+    .from('scenes')
+    .select(`
+      id, owner_id, is_public, created_at, updated_at,
+      title, description, mode, query
+    `)
+    .eq('is_public', true)
+    .order('created_at', { ascending: false })
+    .range(start, end);
+
+  if (error) throw error;
+  return data || [];
+}

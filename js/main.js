@@ -4,6 +4,7 @@
 import './globe/globe.js';
 import { initI18n, t } from './i18n.js';
 import { initLeftPanel } from './panel.js';
+import { initPublicScenesPanel } from '/js/panels/publicScenes.panel.js';
 import './events/panel_buttons.js';
 import './events/distance_buttons.js';
 import './events/luminosity_buttons.js';
@@ -16,6 +17,7 @@ import './ui/langMenu.js';
   const start = async () => {
     await initI18n();     // 1) підняти словник і встановити мову
     initLeftPanel(t);     // 2) згенерити ліву панель, передавши t
+    initPublicScenesPanel();
   };
 
   if (document.readyState !== 'loading') {

@@ -175,5 +175,82 @@
   .has-tip::after,
   .has-tip::before { display: none !important; }
 }
+/* === My Scenes: розмір іконок та кнопок === */
+.cab-scene-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cab-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;   /* розмір кнопки */
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.cab-icon-btn .cab-icon {
+  display: block;
+  width: 18px;   /* реальний розмір піктограми */
+  height: 18px;
+  object-fit: contain;
+}
+/* === My Scenes — шапка модалки (заголовок зліва, × справа) === */
+.cab-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px; /* замість margin у .cab-modal-title */
+}
+
+/* Акуратна кнопка «×» на білому фоні */
+.cab-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  color: #333;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 8px;
+  line-height: 1;
+  cursor: pointer;
+}
+.cab-close-btn:hover { background: #f7f7f7; }
+
+/* === My Scenes — картки списку === */
+.cab-scene-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  padding: 10px 12px;
+  margin: 8px 0;            /* невеликий відступ між сценами */
+}
+
+/* Маркер перед назвою */
+.cab-scene-title {
+  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+}
+.cab-scene-title::before {
+  content: "• ";
+  color: #777;
+  margin-right: 2px;
+}
+
+/* Опис і дата — компактно */
+.cab-scene-desc { margin-top: 2px; opacity: .9; }
+.cab-scene-meta { margin-top: 2px; font-size: 12px; color: #666; }
+
+/* Дії — дрібний відступ зверху, розмір іконок лишається як налаштовано */
+.cab-scene-actions { margin-top: 6px; }
 
 
