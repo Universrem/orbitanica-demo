@@ -38,7 +38,7 @@
 
 #cabinet-ribbon {
   position: absolute;
-  top: 10px; left: 10px;
+  top: 10px; left: 40px;
   display: flex; gap: 8px;
   z-index: 1100;
   pointer-events: auto;
@@ -61,4 +61,119 @@
 #cabinet-ribbon .ribbon-icon {
   width: 20px; height: 20px; display: block;
 }
+/* ================== CABINET: універсальні тултіпи (aria-label) ================== */
+/* Використання:
+   <button class="has-tip" aria-label="…" data-tip-side="bottom|top|left|right">…</button>
+   Показ на :hover і :focus-visible. Без title.
+*/
+
+.has-tip { position: relative; }
+
+/* Тіло підказки */
+.has-tip[aria-label]:hover::after,
+.has-tip[aria-label]:focus-visible::after {
+  content: attr(aria-label);
+  position: absolute;
+  z-index: 1000;
+  max-width: 280px;
+  padding: 6px 10px;
+  border: 1px solid rgba(108,159,234,0.45);
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+  font-size: 12px;
+  line-height: 1.25;
+  white-space: nowrap;               /* для bottom/top */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  pointer-events: none;
+}
+
+/* Стрілочка (ромб) */
+.has-tip[aria-label]:hover::before,
+.has-tip[aria-label]:focus-visible::before {
+  content: '';
+  position: absolute;
+  z-index: 1001;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-left: 1px solid rgba(108,159,234,0.45);
+  border-top: 1px solid rgba(108,159,234,0.45);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* ----------- РОЗТАШУВАННЯ ----------- */
+/* За замовчуванням і для data-tip-side="bottom" */
+.has-tip[aria-label]:hover::after,
+.has-tip[aria-label]:focus-visible::after,
+.has-tip[data-tip-side="bottom"][aria-label]:hover::after,
+.has-tip[data-tip-side="bottom"][aria-label]:focus-visible::after {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.has-tip[aria-label]:hover::before,
+.has-tip[aria-label]:focus-visible::before,
+.has-tip[data-tip-side="bottom"][aria-label]:hover::before,
+.has-tip[data-tip-side="bottom"][aria-label]:focus-visible::before {
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* top */
+.has-tip[data-tip-side="top"][aria-label]:hover::after,
+.has-tip[data-tip-side="top"][aria-label]:focus-visible::after {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.has-tip[data-tip-side="top"][aria-label]:hover::before,
+.has-tip[data-tip-side="top"][aria-label]:focus-visible::before {
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* left */
+.has-tip[data-tip-side="left"][aria-label]:hover::after,
+.has-tip[data-tip-side="left"][aria-label]:focus-visible::after {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: normal; /* дозволяємо перенос */
+}
+
+.has-tip[data-tip-side="left"][aria-label]:hover::before,
+.has-tip[data-tip-side="left"][aria-label]:focus-visible::before {
+  right: calc(100% + 4px);
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* right */
+.has-tip[data-tip-side="right"][aria-label]:hover::after,
+.has-tip[data-tip-side="right"][aria-label]:focus-visible::after {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: normal;
+}
+
+.has-tip[data-tip-side="right"][aria-label]:hover::before,
+.has-tip[data-tip-side="right"][aria-label]:focus-visible::before {
+  left: calc(100% + 4px);
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* На сенсорних пристроях тултіп не показуємо */
+@media (hover: none) {
+  .has-tip::after,
+  .has-tip::before { display: none !important; }
+}
+
 

@@ -103,6 +103,7 @@ export function initLeftPanel(t) {
 
     { id: 'scene_day', title: t('panel_title_scene_day') },
     { id: 'interesting', title: t('panel_title_interesting') },
+    { id: 'all_scenes', title: t('panel_title_all_scenes') },
 
     { type: 'note', i18nKey: 'panel_note_create_scenes', text: t('panel_note_create_scenes'), className: 'panel-section-title' },
 

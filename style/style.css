@@ -273,6 +273,13 @@ summary {
   border-radius: 0;
   background-color: transparent;
 }
+#left-panel > details#all_scenes> summary::before {
+  width: 18px;
+  height: 18px;
+  background: url("../res/icons/all.png") center / contain no-repeat;
+  border-radius: 0;
+  background-color: transparent;
+}
 
 #left-panel > details#univers > summary::before {
   width: 18px;

@@ -477,6 +477,11 @@
     "en": "Scene of the day",
     "es": "Escena del día"
   },
+  "panel_title_all_scenes": {
+"ua": "Усі сцени",
+"en": "All scenes",
+"es": "Todas las escenas"
+},
   "panel_title_univers": {
     "ua": "Всесвіт",
     "en": "Universe",
