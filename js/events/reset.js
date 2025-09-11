@@ -1,3 +1,4 @@
+// /js/events/reset.js
 'use strict';
 
 import { circlesLayer } from '../globe/circles.js';

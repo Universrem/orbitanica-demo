@@ -11,6 +11,138 @@
     "description_es": "Aparición de los primeros humanos anatómicamente modernos.",
     "time_start": { "value": -300000,       "unit": "year" }
   },
+  
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Isaac Newton",
+    "name_ua": "Ісаак Ньютон",
+    "name_es": "Isaac Newton",
+    "description_en": "Physicist and mathematician, author of the law of universal gravitation and laws of motion.",
+    "description_ua": "Фізик і математик, автор закону всесвітнього тяжіння та законів руху.",
+    "description_es": "Físico y matemático, autor de la ley de gravitación universal y las leyes del movimiento.",
+    "time_start": { "value": 1643, "unit": "year" },
+    "time_end": { "value": 1727, "unit": "year" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Albert Einstein",
+    "name_ua": "Альберт Ейнштейн",
+    "name_es": "Albert Einstein",
+    "description_en": "Theoretical physicist, author of the theory of relativity, Nobel Prize winner.",
+    "description_ua": "Фізик-теоретик, автор теорії відносності, лауреат Нобелівської премії.",
+    "description_es": "Físico teórico, autor de la teoría de la relatividad, premio Nobel.",
+    "time_start": { "value": 1879, "unit": "year" },
+    "time_end": { "value": 1955, "unit": "year" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Leonardo da Vinci",
+    "name_ua": "Леонардо да Вінчі",
+    "name_es": "Leonardo da Vinci",
+    "description_en": "Renaissance genius: artist, scientist, inventor, architect.",
+    "description_ua": "Геній Ренесансу: художник, вчений, винахідник, архітектор.",
+    "description_es": "Genio del Renacimiento: artista, científico, inventor, arquitecto.",
+    "time_start": { "value": 1452, "unit": "year" },
+    "time_end": { "value": 1519, "unit": "year" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Marie Curie",
+    "name_ua": "Марія Кюрі",
+    "name_es": "Marie Curie",
+    "description_en": "Physicist and chemist, pioneer in radioactivity research, two-time Nobel laureate.",
+    "description_ua": "Фізик і хімік, піонер досліджень радіоактивності, двічі лауреат Нобелівської премії.",
+    "description_es": "Física y química, pionera en la investigación de la radiactividad, dos veces premio Nobel.",
+    "time_start": { "value": 1867, "unit": "year" },
+    "time_end": { "value": 1934, "unit": "year" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Nikola Tesla",
+    "name_ua": "Нікола Тесла",
+    "name_es": "Nikola Tesla",
+    "description_en": "Inventor in electrical engineering, physicist, engineer.",
+    "description_ua": "Винахідник в галузі електротехніки, фізик, інженер.",
+    "description_es": "Inventor en el campo de la ingeniería eléctrica, físico, ingeniero.",
+    "time_start": { "value": 1856, "unit": "year" },
+    "time_end": { "value": 1943, "unit": "year" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Galileo Galilei",
+    "name_ua": "Галілео Галілей",
+    "name_es": "Galileo Galilei",
+    "description_en": "Astronomer, physicist, engineer, founder of experimental physics.",
+    "description_ua": "Астроном, фізик, інженер, засновник експериментальної фізики.",
+    "description_es": "Astrónomo, físico, ingeniero, fundador de la física experimental.",
+    "time_start": { "value": 1564, "unit": "year" },
+    "time_end": { "value": 1642, "unit": "year" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Charles Darwin",
+    "name_ua": "Чарльз Дарвін",
+    "name_es": "Charles Darwin",
+    "description_en": "Naturalist, author of the theory of evolution by natural selection.",
+    "description_ua": "Натураліст, автор теорії еволюції шляхом природного відбору.",
+    "description_es": "Naturalista, autor de la teoría de la evolución por selección natural.",
+    "time_start": { "value": 1809, "unit": "year" },
+    "time_end": { "value": 1882, "unit": "year" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Stephen Hawking",
+    "name_ua": "Стівен Гокінг",
+    "name_es": "Stephen Hawking",
+    "description_en": "Theoretical physicist, cosmologist, researcher of black holes.",
+    "description_ua": "Фізик-теоретик, космолог, дослідник чорних дір.",
+    "description_es": "Físico teórico, cosmólogo, investigador de agujeros negros.",
+    "time_start": { "value": 1942, "unit": "year" },
+    "time_end": { "value": 2018, "unit": "year" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Aristotle",
+    "name_ua": "Арістотель",
+    "name_es": "Aristóteles",
+    "description_en": "Ancient Greek philosopher, founder of formal logic and many sciences.",
+    "description_ua": "Старогрецький філософ, засновник формальної логіки та багатьох наук.",
+    "description_es": "Filósofo griego antiguo, fundador de la lógica formal y muchas ciencias.",
+    "time_start": { "value": -384, "unit": "year" },
+    "time_end": { "value": -322, "unit": "year" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "Archimedes",
+    "name_ua": "Архімед",
+    "name_es": "Arquímedes",
+    "description_en": "Ancient Greek mathematician, physicist and engineer, author of fundamental laws.",
+    "description_ua": "Старогрецький математик, фізик та інженер, автор фундаментальних законів.",
+    "description_es": "Matemático, físico e ingeniero griego antiguo, autor de leyes fundamentales.",
+    "time_start": { "value": -287, "unit": "year" },
+    "time_end": { "value": -212, "unit": "year" }
+  },
+
   {
     "category_en": "Planet Earth",
     "category_ua": "Планета Земля",
@@ -21,7 +153,7 @@
     "description_en": "Accretion and cooling of the planet Earth.",
     "description_ua": "Утворення й охолодження планети Земля.",
     "description_es": "Acreción y enfriamiento del planeta Tierra.",
-    "time_start": { "value": -4540000000,  "unit": "year" }
+    "time_start": { "value": -4600000000,  "unit": "year" }
   },
   {
     "category_en": "Planet Earth",
@@ -36,6 +168,9 @@
     "time_start": { "value": -13800000000, "unit": "year" }
   },
   {
+    "category_en": "Events",
+    "category_ua": "Події",
+    "category_es": "Eventos",
     "name_en": "Construction of the Pyramids",
     "name_ua": "Будівництво пірамід",
     "name_es": "Construcción de las pirámides",
@@ -210,6 +345,247 @@
     "description_ua": "Подорож Христофора Колумба 1492 р.",
     "description_es": "Viaje de Cristóbal Colón en 1492.",
     "time_start": { "value": 1492,         "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Penicillin",
+    "name_ua": "Пеніцилін",
+    "name_es": "Penicilina",
+    "description_en": "The first antibiotic discovered by Alexander Fleming, revolutionizing medicine.",
+    "description_ua": "Перший антибіотик, відкритий Олександром Флемінгом, що революціонізував медицину.",
+    "description_es": "El primer antibiótico descubierto por Alexander Fleming, que revolucionó la medicina.",
+    "time_start": { "value": 1928, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "DNA Structure",
+    "name_ua": "Структура ДНК",
+    "name_es": "Estructura del ADN",
+    "description_en": "Discovery of the double helix structure of DNA by Watson and Crick.",
+    "description_ua": "Відкриття подвійної спіралі структури ДНК Уотсоном і Криком.",
+    "description_es": "Descubrimiento de la estructura de doble hélice del ADN por Watson y Crick.",
+    "time_start": { "value": 1953, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Gravitation Law",
+    "name_ua": "Закон тяжіння",
+    "name_es": "Ley de Gravitación",
+    "description_en": "Newton's discovery of the law of universal gravitation.",
+    "description_ua": "Відкриття Ньютоном закону всесвітнього тяжіння.",
+    "description_es": "Descubrimiento de Newton de la ley de gravitación universal.",
+    "time_start": { "value": 1687, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Electricity",
+    "name_ua": "Електрика",
+    "name_es": "Electricidad",
+    "description_en": "Discovery and harnessing of electrical energy.",
+    "description_ua": "Відкриття та освоєння електричної енергії.",
+    "description_es": "Descubrimiento y aprovechamiento de la energía eléctrica.",
+    "time_start": { "value": 1752, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Relativity Theory",
+    "name_ua": "Теорія відносності",
+    "name_es": "Teoría de Relatividad",
+    "description_en": "Einstein's theory that revolutionized understanding of space and time.",
+    "description_ua": "Теорія Ейнштейна, що революціонізувала розуміння простору та часу.",
+    "description_es": "Teoría de Einstein que revolucionó la comprensión del espacio y el tiempo.",
+    "time_start": { "value": 1905, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Periodic Table",
+    "name_ua": "Періодична таблиця",
+    "name_es": "Tabla Periódica",
+    "description_en": "Mendeleev's classification of chemical elements.",
+    "description_ua": "Класифікація хімічних елементів Менделєєва.",
+    "description_es": "Clasificación de elementos químicos de Mendeleev.",
+    "time_start": { "value": 1869, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Quantum Mechanics",
+    "name_ua": "Квантова механіка",
+    "name_es": "Mecánica Cuántica",
+    "description_en": "Fundamental theory in physics describing nature at atomic scales.",
+    "description_ua": "Фундаментальна теорія у фізиці, що описує природу на атомному рівні.",
+    "description_es": "Teoría fundamental en física que describe la naturaleza a escalas atómicas.",
+    "time_start": { "value": 1900, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "X-Rays",
+    "name_ua": "Рентгенівські промені",
+    "name_es": "Rayos X",
+    "description_en": "Discovery of X-rays by Wilhelm Röntgen.",
+    "description_ua": "Відкриття рентгенівських променів Вільгельмом Рентгеном.",
+    "description_es": "Descubrimiento de los rayos X por Wilhelm Röntgen.",
+    "time_start": { "value": 1895, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Vaccination",
+    "name_ua": "Вакцинація",
+    "name_es": "Vacunación",
+    "description_en": "Edward Jenner's discovery of the smallpox vaccine.",
+    "description_ua": "Відкриття Едвардом Дженнером вакцини від віспи.",
+    "description_es": "Descubrimiento de la vacuna contra la viruela por Edward Jenner.",
+    "time_start": { "value": 1796, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Atomic Structure",
+    "name_ua": "Атомна структура",
+    "name_es": "Estructura Atómica",
+    "description_en": "Rutherford's discovery of the atomic nucleus.",
+    "description_ua": "Відкриття Резерфордом атомного ядра.",
+    "description_es": "Descubrimiento del núcleo atómico por Rutherford.",
+    "time_start": { "value": 1911, "unit": "year" }
+  },
+    {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Agriculture",
+    "name_ua": "Землеробство",
+    "name_es": "Agricultura",
+    "description_en": "The domestication of plants, which gave rise to the Neolithic Revolution and the first civilizations.",
+    "description_ua": "Одомашнення рослин, що дало початок Неолітичній революції та першим цивілізаціям.",
+    "description_es": "Domesticación de plantas, que dio lugar a la Revolución Neolítica y las primeras civilizaciones.",
+    "time_start": { "value": -10000, "unit": "year" },
+    "time_end": { "value": -8000, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Wheel",
+    "name_ua": "Колесо",
+    "name_es": "Rueda",
+    "description_en": "The invention of the wheel and axle revolutionized transport and mechanics.",
+    "description_ua": "Винахід колеса та осі революціонізував транспорт і механіку.",
+    "description_es": "La invención de la rueda y el eje revolucionó el transporte y la mecánica.",
+    "time_start": { "value": -3500, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Writing",
+    "name_ua": "Писемність",
+    "name_es": "Escritura",
+    "description_en": "The creation of writing systems allowed for the recording and transmission of knowledge.",
+    "description_ua": "Створення систем письма дозволило фіксувати та передавати знання.",
+    "description_es": "La creación de sistemas de escritura permitió registrar y transmitir conocimiento.",
+    "time_start": { "value": -3400, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Zero",
+    "name_ua": "Нуль",
+    "name_es": "Cero",
+    "description_en": "The concept of zero as a number, fundamental for advanced mathematics and computing.",
+    "description_ua": "Концепція нуля як числа, фундаментальна для розвиненої математики та обчислень.",
+    "description_es": "El concepto del cero como número, fundamental para las matemáticas avanzadas y la computación.",
+    "time_start": { "value": 628, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Printing Press",
+    "name_ua": "Друкарство",
+    "name_es": "Imprenta",
+    "description_en": "Gutenberg's invention democratized knowledge and accelerated the Renaissance and Scientific Revolution.",
+    "description_ua": "Винахід Гутенберга демократизував знання та прискорив Ренесанс і Наукову революцію.",
+    "description_es": "La invención de Gutenberg democratizó el conocimiento y aceleró el Renacimiento y la Revolución Científica.",
+    "time_start": { "value": 1440, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Heliocentrism",
+    "name_ua": "Геліоцентризм",
+    "name_es": "Heliocentrismo",
+    "description_en": "Copernicus' discovery that the Earth revolves around the Sun changed our place in the universe.",
+    "description_ua": "Відкриття Коперника про те, що Земля обертається навколо Сонця, змінило наше місце у Всесвіті.",
+    "description_es": "El descubrimiento de Copérnico de que la Tierra gira alrededor del Sol cambió nuestro lugar en el universo.",
+    "time_start": { "value": 1543, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Electricity",
+    "name_ua": "Електрика",
+    "name_es": "Electricidad",
+    "description_en": "The discovery and harnessing of electrical energy powered the Second Industrial Revolution.",
+    "description_ua": "Відкриття та освоєння електричної енергії стало основою Другої промислової революції.",
+    "description_es": "El descubrimiento y aprovechamiento de la energía eléctrica impulsó la Segunda Revolución Industrial.",
+    "time_start": { "value": 1752, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "Penicillin",
+    "name_ua": "Пеніцилін",
+    "name_es": "Penicilina",
+    "description_en": "Fleming's discovery of the first antibiotic saved millions of lives and founded modern medicine.",
+    "description_ua": "Відкриття Флемінгом першого антибіотика врятувало мільйони життів і започаткувало сучасну медицину.",
+    "description_es": "El descubrimiento del primer antibiótico por Fleming salvó millones de vidas y fundó la medicina moderna.",
+    "time_start": { "value": 1928, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "DNA Structure",
+    "name_ua": "Структура ДНК",
+    "name_es": "Estructura del ADN",
+    "description_en": "The discovery of the double helix by Watson and Crick unlocked the secrets of heredity and life itself.",
+    "description_ua": "Відкриття подвійної спіралі Уотсоном і Криком розкрило таємниці спадковості та самого життя.",
+    "description_es": "El descubrimiento de la doble hélice por Watson y Crick desbloqueó los secretos de la herencia y la vida misma.",
+    "time_start": { "value": 1953, "unit": "year" }
+  },
+  {
+    "category_en": "Discoveries",
+    "category_ua": "Відкриття",
+    "category_es": "Descubrimientos",
+    "name_en": "World Wide Web",
+    "name_ua": "Всесвітня павутина",
+    "name_es": "World Wide Web",
+    "description_en": "Tim Berners-Lee's invention revolutionized global communication, information access and society.",
+    "description_ua": "Винахід Тіма Бернерса-Лі революціонізував глобальний зв'язок, доступ до інформації та суспільство.",
+    "description_es": "La invención de Tim Berners-Lee revolucionó la comunicación global, el acceso a la información y la sociedad.",
+    "time_start": { "value": 1989, "unit": "year" }
   },
   {
     "category_en": "First Event",
@@ -393,7 +769,7 @@
     "description_en": "The earliest geological eon in Earth's history, lasting from the planet's formation",
     "description_ua": "Найдавніший геологічний еон в історії Землі, який тривав з моменту утворення планети",
     "description_es": "El eón geológico más antiguo en la historia de la Tierra, que duró desde la formación del planeta",
-    "time_start": { "value": -4600000000, "unit": "year" },
+    "time_start": { "value": -4600000001, "unit": "year" },
     "time_end": { "value": -4000000000, "unit": "year" }
   },
   {
@@ -406,7 +782,7 @@
     "description_en": "The second eon in Earth's history when the first life forms appeared",
     "description_ua": "Другий еон в історії Землі, коли з'явилися перші форми життя",
     "description_es": "El segundo eón en la historia de la Tierra cuando aparecieron las primeras formas de vida",
-    "time_start": { "value": -4000000000, "unit": "year" },
+    "time_start": { "value": -4000000001, "unit": "year" },
     "time_end": { "value": -2500000000, "unit": "year" }
   },
   {
@@ -419,7 +795,7 @@
     "description_en": "The third eon in Earth's history, characterized by the emergence of complex life",
     "description_ua": "Третій еон в історії Землі, характеризується появою складного життя",
     "description_es": "El tercer eón en la historia de la Tierra, caracterizado por la emergencia de vida compleja",
-    "time_start": { "value": -2500000000, "unit": "year" },
+    "time_start": { "value": -2500000001, "unit": "year" },
     "time_end": { "value": -541000000, "unit": "year" }
   },
   {
@@ -432,7 +808,7 @@
     "description_en": "The first period of the Paleozoic Era, known for the Cambrian explosion of life",
     "description_ua": "Перший період палеозойської ери, відомий кембрійським вибухом життя",
     "description_es": "El primer período de la Era Paleozoica, conocido por la explosión cámbrica de vida",
-    "time_start": { "value": -541000000, "unit": "year" },
+    "time_start": { "value": -541000001, "unit": "year" },
     "time_end": { "value": -485000000, "unit": "year" }
   },
   {
@@ -445,7 +821,7 @@
     "description_en": "The second period of the Paleozoic Era, marked by diversification of marine life",
     "description_ua": "Другий період палеозойської ери, позначений диверсифікацією морського життя",
     "description_es": "El segundo período de la Era Paleozoica, marcado por la diversificación de la vida marina",
-    "time_start": { "value": -485000000, "unit": "year" },
+    "time_start": { "value": -485000001, "unit": "year" },
     "time_end": { "value": -443000000, "unit": "year" }
   },
   {
@@ -458,7 +834,7 @@
     "description_en": "The third period of the Paleozoic Era, time of development of fish and the first land plants",
     "description_ua": "Третій період палеозойської ери, час розвитку риб і перших наземних рослин",
     "description_es": "El tercer período de la Era Paleozoica, tiempo de desarrollo de peces y las primeras plantas terrestres",
-    "time_start": { "value": -443000000, "unit": "year" },
+    "time_start": { "value": -443000001, "unit": "year" },
     "time_end": { "value": -419000000, "unit": "year" }
   },
   {
@@ -471,7 +847,7 @@
     "description_en": "The fourth period of the Paleozoic Era, known as the 'Age of Fishes', first amphibians appeared",
     "description_ua": "Четвертий період палеозойської ери, відомий як 'вік риб', з'явилися перші земноводні",
     "description_es": "El cuarto período de la Era Paleozoica, conocido como la 'Edad de los Peces', aparecieron los primeros anfibios",
-    "time_start": { "value": -419000000, "unit": "year" },
+    "time_start": { "value": -419000001, "unit": "year" },
     "time_end": { "value": -359000000, "unit": "year" }
   },
   {
@@ -484,7 +860,7 @@
     "description_en": "The fifth period of the Paleozoic Era, time of formation of large coal deposits and development of land plants",
     "description_ua": "П'ятий період палеозойської ери, час утворення великих покладів вугілля та розвитку наземних рослин",
     "description_es": "El quinto período de la Era Paleozoica, tiempo de formación de grandes depósitos de carbón y desarrollo de plantas terrestres",
-    "time_start": { "value": -359000000, "unit": "year" },
+    "time_start": { "value": -359000001, "unit": "year" },
     "time_end": { "value": -299000000, "unit": "year" }
   },
   {
@@ -497,7 +873,7 @@
     "description_en": "The last period of the Paleozoic Era, ended with the largest mass extinction in Earth's history",
     "description_ua": "Останній період палеозойської ери, завершився найбільшим масовим вимиранням в історії Землі",
     "description_es": "El último período de la Era Paleozoica, terminó con la mayor extinción masiva en la historia de la Tierra",
-    "time_start": { "value": -299000000, "unit": "year" },
+    "time_start": { "value": -299000001, "unit": "year" },
     "time_end": { "value": -252000000, "unit": "year" }
   },
   {
@@ -510,7 +886,7 @@
     "description_en": "The first period of the Mesozoic Era, life recovered after the great extinction, first dinosaurs appeared",
     "description_ua": "Перший період мезозойської ери, життя відновилося після великого вимирання, з'явилися перші динозаври",
     "description_es": "El primer período de la Era Mesozoica, la vida se recuperó después de la gran extinción, aparecieron los primeros dinosaurios",
-    "time_start": { "value": -252000000, "unit": "year" },
+    "time_start": { "value": -252000001, "unit": "year" },
     "time_end": { "value": -201000000, "unit": "year" }
   },
   {
@@ -523,7 +899,7 @@
     "description_en": "The second period of the Mesozoic Era, known as the 'Age of Dinosaurs', with giant sauropods and first birds",
     "description_ua": "Другий період мезозойської ери, відомий як 'вік динозаврів', з гігантськими завроподами та першими птахами",
     "description_es": "El segundo período de la Era Mesozoica, conocido como la 'Edad de los Dinosaurios', con saurópodos gigantes y las primeras aves",
-    "time_start": { "value": -201000000, "unit": "year" },
+    "time_start": { "value": -201000001, "unit": "year" },
     "time_end": { "value": -145000000, "unit": "year" }
   },
   {
@@ -536,7 +912,7 @@
     "description_en": "The last period of the Mesozoic Era, ended with the asteroid impact that caused mass extinction of dinosaurs",
     "description_ua": "Останній період мезозойської ери, завершився падінням астероїда, що спричинило масове вимирання динозаврів",
     "description_es": "El último período de la Era Mesozoica, terminó con el impacto de asteroide que causó la extinción masiva de dinosaurios",
-    "time_start": { "value": -145000000, "unit": "year" },
+    "time_start": { "value": -145000001, "unit": "year" },
     "time_end": { "value": -66000000, "unit": "year" }
   },
   {
@@ -549,7 +925,7 @@
     "description_en": "The first period of the Cenozoic Era, mammals began to dominate after dinosaur extinction",
     "description_ua": "Перший період кайнозойської ери, ссавці почали домінувати після вимирання динозаврів",
     "description_es": "El primer período de la Era Cenozoica, los mamíferos comenzaron a dominar después de la extinción de dinosaurios",
-    "time_start": { "value": -66000000, "unit": "year" },
+    "time_start": { "value": -66000001, "unit": "year" },
     "time_end": { "value": -23000000, "unit": "year" }
   },
   {
@@ -562,7 +938,7 @@
     "description_en": "The second period of the Cenozoic Era, modern mammals and birds evolved, first hominids appeared",
     "description_ua": "Другий період кайнозойської ери, еволюціонували сучасні ссавці та птахи, з'явилися перші гомініди",
     "description_es": "El segundo período de la Era Cenozoica, evolucionaron mamíferos y aves modernas, aparecieron los primeros homínidos",
-    "time_start": { "value": -23000000, "unit": "year" },
+    "time_start": { "value": -23000001, "unit": "year" },
     "time_end": { "value": -2600000, "unit": "year" }
   },
   {
@@ -575,10 +951,105 @@
     "description_en": "The current geological period, characterized by ice ages and the development of modern humans",
     "description_ua": "Сучасний геологічний період, характеризується льодовиковими періодами та розвитком сучасних людей",
     "description_es": "El período geológico actual, caracterizado por las edades de hielo y el desarrollo de humanos modernos",
-    "time_start": { "value": -2600000, "unit": "year" },
+    "time_start": { "value": -2600001, "unit": "year" },
     "time_end": { "value": 0, "unit": "year" }
-  }
-
-
+  },
+  {
+  "category_en": "Turning Points",
+  "category_ua": "Переломні віхи",
+  "category_es": "Puntos de Inflexión",
+  "name_en": "Neolithic Revolution",
+  "name_ua": "Неолітична революція",
+  "name_es": "Revolución Neolítica",
+  "description_en": "Transition from hunting to farming, leading to the first settlements and civilizations.",
+  "description_ua": "Перехід від полювання до землеробства, що призвело до перших поселень і цивілізацій.",
+  "description_es": "Transición de la caza a la agricultura, conduciendo a los primeros asentamientos y civilizaciones.",
+  "time_start": { "value": -10000, "unit": "year" },
+  "time_end": { "value": -3000, "unit": "year" }
+},
+{
+  "category_en": "Turning Points",
+  "category_ua": "Переломні віхи",
+  "category_es": "Puntos de Inflexión",
+  "name_en": "Invention of Writing",
+  "name_ua": "Винахід писемності",
+  "name_es": "Invención de la Escritura",
+  "description_en": "The emergence of writing systems, marking the beginning of recorded history.",
+  "description_ua": "Поява систем письма, що поклала початок історичній епосі.",
+  "description_es": "Aparición de sistemas de escritura, marcando el inicio de la historia registrada.",
+  "time_start": { "value": -3400, "unit": "year" }
+},
+{
+  "category_en": "Turning Points",
+  "category_ua": "Переломні віхи",
+  "category_es": "Puntos de Inflexión",
+  "name_en": "Athenian Democracy",
+  "name_ua": "Афінська демократія",
+  "name_es": "Democracia Ateniense",
+  "description_en": "Foundation of the first democratic system of government in Athens.",
+  "description_ua": "Заснування першої демократичної системи правління в Афінах.",
+  "description_es": "Fundación del primer sistema democrático de gobierno en Atenas.",
+  "time_start": { "value": -508, "unit": "year" }
+},
+{
+  "category_en": "Turning Points",
+  "category_ua": "Переломні віхи",
+  "category_es": "Puntos de Inflexión",
+  "name_en": "Fall of Rome",
+  "name_ua": "Падіння Риму",
+  "name_es": "Caída de Roma",
+  "description_en": "The collapse of the Western Roman Empire, marking the end of Antiquity.",
+  "description_ua": "Колaps Західної Римської імперії, що завершило античну епоху.",
+  "description_es": "Colapso del Imperio Romano de Occidente, marcando el fin de la Antigüedad.",
+  "time_start": { "value": 476, "unit": "year" }
+},
+{
+  "category_en": "Turning Points",
+  "category_ua": "Переломні віхи",
+  "category_es": "Puntos de Inflexión",
+  "name_en": "Printing Press",
+  "name_ua": "Друкарський верстат",
+  "name_es": "Prensa de Imprenta",
+  "description_en": "Gutenberg's invention revolutionized the mass production of books and knowledge.",
+  "description_ua": "Винахід Гутенберга революціонізував масове виробництво книг і знань.",
+  "description_es": "La invención de Gutenberg revolucionó la producción masiva de libros y el conocimiento.",
+  "time_start": { "value": 1440, "unit": "year" }
+},
+{
+  "category_en": "Turning Points",
+  "category_ua": "Переломні віхи",
+  "category_es": "Puntos de Inflexión",
+  "name_en": "Steam Engine",
+  "name_ua": "Парова машина",
+  "name_es": "Máquina de Vapor",
+  "description_en": "Key invention that powered the Industrial Revolution and modern industry.",
+  "description_ua": "Ключовий винахід, що запустив Промислову революцію та сучасну індустрію.",
+  "description_es": "Invención clave que impulsó la Revolución Industrial y la industria moderna.",
+  "time_start": { "value": 1712, "unit": "year" }
+},
+{
+  "category_en": "Turning Points",
+  "category_ua": "Переломні віхи",
+  "category_es": "Puntos de Inflexión",
+  "name_en": "Gagarin's Spaceflight",
+  "name_ua": "Політ Гагаріна",
+  "name_es": "Vuelo de Gagarin",
+  "description_en": "First human spaceflight, opening the era of human exploration of space.",
+  "description_ua": "Перший політ людини в космос, що відкрив еру космічних польотів.",
+  "description_es": "Primer vuelo espacial humano, abriendo la era de la exploración espacial.",
+  "time_start": { "value": 1961, "unit": "year" }
+},
+{
+  "category_en": "Turning Points",
+  "category_ua": "Переломні віхи",
+  "category_es": "Puntos de Inflexión",
+  "name_en": "Creation of Internet",
+  "name_ua": "Створення Інтернету",
+  "name_es": "Creación de Internet",
+  "description_en": "Development of the global network that revolutionized communication and information.",
+  "description_ua": "Розвиток глобальної мережі, що революціонізувала зв'язок та інформацію.",
+  "description_es": "Desarrollo de la red global que revolucionó la comunicación y la información.",
+  "time_start": { "value": 1983, "unit": "year" }
+}
 ]
 

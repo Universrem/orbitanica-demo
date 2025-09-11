@@ -1,6 +1,5 @@
 // /cabinet/js/cloud/scenes.cloud.js
 // CRUD для scenes/shortlinks під RLS
-
 import { getSupabase } from '/cabinet/js/cloud/config.js';
 
 /** Повертає userId або null (401 ≠ помилка) */
@@ -153,7 +152,8 @@ export async function ensureShortLink(sceneId) {
 
 // 1) One active scene of the day (or null)
 export async function getSceneOfDay() {
-  const { data, error } = await supabase
+  const sb = await getSupabase();
+  const { data, error } = await sb
     .from('scene_picks')
     .select(`
       created_at,
@@ -167,13 +167,15 @@ export async function getSceneOfDay() {
     .order('created_at', { ascending: false })
     .limit(1);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return (data && data[0]) ? data[0].scene : null;
 }
 
+
 // 2) Curated "interesting" list (rank ASC NULLS LAST, then created_at DESC)
 export async function listInteresting({ limit = 20 } = {}) {
-  const { data, error } = await supabase
+  const sb = await getSupabase();
+  const { data, error } = await sb
     .from('scene_picks')
     .select(`
       rank,
@@ -189,31 +191,92 @@ export async function listInteresting({ limit = 20 } = {}) {
     .order('created_at', { ascending: false })
     .limit(limit);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 
-  // повертаємо плоский масив сцен; rank додаємо як scene._pick_rank (не ламає схему scenes)
-  return (data || []).map(row => {
-    const scene = row.scene || null;
-    if (scene) scene._pick_rank = row.rank;
-    return scene;
-  }).filter(Boolean);
+  return (data || [])
+    .map(row => {
+      const scene = row.scene || null;
+      if (scene) scene._pick_rank = row.rank;
+      return scene;
+    })
+    .filter(Boolean);
 }
 
 // 3) All public scenes (newest first) with pagination
 export async function listAllPublic({ limit = 30, offset = 0 } = {}) {
+  const sb = await getSupabase();
   const start = offset;
   const end = offset + limit - 1;
 
-  const { data, error } = await supabase
-    .from('scenes')
+  // Беремо дані з view: scenes_public_feed (вже відфільтровано is_public=TRUE)
+  const { data, error } = await sb
+    .from('scenes_public_feed')
     .select(`
-      id, owner_id, is_public, created_at, updated_at,
-      title, description, mode, query
+      id, owner_id, created_at, updated_at,
+      lang, title, description, mode, query,
+      views, likes
     `)
-    .eq('is_public', true)
     .order('created_at', { ascending: false })
     .range(start, end);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return data || [];
 }
+/** Збільшити лічильник переглядів сцени (RPC) */
+export async function incrementSceneView(sceneId) {
+  const sb = await getSupabase();
+  const { error } = await sb.rpc('inc_scene_view', { p_scene_id: sceneId });
+  if (error) throw new Error(error.message);
+  return true;
+}
+/**
+ * Поставити/зняти лайк для поточного користувача.
+ * Повертає { liked:boolean, likes:number } — актуальний стан та кількість.
+ */
+export async function toggleLike(sceneId) {
+  const sb = await getSupabase();
+  const userId = await getUserIdRequired();
+
+  // Чи вже лайкнуто?
+  const exists = await sb
+    .from('scene_likes')
+    .select('scene_id', { count: 'exact', head: false })
+    .eq('scene_id', sceneId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (exists.error && exists.error.code !== 'PGRST116') {
+    // PGRST116 — no rows; інші помилки — пробросити
+    throw new Error(exists.error.message);
+  }
+
+  if (exists.data) {
+    // Вже було — знімаємо лайк
+    const del = await sb
+      .from('scene_likes')
+      .delete()
+      .eq('scene_id', sceneId)
+      .eq('user_id', userId);
+    if (del.error) throw new Error(del.error.message);
+  } else {
+    // Не було — ставимо лайк
+    const ins = await sb
+      .from('scene_likes')
+      .insert({ scene_id: sceneId, user_id: userId });
+    if (ins.error) throw new Error(ins.error.message);
+  }
+
+  // Повернути актуальну кількість
+  const cnt = await sb
+    .from('scene_likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('scene_id', sceneId);
+
+  if (cnt.error) throw new Error(cnt.error.message);
+  const likes = typeof cnt.count === 'number' ? cnt.count : 0;
+  const liked = !exists.data; // якщо вставили — тепер liked=true; якщо видалили — false
+
+  return { liked, likes };
+}
+
+
