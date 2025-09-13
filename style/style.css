@@ -364,7 +364,7 @@ summary {
 /* ====== ЕЛЕМЕНТИ ФОРМИ В ЛІВІЙ ПАНЕЛІ ====== */
 #left-panel .section-content select,
 #left-panel .section-content input,
-#left-panel .section-content button:not(.icon-button) {
+#left-panel .section-content button:not(.icon-button):not(.public-scene-item):not(.scene-like-btn) {
   height: 30px;
   padding: 0 8px;
   font-size: 0.8rem;
@@ -374,6 +374,47 @@ summary {
   background-color: #f7f7f7;
   line-height: 30px;
 }
+/* --- Public scenes: картка має рости по висоті, щоб було видно назву й опис --- */
+#left-panel .section-content .public-scene-item {
+  height: auto;
+  line-height: normal;
+  white-space: normal; /* на випадок, якщо десь було одно-рядкове обрізання */
+}
+
+/* --- Текст картки сцени: курсив і синій для активних/наведених --- */
+#left-panel .section-content .public-scene-item .public-scene-title {
+  font-style: italic;       /* курсив заголовка */
+  color: inherit;           /* базовий колір як у панелі */
+}
+
+/* Тільки колір заголовка міняємо на синій */
+#left-panel .section-content .public-scene-item:hover .public-scene-title,
+#left-panel .section-content .public-scene-item:focus-visible .public-scene-title,
+#left-panel .section-content .public-scene-item.is-active .public-scene-title {
+  color: #0b5cff;           /* той самий синій, що і для режимів */
+}
+
+/* --- Submodes (Всесвіт: Діаметр/Відстань/Світність/Маса) --- */
+/* Додаємо клас .submode-item у розмітку цих пунктів */
+#left-panel .section-content .submode-item {
+  font-size: 0.92em;   /* той самий шрифт, просто трохи менший */
+  font-style: italic;  /* курсив */
+  /* інші властивості (відступи, іконки, сімейство шрифту) успадковуються як у сусідів */
+}
+/* --- Активний/відкритий пункт (сцена або підрежим) --- */
+/* --- Активний/відкритий пункт --- */
+/* Для сцен: лише колір заголовка (фон/рамки не потрібні) */
+#left-panel .section-content .public-scene-item.is-active .public-scene-title,
+#left-panel .section-content .public-scene-item:focus-visible .public-scene-title {
+  color: #0b5cff;
+}
+
+/* (Підрежими залишаємо як є; змін не вносимо) */
+/* Легкий ховер лише для підрежимів (для сцен — вимкнено) */
+#left-panel .section-content .submode-item:hover {
+  background: rgba(11, 92, 255, 0.06);
+}
+
 
 #left-panel .section-content > select:first-of-type {
   margin-top: 0.5em;
@@ -414,7 +455,7 @@ summary {
 /* ====== ЕФЕКТ ПРИ НАВЕДЕННІ КУРСОРА ====== */
 #left-panel .section-content select:hover,
 #left-panel .section-content input:hover,
-#left-panel .section-content button:not(.icon-button):hover {
+#left-panel .section-content button:not(.icon-button):not(.public-scene-item):not(.scene-like-btn):hover {
   background-color: #f9f9f9;       
   cursor: pointer;                
 }
@@ -1246,6 +1287,98 @@ body.modal-open { overflow: hidden; }
   color: #555;
 }
 
+#left-panel .section-content .scene-views {
+  margin-left: auto;   /* перегляди вправо */
+  color: #777;
+}
+/* ==== Public Scenes: improved cards ==== */
+#left-panel details#all_scenes .section-content,
+#left-panel details#interesting .section-content {
+  padding: 8px 10px 12px;
+}
+
+#left-panel .section-content .cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Карточка */
+#left-panel .section-content .public-scene-item {
+  display: grid;
+  height: auto;
+  line-height: normal;
+  white-space: normal;
+  grid-template-rows: auto auto auto;   /* title, desc, stats */
+  gap: 6px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: default;
+  transition: none;
+}
+
+#left-panel .section-content .public-scene-item:hover {
+  box-shadow: none;
+  border-color: inherit;
+}
+
+#left-panel .section-content .public-scene-item:active {
+  transform: none;
+}
+
+#left-panel .section-content .public-scene-item:focus {
+  outline: none;
+  outline-offset: 0;
+}
+
+#left-panel .section-content .public-scene-item.is-active {
+  border-color: inherit;
+  box-shadow: none;
+}
+
+/* Заголовок: 2 рядки, без рваних переносів */
+#left-panel .section-content .public-scene-title {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.25;
+  letter-spacing: .01em;
+  margin: 0;
+  color: inherit;
+  font-style: italic;
+  cursor: pointer;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;   /* максимум 2 рядки */
+  line-clamp: 2;           /* сучасним браузерам */
+  overflow: hidden;
+}
+
+/* Опис: 1 рядок із крапками */
+#left-panel .section-content .public-scene-desc {
+  font-size: 12px;
+  line-height: 1.25;
+  color: #555;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Статистика: ♥ і 👁 акуратно по рядку */
+#left-panel .section-content .public-scene-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #555;
+}
+
+/* Кнопка ♥ */
 #left-panel .section-content .scene-like-btn {
   display: inline-flex;
   align-items: center;
@@ -1256,14 +1389,59 @@ body.modal-open { overflow: hidden; }
   background: #fff;
   line-height: 1;
   cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .02s ease;
 }
 
-#left-panel .section-content .scene-like-btn.is-liked {
-  border-color: rgba(220,20,60,.4);
-  box-shadow: 0 0 0 2px rgba(220,20,60,.08) inset;
-}
-
+/* Число переглядів праворуч */
 #left-panel .section-content .scene-views {
-  margin-left: auto;   /* перегляди вправо */
+  margin-left: auto;
   color: #777;
+}
+
+/* Низ секції (кнопка More) */
+#left-panel .section-content .footer {
+  margin-top: 10px;
+}
+
+#left-panel .section-content .public-all-more.cab-btn {
+  width: 100%;
+}
+
+/* === Like: ♡ (контур) → ♥ (червоне), без рамок і тіней === */
+#left-panel .section-content .scene-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #222;            /* базовий колір і для цифри, і для ♡ */
+  cursor: pointer;
+}
+#left-panel .section-content .scene-like-btn:hover,
+#left-panel .section-content .scene-like-btn:active,
+#left-panel .section-content .scene-like-btn:focus {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  outline: none;
+}
+
+#left-panel .section-content .scene-like-btn .heart-outline { /* ♡ */
+  display: inline-block;
+  line-height: 1;
+}
+#left-panel .section-content .scene-like-btn .heart-fill {    /* ♥ */
+  display: none;             /* показуємо тільки коли .is-liked */
+  line-height: 1;
+  color: #e11900;
+}
+
+/* коли лайкнуто — показуємо ♥, ховаємо ♡ */
+#left-panel .section-content .scene-like-btn.is-liked .heart-outline { display: none; }
+#left-panel .section-content .scene-like-btn.is-liked .heart-fill    { display: inline-block; }
+#left-panel .section-content .scene-like-btn .heart-outline,
+#left-panel .section-content .scene-like-btn .heart-fill {
+  font-family: "Segoe UI Symbol","Noto Color Emoji","Apple Color Emoji",system-ui,sans-serif;
 }

@@ -2,6 +2,7 @@
 import { t } from '/js/i18n.js';
 import { getSceneOfDay, listInteresting, listAllPublic } from '/cabinet/js/cloud/scenes.cloud.js';
 import { incrementSceneView, toggleLike } from '/cabinet/js/cloud/scenes.cloud.js';
+import { getMyLikedSceneIds } from '/cabinet/js/cloud/scenes.cloud.js';
 import { resetAllUI } from '/js/events/reset.js';
 
 
@@ -86,10 +87,18 @@ function renderList(cardsContainer, rows, { append = false, seen = null } = {}) 
     // ── Статистика: ♥ лайки + 👁 перегляди
     const stats = el('div', 'public-scene-stats');
 
-    const likeBtn  = el('button', 'scene-like-btn', { type: 'button', 'aria-label': 'Like' });
-    const likeIcon = el('span', 'scene-like-icon', { text: '♥' });
-    const likeNum  = el('span', 'scene-like-num',  { text: String(row.likes ?? 0) });
-    likeBtn.append(likeIcon, likeNum);
+const likeBtn  = el('button', 'scene-like-btn', { type: 'button', 'aria-label': 'Like' });
+const heartOutline = el('span', 'heart-outline', { text: '♡' });  // контур
+const heartFill    = el('span', 'heart-fill',    { text: '♥' });  // заливка (ховається CSS)
+const likeNum      = el('span', 'scene-like-num', { text: String(row.likes ?? 0) });
+
+likeBtn.append(heartOutline, heartFill, likeNum);
+
+// початковий стан: показуємо ♡; якщо з бекенду прийшов флаг — відразу ♥
+const likedInit = row.likedByMe ?? row.liked ?? false;
+likeBtn.classList.toggle('is-liked', !!likedInit);
+likeBtn.setAttribute('aria-pressed', likedInit ? 'true' : 'false');
+
 
     const viewsSpan = el('span', 'scene-views', { text: `👁 ${row.views ?? 0}` });
 
@@ -113,17 +122,25 @@ function renderList(cardsContainer, rows, { append = false, seen = null } = {}) 
     });
 
     // Клік по сердечку: toggle лайк (не запускає застосування сцени)
-    likeBtn.addEventListener('click', async (ev) => {
-      ev.stopPropagation();
-      try {
-        const res = await toggleLike(row.id);
-        likeNum.textContent = String(res.likes ?? 0);
-        row.likes = res.likes ?? 0;
-        likeBtn.classList.toggle('is-liked', !!res.liked);
-      } catch (e) {
-        console.error('[like]', e);
-      }
-    });
+likeBtn.addEventListener('click', async (ev) => {
+  ev.stopPropagation();
+  try {
+    const res = await toggleLike(row.id);
+    // лічильник з бекенду — джерело правди
+    const likedNow = !!res.liked;
+    const likesNow = Number(res.likes ?? 0);
+
+    likeNum.textContent = String(likesNow);
+    row.likes = likesNow;
+
+    // візуальний стан: заповнення серця + ARIA
+    likeBtn.classList.toggle('is-liked', likedNow);
+    likeBtn.setAttribute('aria-pressed', likedNow ? 'true' : 'false');
+  } catch (e) {
+    console.error('[like]', e);
+  }
+});
+
 
     btn.append(title, desc, stats);
     cardsContainer.append(btn);
@@ -154,6 +171,15 @@ async function handleInterestingOpen(detailsEl) {
 
   try {
     const rows = await listInteresting({ limit: 50 });
+    // мої лайки між сесіями
+try {
+  const ids = rows.map(r => r.id).filter(Boolean);
+  const likedSet = await getMyLikedSceneIds(ids);
+  rows.forEach(r => { r.liked = likedSet.has(r.id); });
+} catch (e) {
+  console.warn('[likes init: interesting]', e);
+}
+
     cards.replaceChildren();
     if (!rows?.length) {
       cards.textContent = (t('scenes.empty') || '');
@@ -186,6 +212,15 @@ async function handleAllOpen(detailsEl) {
   state.allBusy = true;
   try {
     const rows = await listAllPublic({ limit: state.allLimit, offset: state.allOffset });
+    // мої лайки між сесіями
+try {
+  const ids = rows.map(r => r.id).filter(Boolean);
+  const likedSet = await getMyLikedSceneIds(ids);
+  rows.forEach(r => { r.liked = likedSet.has(r.id); });
+} catch (e) {
+  console.warn('[likes init: all]', e);
+}
+
 
     if (first) cards.replaceChildren();
 

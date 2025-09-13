@@ -279,4 +279,26 @@ export async function toggleLike(sceneId) {
   return { liked, likes };
 }
 
+// === Моє: набір scene_id, які лайкнув поточний користувач серед переданих ===
+export async function getMyLikedSceneIds(sceneIds = []) {
+  try {
+    if (!Array.isArray(sceneIds) || sceneIds.length === 0) return new Set();
+
+    const sb = await getSupabase();
+    const uid = await getUserIdOrNull();
+    if (!uid) return new Set(); // гість — нічого не підсвічуємо
+
+    const { data, error } = await sb
+      .from('scene_likes')      // таблиця лайків
+      .select('scene_id')
+      .eq('user_id', uid)
+      .in('scene_id', sceneIds);
+
+    if (error) throw new Error(error.message);
+    return new Set((data || []).map(r => r.scene_id));
+  } catch (e) {
+    console.error('[cloud] getMyLikedSceneIds failed:', e);
+    return new Set();
+  }
+}
 
