@@ -8,6 +8,22 @@ import { onHistoryCalculate } from '/js/events/history_buttons.js';
 (function registerHistoryApplier(){
   'use strict';
 
+    // ---- control for single pending "first center move" handler
+  const CENTER_EVS = ['orbit:center-changed','orbit:centerChanged','og:center-changed','og:centerChanged'];
+  let pendingCenterOnce = null;
+
+  function clearPendingCenterOnce() {
+    if (!pendingCenterOnce) return;
+    for (const ev of CENTER_EVS) {
+      window.removeEventListener(ev, pendingCenterOnce);
+    }
+    pendingCenterOnce = null;
+  }
+
+  // safety: будь-який повний reset знімає ще не спрацювали "одноразові" слухачі
+  window.addEventListener('orbit:ui-reset', clearPendingCenterOnce);
+
+
   // ---------- маленькі DOM-хелпери ----------
   function setDetailsOpen(id) {
     const det = document.getElementById(id);
@@ -50,31 +66,35 @@ import { onHistoryCalculate } from '/js/events/history_buttons.js';
     return [];
   }
 
-  // ---------- одноразовий «сторож» першої зміни центру ----------
-  function setupFirstCenterRepaint(query) {
-    if (!query || query.__history_applier_reapplied) return;
+// ---------- одноразовий «сторож» першої зміни центру (без накопичення) ----------
+function setupFirstCenterRepaint(query) {
+  if (!query || query.__history_applier_reapplied) return;
 
-    const once = async () => {
-      try {
-        // повне очищення того ж шару, що робить Reset у режимі
-        window.dispatchEvent(new Event('orbit:ui-reset'));
-      } catch (_) {}
+  // перед установкою нового — прибрати попередній, якщо ще не спрацював
+  clearPendingCenterOnce();
 
-      try {
-        // позначимо, що вже робили автоперемальовку — щоб не зациклитись
-        const q2 = { ...query, __history_applier_reapplied: true };
-        await applyHistoryScene(q2);
-      } catch (e) {
-        console.error('[history_applier] repaint after center change failed:', e);
-      }
-    };
+  const once = async () => {
+    // зняти той самий handler з усіх назв подій, аби він гарантовано спрацював лише раз
+    clearPendingCenterOnce();
 
-    // типові назви подій зміни центру; спрацює будь-яка з них (першою)
-    const EVS = ['orbit:center-changed', 'orbit:centerChanged', 'og:center-changed', 'og:centerChanged'];
-    for (const ev of EVS) {
-      window.addEventListener(ev, once, { once: true });
+    try {
+      window.dispatchEvent(new Event('orbit:ui-reset'));
+    } catch (_) {}
+
+    try {
+      const q2 = { ...query, __history_applier_reapplied: true };
+      await applyHistoryScene(q2);
+    } catch (e) {
+      console.error('[history_applier] repaint after center change failed:', e);
     }
+  };
+
+  pendingCenterOnce = once;
+  for (const ev of CENTER_EVS) {
+    window.addEventListener(ev, once, { once: true });
   }
+}
+
 
   // ---------- головний аплаєр ----------
   async function applyHistoryScene(query) {

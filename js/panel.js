@@ -2,7 +2,7 @@
 
 'use strict';
 
-import { resetAllUI, resetScreenUI } from './events/reset.js';
+import { resetAllUI } from './events/reset.js';
 import { getMode } from './modes/registry.js';
 import './modes/builtin.js'; // реєструє стандартні режими (side-effect)
 
@@ -576,33 +576,27 @@ else if (el.classList.contains('panel-note')) {
 subSum.addEventListener('click', (e) => {
   e.preventDefault();
 
-  const wasOpen = subDet.open === true;
-  const root = document.getElementById('left-panel');
+  const leftPanel = document.getElementById('left-panel');
+  const opening = !subDet.open;
 
-  if (root) {
+  if (leftPanel) {
     // Закрити всі підрежими у всіх секціях
-    root.querySelectorAll('#left-panel details details').forEach(other => {
+    leftPanel.querySelectorAll('#left-panel details details').forEach(other => {
       if (other !== subDet) other.open = false;
     });
-    // Закрити всі топ-рівневі режими (history/money/math тощо), крім контейнерів
-const containerDet = subDet.closest('#left-panel > details');
-root.querySelectorAll('#left-panel > details').forEach(top => {
-  if (top !== containerDet) top.open = false;
-});
-
+    // Закрити всі топ-рівневі режими, крім контейнера цього підрежиму
+    const containerDet = subDet.closest('#left-panel > details');
+    leftPanel.querySelectorAll('#left-panel > details').forEach(top => {
+      if (top !== containerDet) top.open = false;
+    });
   }
 
-  if (wasOpen) {
-    subDet.open = false;
-    resetAllUI();
-    return;
-  }
+  // Навігація → завжди повний ресет
+  resetAllUI();
 
-  resetScreenUI(); // легкий reset: НЕ чистить селекти з даними
-  subDet.open = true;
+  // Відкрити/закрити поточний підрежим
+  subDet.open = opening;
 });
-
-
 
         content.append(subDet);
       });
@@ -616,57 +610,32 @@ root.querySelectorAll('#left-panel > details').forEach(top => {
     }
 
     // Закриття інших головних секцій при відкритті цієї
-// Клік по головному summary
 sum.addEventListener('click', (e) => {
   e.preventDefault();
 
   const leftPanel = document.getElementById('left-panel');
-  const isContainer = Array.isArray(sec.children); // univers/geo: список підрежимів
-
-if (isContainer) {
-  const wasOpen = det.open === true;
-
-  // закрити всі інші топ-рівневі секції
-  document.querySelectorAll('#left-panel > details').forEach(other => {
-    if (other !== det) other.open = false;
-  });
-
-  if (wasOpen) {
-    // закриваємо контейнер + підсекції та робимо ПОВНИЙ reset
-    det.open = false;
-    det.querySelectorAll('details').forEach(d => d.open = false);
-    resetAllUI();
-  } else {
-    // відкриваємо контейнер із чистого стану
-    resetScreenUI(); // не чіпає вміст форм/випадайок
-    det.open = true;
-  }
-  return;
-}
-
-
-  // Режим без підрежимів (history/money/math/…)
-  const wasOpen = det.open === true;
+  const isContainer = Array.isArray(sec.children); // univers/geo мають підрежими
+  const opening = !det.open;
 
   if (leftPanel) {
     // Закрити всі підрежими у всіх контейнерах
     leftPanel.querySelectorAll('#left-panel details details').forEach(d => d.open = false);
-    // Закрити всі інші топ-рівневі режими (окрім контейнерів і цього)
+    // Закрити всі інші топ-рівневі режими (окрім дозволених і поточного)
     leftPanel.querySelectorAll('#left-panel > details').forEach(other => {
       if (other !== det && !ALWAYS_OPEN_SECTIONS.has(other.id)) other.open = false;
     });
   }
 
-  if (wasOpen) {
-    det.open = false;
-    resetAllUI(); // клік по відкритому → закрити й повністю очистити
-    return;
+  // Навігація → завжди повний ресет
+  resetAllUI();
+
+  // Відкрити/закрити поточну секцію
+  det.open = opening;
+
+  // Якщо закриваємо контейнер — також закрити його підрежими
+  if (!opening && isContainer) {
+    det.querySelectorAll('details').forEach(d => d.open = false);
   }
-
-  resetAllUI(); // перехід з іншого режиму → повний reset
-  // Контейнери (univers/geo) лишаємо відкритими
-det.open = true; // просто відкриваємо обраний режим
-
 });
 
 
@@ -686,27 +655,4 @@ getMode('math')?.initBlock?.();
 getMode('geo_area')?.initBlock?.();
 getMode('geo_population')?.initBlock?.();
 getMode('geo_objects')?.initBlock?.();
-
-  // ==== Авто-скидання при переході у будь-яку іншу секцію лівої панелі
-  const leftPanel = document.getElementById('left-panel');
-  if (leftPanel && !leftPanel.__orbitResetHookAttached) {
-    leftPanel.addEventListener('click', (e) => {
-  const sum = e.target.closest('summary');
-  if (!sum || !leftPanel.contains(sum)) return;
-
-  const det = sum.parentElement; // <details>
-
-  // Працюємо лише для ГОЛОВНИХ секцій (#left-panel > details)
-  const isTopLevel = det && det.parentElement === leftPanel;
-
-  if (isTopLevel && det.tagName === 'DETAILS' && !det.open) {
-    // при переході між головними секціями — легкий "екранний" ресет
-    resetScreenUI();
-  }
-}, true);
-
-
-    // Захист від повторного підвішування
-    leftPanel.__orbitResetHookAttached = true;
-  }
 }
