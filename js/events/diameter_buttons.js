@@ -3,21 +3,66 @@
 
 /**
  * Обробник для режиму «Діаметри».
- * Рівно за еталоном «Гроші», але з лінійним масштабом діаметрів.
+ * Побудовано за еталоном «Історія»:
+ *  - є локальний буфер обраних О2 + публічний геттер (для серіалізатора);
+ *  - стабільний лічильник результатів для О2 (кольори/ID кіл);
+ *  - на глобальний UI-RESET скидаємо лічильник; буфер О2 чистимо лише коли це НЕ "перемальовування";
+ *  - під час "перемальовування" (repaint) НЕ пишемо в інфопанель і НЕ пушимо О2 у буфер → без дублів.
  */
 
 import { getDiameterData } from '../data/data_diameter.js';
 import { setDiameterBaseline, addDiameterCircle, resetDiameterScale } from '../calc/calculate_diameter.js';
 
-import { setBaselineResult, addResult } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
   setCircleLabelTextById,
 } from '../globe/circles.js';
 
-// Лічильник для унікальних id кіл О2
+// ——— СТАН СЕСІЇ ———
+
+// Лічильник для унікальних id/кольорів О2 (скидається на UI-RESET)
 let diameterResultSeq = 0;
+
+// Прапорець «йде перемальовування сцени» (аплаєр має кидати orbit:repaint-start/end)
+let __isRepaint = false;
+
+// Локальний список вибраних О2 (накопичується під час створення сцени)
+const __diameterSelectedO2s = [];
+
+// Додати один О2 до списку (без побічних ефектів)
+function __pushSelectedO2(item) {
+  try {
+    const categoryKey = String(item?.object2?.category || item?.object2?.categoryKey || '').trim();
+    const name = String(item?.object2?.name || '').trim();
+    const objectId = String(
+      item?.object2?.userId || item?.object2?.objectId || item?.object2?.name || ''
+    ).trim(); // офіц. id або fallback=назва
+    if (!categoryKey || !objectId) return;
+    __diameterSelectedO2s.push({ categoryKey, objectId, name: name || null });
+  } catch (_) {}
+}
+
+// Очистити список (на нову сцену)
+function __resetSelectedO2s() {
+  __diameterSelectedO2s.length = 0;
+}
+
+// Публічний геттер для серіалізатора univers_diameter_serializer.js
+try {
+  (window.orbit ||= {});
+  window.orbit.getUniversDiameterSelectedO2s = () => __diameterSelectedO2s.slice();
+} catch (_) {}
+
+// ——— ГЛОБАЛЬНІ ПОДІЇ ———
+try {
+  window.addEventListener('orbit:ui-reset', () => {
+    diameterResultSeq = 0;
+    __resetSelectedO2s();
+  });
+} catch {}
+
 
 /**
  * onDiameterCalculate({ scope, object1Group, object2Group })
@@ -32,11 +77,12 @@ export function onDiameterCalculate({ scope /*, object1Group, object2Group */ })
   const color2 = getColorForKey(`diameter:o2:${++diameterResultSeq}`);
 
   // 2) Baseline у калькуляторі
-  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // D1 (м)
-  const v1 = Number(data?.object1?.diameterReal);                      // V1 (м)
+  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // D1 (м) — масштабований діаметр на мапі
+  const v1 = Number(data?.object1?.diameterReal);                      // V1 (м) — реальний діаметр
   const u1 = data?.object1?.unit || 'm';
 
-  resetDiameterScale(); // чистий стан на кожен розрахунок
+  // Завжди оновлюємо внутрішній масштаб (геометрія кола залежить від центру)
+  resetDiameterScale();
   setDiameterBaseline({
     diameterReal: v1,
     unit: u1,
@@ -55,19 +101,27 @@ export function onDiameterCalculate({ scope /*, object1Group, object2Group */ })
     }
   }
 
-  // 2b) Інфопанель: baseline
+  // 2b) Інфопанель: baseline (лише якщо це НЕ перевідмальовування)
   const o1RealOk = Number.isFinite(v1) && v1 > 0;
-  setBaselineResult({
-    libIndex: data?.object1?.libIndex ?? null,
-    realValue: o1RealOk ? v1 : null,
-    realUnit:  o1RealOk ? u1 : null,
-    scaledMeters: baselineDiameter,  // діаметр базового кола на мапі
-    name: data?.object1?.name || '',
-    description: data?.object1?.description || '',
-    color: color1,
-    uiLeftLabelKey:  'diameter.labels.o1.left',   // "Діаметр"
-    uiRightLabelKey: 'diameter.labels.o1.right',  // "Масштабований діаметр"
-  });
+ addGroup({
+  id: 'diameter_o1',
+  title: data?.object1?.name || '',
+  color: color1,
+  groupType: 'baseline',
+  uiLeftLabelKey:  'diameter.labels.o1.left',
+  uiRightLabelKey: 'diameter.labels.o1.right',
+});
+appendVariant({
+  id: 'diameter_o1',
+  variant: 'single',
+  realValue: o1RealOk ? v1 : null,
+  realUnit:  o1RealOk ? u1 : null,
+  scaledMeters: baselineDiameter
+});
+if (String(data?.object1?.description || '').trim()) {
+  setGroupDescription({ id: 'diameter_o1', description: data.object1.description });
+}
+
 
   // ——— LOCK O1 UI ДО RESET + START SESSION ———
   const baselineValid = o1RealOk && baselineDiameter > 0;
@@ -101,30 +155,41 @@ export function onDiameterCalculate({ scope /*, object1Group, object2Group */ })
     }
   }
 
-  // 4) Інфопанель: результат О2
+  // 4) Інфопанель: результат О2 (лише якщо це НЕ перевідмальовування)
   const o2RealOk = Number.isFinite(v2) && v2 > 0;
   const scaledDiameterMeters = res && Number(res.scaledRadiusMeters) > 0
     ? 2 * Number(res.scaledRadiusMeters)
     : 0;
 
-  addResult({
-    libIndex: data?.object2?.libIndex ?? null,
-    realValue: o2RealOk ? v2 : null,
-    realUnit:  o2RealOk ? u2 : null,
-    scaledMeters: scaledDiameterMeters,
-    name: data?.object2?.name || '',
-    description: data?.object2?.description || '',
-    color: color2,
-    invisibleReason: res?.tooLarge ? 'tooLarge' : null,
-    requiredBaselineMeters: res?.requiredBaselineMeters ?? null
-  });
+const groupId = `diameter_o2_${diameterResultSeq}`;
+addGroup({
+  id: groupId,
+  title: data?.object2?.name || '',
+  color: color2,
+  groupType: 'item',
+  uiLeftLabelKey:  'diameter.labels.o1.left',
+  uiRightLabelKey: 'diameter.labels.o1.right',
+});
+appendVariant({
+  id: groupId,
+  variant: 'single',
+  realValue: o2RealOk ? v2 : null,
+  realUnit:  o2RealOk ? u2 : null,
+  scaledMeters: scaledDiameterMeters,
+  invisibleReason: res?.tooLarge ? 'tooLarge' : null,
+  requiredBaselineMeters: res?.requiredBaselineMeters ?? null
+});
+if (String(data?.object2?.description || '').trim()) {
+  setGroupDescription({ id: groupId, description: data.object2.description });
+}
+__pushSelectedO2(data);
+
 
   // Консоль для діагностики
   console.log(
-    '[mode:diameter] D1=%sm; V1=%sm; V2=%sm → D2=%sm',
-    baselineDiameter,
-    o1RealOk ? v1.toLocaleString() : '—',
-    o2RealOk ? v2.toLocaleString() : '—',
-    scaledDiameterMeters
-  );
+  '[mode:diameter] O1: D(m)=%s → Dscaled=%s; O2: V(m)=%s → Dscaled=%s',
+  o1RealOk ? v1 : '—', baselineDiameter,
+  o2RealOk ? v2 : '—', scaledDiameterMeters
+);
+
 }

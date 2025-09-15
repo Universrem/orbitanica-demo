@@ -3,7 +3,7 @@
 
 import { t, getCurrentLang } from '../i18n.js';
 import { getUniverseLibrary } from '../data/universe.js';
-import { formatHistoryGroupTitle, formatHistoryVariantPrefix } from './ip_text_history.js';
+import { formatHistoryVariantPrefix } from './ip_text_history.js';
 
 
 let panelEl = null;
@@ -205,8 +205,8 @@ function render() {
   };
 
   items.forEach(it => {
-        // === Grouped History rendering ===
-    if (it.type === 'history-group') {
+    if (it.type === 'group') {
+
       // підпис "лівий → правий" показуємо один раз для baseline/item
 if (it.groupType === 'baseline') {
   appendSubtitleIfNeeded({
@@ -452,24 +452,36 @@ export function addResultV2({ name, description, thumbUrl, realValue, realUnit, 
   });
   render();
 }
-/** === History (grouped) API === */
-export function addHistoryGroup({ id, title, color, thumbUrl = '', groupType = 'item' }) {
+
+
+export function addGroup({
+  id,
+  title,
+  color,
+  thumbUrl = '',
+  groupType = 'item',           // 'baseline' | 'item'
+  uiLeftLabelKey,
+  uiRightLabelKey
+}) {
   ensureDom();
   const gid = String(id || '').trim();
   if (!gid) return;
-  const idx = items.findIndex(it => it.type === 'history-group' && it.groupId === gid);
+
+  const idx = items.findIndex(it => it.type === 'group' && it.groupId === gid);
+
   const rec = {
-    type: 'history-group',
+    type: 'group',
     groupId: gid,
-    groupType, // 'baseline' | 'item'
-    title: formatHistoryGroupTitle(title),
+    groupType,
+    title: String(title || ''),
     color: color || 'rgba(60,60,60,0.9)',
     thumbUrl: String(thumbUrl || ''),
     description: '',
-    uiLeftLabelKey: 'history.labels.o1.left',
-    uiRightLabelKey: 'history.labels.o1.right',
+    uiLeftLabelKey: String(uiLeftLabelKey || ''),
+    uiRightLabelKey: String(uiRightLabelKey || ''),
     variants: []
   };
+
   if (idx >= 0) {
     const prev = items[idx];
     rec.variants = Array.isArray(prev.variants) ? prev.variants : [];
@@ -481,7 +493,8 @@ export function addHistoryGroup({ id, title, color, thumbUrl = '', groupType = '
   render();
 }
 
-export function appendHistoryVariant({
+
+export function appendVariant({
   id,
   variant,
   realValue = null,
@@ -493,21 +506,20 @@ export function appendHistoryVariant({
   ensureDom();
   const gid = String(id || '').trim();
   if (!gid) return;
-  const idx = items.findIndex(it => it.type === 'history-group' && it.groupId === gid);
+
+  const idx = items.findIndex(it => it.type === 'group' && it.groupId === gid);
   if (idx < 0) return;
 
-  // Ключ унікальності: 'start' | 'end' | 'single' (для одинарних подій без діапазону)
+  // 'start' | 'end' | 'single'
   const key = (variant === 'start' || variant === 'end') ? variant : 'single';
-  const rec = { variant, realValue, realUnit, scaledMeters, invisibleReason, requiredBaselineMeters };
+  const rec = { variant: key, realValue, realUnit, scaledMeters, invisibleReason, requiredBaselineMeters };
 
   const arr = Array.isArray(items[idx].variants) ? items[idx].variants : [];
   const pos = arr.findIndex(v => ((v?.variant === 'start' || v?.variant === 'end') ? v.variant : 'single') === key);
 
   if (pos >= 0) {
-    // Оновлюємо існуючий підрядок (ідемпотентно)
-    arr[pos] = rec;
+    arr[pos] = rec;         // upsert
   } else {
-    // Додаємо новий підрядок
     arr.push(rec);
   }
 
@@ -515,14 +527,14 @@ export function appendHistoryVariant({
   render();
 }
 
-
-export function setHistoryGroupDescription({ id, description = '' }) {
+export function setGroupDescription({ id, description = '' }) {
   ensureDom();
   const gid = String(id || '').trim();
   if (!gid) return;
-  const idx = items.findIndex(it => it.type === 'history-group' && it.groupId === gid);
+  const idx = items.findIndex(it => it.type === 'group' && it.groupId === gid);
   if (idx < 0) return;
   items[idx].description = String(description || '');
   render();
 }
+
 

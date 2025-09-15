@@ -198,9 +198,15 @@ function openSaveSceneModal(onSubmit /* (formValues, setError, close) */) {
 // ---------- Дрібні утиліти ----------
 function getActiveModeId() {
   const left = document.getElementById('left-panel');
-  const det = left?.querySelector(':scope > details[open]') || document.querySelector('#left-panel > details[open]');
-  return det?.id || null;
+  const top = left?.querySelector(':scope > details[open]')
+           || document.querySelector('#left-panel > details[open]');
+  if (!top) return null;
+
+  // якщо це контейнер (univers/geo) і є відкритий підрежим — беремо його id
+  const sub = top.querySelector(':scope > .section-content > details[open]');
+  return (sub?.id) || top.id || null;
 }
+
 
 // ---------- Провід: обробка «Save scene» ----------
 async function handleSaveScene() {

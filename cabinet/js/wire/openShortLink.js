@@ -7,9 +7,6 @@ import { getSceneByCode } from '/cabinet/js/cloud/scenes.cloud.js';
 import { onHistoryCalculate } from '/js/events/history_buttons.js';
 import { t } from '/js/i18n.js';
 
-// Поки що підтримуємо один режим явно
-const SUPPORTED_MODES = ['history'];
-
 /* ====================== Службові UI-хелпери ====================== */
 function openInfoModal(titleText, bodyText) {
   const id = 'cab-info-overlay';
@@ -179,21 +176,34 @@ async function bootstrap() {
 
     const q = migrateQueryIfNeeded(scene.query || scene);
 
-    if (!SUPPORTED_MODES.includes(q.mode)) {
-      openInfoModal('Error', `Mode "${q.mode}" is not supported.`);
-      return;
-    }
-
     // Дамо шанс іншим частинам UI підхопити подію
     document.dispatchEvent(new CustomEvent('cabinet:scene-loaded', { detail: { scene, code, query: q } }));
 
-    // Основний шлях: централізований аплаєр
-    if (window?.orbit?.applyScene) {
-      await window.orbit.applyScene(q);
-    } else if (q.mode === 'history' && q.history) {
-      // Запасний шлях: «тихий» програвач без кліків
-      await applyHistorySilent(q.history);
-    }
+// Основний шлях: централізований аплаєр або прямий аплаєр із реєстру
+let applied = false;
+
+if (window?.orbit?.applyScene) {
+  await window.orbit.applyScene(q);
+  applied = true;
+} else {
+  const applier = window?.orbit?.getSceneApplier?.(q.mode);
+  if (typeof applier === 'function') {
+    await applier(q);
+    applied = true;
+  }
+}
+
+// Тимчасовий підстраховуючий фолбек лише для history (бо вже є в цьому файлі)
+if (!applied && q.mode === 'history' && q.history) {
+  await applyHistorySilent(q.history);
+  applied = true;
+}
+
+if (!applied) {
+  openInfoModal('Error', `Mode "${q.mode}" is not supported.`);
+  return;
+}
+
 
     // Приберемо '?s=' із адресного рядка (щоб не заважав далі)
     const url = new URL(location.href);

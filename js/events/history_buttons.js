@@ -24,7 +24,7 @@ import {
   resetHistoryScale
 } from '../calc/calculate_history.js';
 
-import { addHistoryGroup, appendHistoryVariant, setHistoryGroupDescription } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
@@ -117,7 +117,7 @@ export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) 
   const y1_start = data?.object1?.yearStart;
   const y1_start_ok = Number.isFinite(y1_start);
 
-  addHistoryGroup({
+  addGroup({
     id: 'history_o1',
     title: data?.object1?.name || '',
     color: color1,
@@ -127,7 +127,7 @@ export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) 
     uiRightLabelKey: 'history.labels.o1.right',
   });
 
-  appendHistoryVariant({
+  appendVariant({
     id: 'history_o1',
     variant: hasEnd1 ? 'start' : 'single', // якщо нема end, це ОДИН запис з '-'
     realValue: y1_start_ok ? y1_start : null,
@@ -136,7 +136,7 @@ export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) 
   });
 
   if (String(data?.object1?.description || '').trim()) {
-    setHistoryGroupDescription({
+    setGroupDescription({
       id: 'history_o1',
       description: data?.object1?.description
     });
@@ -178,7 +178,7 @@ export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) 
       }
     }
 
-    appendHistoryVariant({
+    appendVariant({
       id: 'history_o1',
       variant: 'end',
       realValue: y1_end,
@@ -204,7 +204,7 @@ export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) 
   } else {
     // 4x) Група О2 (уніфіковані лейбли колонок!)
     const groupId = `history_o2_${historyResultSeq}`;
-    addHistoryGroup({
+    addGroup({
       id: groupId,
       title: o2name || '',
       color: color2,
@@ -213,7 +213,7 @@ export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) 
       uiRightLabelKey: 'history.labels.o1.right',
     });
     if (o2desc) {
-      setHistoryGroupDescription({
+      setGroupDescription({
         id: groupId,
         description: o2desc
       });
@@ -231,7 +231,7 @@ export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) 
           setCircleLabelTextById(id, lbl2);
         }
       }
-      appendHistoryVariant({
+      appendVariant({
         id: groupId,
         variant: hasEnd2 ? 'start' : 'single',
         realValue: y2_start,
@@ -250,7 +250,7 @@ export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) 
         const id = addGeodesicCircle(resE.scaledRadiusMeters, color2, `${groupId}_end`);
         if (id && o2name) setCircleLabelTextById(id, `${o2name} ]`);
       }
-      appendHistoryVariant({
+      appendVariant({
         id: groupId,
         variant: 'end',
         realValue: y2_end,

@@ -1,10 +1,10 @@
-// /cabinet/js/serializers/money_serializer.js
-// Серіалізатор режиму «Money» з підтримкою масиву О2 (o2s).
+// /cabinet/js/serializers/geo_population_serializer.js
+// Серіалізатор режиму «Geography → Population» з підтримкою масиву О2 (o2s).
 // Працює незалежно від порядку завантаження: якщо місток ще не готовий — стає в чергу.
 
 import { getCurrentLang } from '/js/i18n.js';
 
-(function registerMoneySerializer() {
+(function registerGeoPopulationSerializer() {
   'use strict';
 
   // ---------- helpers ----------
@@ -54,39 +54,39 @@ import { getCurrentLang } from '/js/i18n.js';
   // Масив О2: спершу офіційний стан, інакше — фолбек на поточні селекти (1 елемент)
   function readO2Array() {
     try {
-      if (typeof window?.orbit?.getMoneySelectedO2s === 'function') {
-        const fromState = window.orbit.getMoneySelectedO2s();
+      if (typeof window?.orbit?.getGeoPopulationSelectedO2s === 'function') {
+        const fromState = window.orbit.getGeoPopulationSelectedO2s();
         if (!Array.isArray(fromState)) {
-          console.warn('[money_serializer] getMoneySelectedO2s() must return array; got:', typeof fromState);
+          console.warn('[geo_population_serializer] getGeoPopulationSelectedO2s() must return array; got:', typeof fromState);
         } else {
           const norm = fromState.map(normO2).filter(Boolean);
           if (norm.length) return norm;
         }
       }
     } catch (err) {
-      console.warn('[money_serializer] Error reading O2 from state:', err);
+      console.warn('[geo_population_serializer] Error reading O2 from state:', err);
     }
 
     // Фолбек: поточний вибір у випадайках → масив із 1 елемента або порожній
-    const cat2 = readSelectInfo('moneyCategoryObject2');
-    const obj2 = readSelectInfo('moneyObject2');
+    const cat2 = readSelectInfo('geoPopCategoryObject2');
+    const obj2 = readSelectInfo('geoPopObject2');
     const one = normO2({ categoryKey: cat2.value, objectId: obj2.value, name: obj2.label });
     return one ? [one] : [];
   }
 
   // ---------- serializer ----------
-  const serializer = function serializeMoneyScene() {
+  const serializer = function serializeGeoPopulationScene() {
     // О1
-    const cat1 = readSelectInfo('moneyCategoryObject1');
-    const obj1 = readSelectInfo('moneyObject1');
-    const baselineMeters = readNumberOrNull('moneyBaselineDiameter');
+    const cat1 = readSelectInfo('geoPopCategoryObject1');
+    const obj1 = readSelectInfo('geoPopObject1');
+    const baselineMeters = readNumberOrNull('geoPopBaselineDiameter');
 
     // О2 (масив)
     const o2s = readO2Array();
 
     // Мінімальна валідність: має бути О1 та хоча б один О2
     if (!obj1.value || o2s.length === 0) {
-      console.warn('[money_serializer] Incomplete data: need O1 and at least one O2');
+      console.warn('[geo_population_serializer] Incomplete data: need O1 and at least one O2');
       return null;
     }
 
@@ -94,9 +94,9 @@ import { getCurrentLang } from '/js/i18n.js';
     const scene = {
       version: 2,
       lang: getCurrentLang?.() || 'en',
-      mode: 'money',
+      mode: 'geo_population',
       center: getCenterOrNull(),
-      money: {
+      geo_population: {
         o1: {
           categoryKey: cat1.value,
           name: obj1.label,
@@ -113,14 +113,14 @@ import { getCurrentLang } from '/js/i18n.js';
   // ---------- реєстрація / черга ----------
   try {
     if (window?.orbit?.registerSceneSerializer) {
-      window.orbit.registerSceneSerializer('money', serializer);
+      window.orbit.registerSceneSerializer('geo_population', serializer);
     } else {
       (window.__orbit_pending_serializers__ ||= []).push({
-        mode: 'money',
+        mode: 'geo_population',
         fn: serializer
       });
     }
   } catch (e) {
-    console.error('[money_serializer] register failed:', e);
+    console.error('[geo_population_serializer] register failed:', e);
   }
 })();
