@@ -1,116 +1,106 @@
 // /cabinet/js/serializers/univers_luminosity_serializer.js
 // Серіалізатор режиму «Universe → Luminosity» з підтримкою масиву О2 (o2s).
-// Працює незалежно від порядку завантаження: якщо місток ще не готовий — стає в чергу.
+// Стає в чергу, якщо реєстратор ще не готовий.
 
 import { getCurrentLang } from '/js/i18n.js';
 
 (function registerUniversLuminositySerializer() {
   'use strict';
 
-  // ---------- helpers ----------
+  // ---- helpers ----
   function getCenterOrNull() {
     try {
       const c = window?.orbit?.getCenter?.();
       if (c && Number.isFinite(c.lat) && Number.isFinite(c.lon)) {
         return { lat: c.lat, lon: c.lon };
       }
-    } catch (_) {}
+    } catch {}
     return null;
   }
 
-  function readSelectInfo(selectId) {
-    const el = document.getElementById(selectId);
-    if (!el || el.tagName !== 'SELECT') return { value: null, label: null };
-    const value = el.value ?? null;
-    let label = null;
-    try {
-      const opt = el.selectedIndex >= 0 ? el.options[el.selectedIndex] : null;
-      label = (opt?.textContent || '').trim() || null;
-    } catch (_) {}
-    return { value: value || null, label };
+  function readSelectInfo(id) {
+    const el = document.getElementById(id);
+    if (!el || el.tagName !== 'SELECT') return { value: '', label: '' };
+    const value = String(el.value || '');
+    const label = String(el.options?.[el.selectedIndex]?.text || '');
+    return { value, label };
   }
 
-  function readNumberOrNull(inputId) {
-    const el = document.getElementById(inputId);
-    if (!el) return null;
-    const n = Number(String(el.value ?? '').replace(',', '.').trim());
-    return Number.isFinite(n) ? n : null;
+  function readNumber(id) {
+    const el = document.getElementById(id);
+    if (!el) return NaN;
+    const v = Number(el.value);
+    return Number.isFinite(v) ? v : NaN;
   }
 
-  // Уніфікація одного елемента О2
-  function normO2(x) {
-    if (!x) return null;
-    const categoryKey = (x.categoryKey ?? x.category ?? null);
-    const objectId    = (x.objectId ?? x.id ?? null);
-    const name        = (x.name ?? x.label ?? null);
+  function normO(obj) {
+    const categoryKey = String(obj?.categoryKey || '').trim();
+    const objectId    = String(obj?.objectId    || '').trim();
+    const nameRaw     = obj?.name ?? obj?.label ?? null;
     if (!categoryKey || !objectId) return null;
     return {
-      categoryKey: String(categoryKey),
-      objectId: String(objectId),
-      name: name ? String(name) : null
+      categoryKey,
+      objectId,
+      name: nameRaw != null ? String(nameRaw) : null
     };
   }
 
-  // Масив О2: спершу офіційний стан, інакше — фолбек на поточні селекти (1 елемент)
+  // Масив О2: пріоритет — з буфера кнопок; фолбек — поточні селекти (1 шт)
   function readO2Array() {
     try {
       if (typeof window?.orbit?.getUniversLuminositySelectedO2s === 'function') {
         const fromState = window.orbit.getUniversLuminositySelectedO2s();
-        if (!Array.isArray(fromState)) {
-          console.warn('[univers_luminosity_serializer] getUniversLuminositySelectedO2s() must return array; got:', typeof fromState);
-        } else {
-          const norm = fromState.map(normO2).filter(Boolean);
+        if (Array.isArray(fromState)) {
+          const norm = fromState.map(normO).filter(Boolean);
           if (norm.length) return norm;
+        } else {
+          console.warn('[univers_luminosity_serializer] getUniversLuminositySelectedO2s() must return array; got:', typeof fromState);
         }
       }
     } catch (err) {
       console.warn('[univers_luminosity_serializer] Error reading O2 from state:', err);
     }
 
-    // Фолбек: поточний вибір у випадайках → масив із 1 елемента або порожній
     const cat2 = readSelectInfo('lumiCategoryObject2');
     const obj2 = readSelectInfo('lumiObject2');
-    const one = normO2({ categoryKey: cat2.value, objectId: obj2.value, name: obj2.label });
+    const one  = normO({ categoryKey: cat2.value, objectId: obj2.value, name: obj2.label });
     return one ? [one] : [];
   }
 
-  // ---------- serializer ----------
-  const serializer = function serializeUniversLuminosityScene() {
-    // О1
+  // ---- serializer ----
+  const serializer = () => {
+    // O1 (у «Світності» два селектори)
     const cat1 = readSelectInfo('lumiCategoryObject1');
     const obj1 = readSelectInfo('lumiObject1');
-    const baselineMeters = readNumberOrNull('lumiCircleObject1');
+    const o1   = normO({ categoryKey: cat1.value, objectId: obj1.value, name: obj1.label });
 
-    // О2 (масив)
-    const o2s = readO2Array();
+    // масштаб — діаметр кола для О1
+    const baselineDiameterMeters = readNumber('lumiCircleObject1');
 
-    // Мінімальна валідність: має бути О1 та хоча б один О2
-    if (!obj1.value || o2s.length === 0) {
-      console.warn('[univers_luminosity_serializer] Incomplete data: need O1 and at least one O2');
+    // Якщо немає О1 або масштабу — сцена невалідна
+    if (!o1 || !Number.isFinite(baselineDiameterMeters) || baselineDiameterMeters <= 0) {
       return null;
     }
 
-    // Сцена
     const scene = {
-      version: 2,
-      lang: getCurrentLang?.() || 'en',
       mode: 'univers_luminosity',
+      lang: typeof getCurrentLang === 'function' ? getCurrentLang() : null,
       center: getCenterOrNull(),
       univers_luminosity: {
         o1: {
-          categoryKey: cat1.value,
-          name: obj1.label,
-          objectId: obj1.value,
-          baselineDiameterMeters: baselineMeters
+          objectId: o1.objectId,
+          name: o1.name,
+          categoryKey: o1.categoryKey,
+          baselineDiameterMeters: baselineDiameterMeters
         },
-        o2s
+        o2s: readO2Array()
       }
     };
 
     return scene;
   };
 
-  // ---------- реєстрація / черга ----------
+  // ---- register / queue ----
   try {
     if (window?.orbit?.registerSceneSerializer) {
       window.orbit.registerSceneSerializer('univers_luminosity', serializer);

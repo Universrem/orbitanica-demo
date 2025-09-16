@@ -15,7 +15,7 @@
 import { getLuminosityData } from '../data/data_luminosity.js';
 import { setLuminosityBaseline, addLuminosityCircle, resetLuminosityScale } from '../calc/calculate_luminosity.js';
 
-import { setBaselineResult, addResult } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
@@ -24,6 +24,28 @@ import {
 
 // Лічильник для унікальних id кіл О2
 let luminosityResultSeq = 0;
+
+// [NEW] Акумуляція вибраних О2 для серіалізації сцен
+const __luminositySelectedO2s = [];
+function __pushSelectedO2(data) {
+  try {
+    const categoryKey = String(data?.object2?.category || data?.object2?.categoryKey || '').trim();
+    const name = String(data?.object2?.name || '').trim();
+    const objectId = String(data?.object2?.userId || data?.object2?.objectId || data?.object2?.name || '').trim(); // офіційний id або fallback=назва
+    if (!categoryKey || !objectId) return;
+    __luminositySelectedO2s.push({ categoryKey, objectId, name: name || null });
+  } catch {}
+}
+function __resetSelectedO2s() { __luminositySelectedO2s.length = 0; }
+try { (window.orbit ||= {}); window.orbit.getUniversLuminositySelectedO2s = () => __luminositySelectedO2s.slice(); } catch {}
+
+// Скидання лічильника та буфера при повному UI-RESET
+try {
+  window.addEventListener('orbit:ui-reset', () => {
+    luminosityResultSeq = 0;
+    __resetSelectedO2s();
+  });
+} catch {}
 
 /**
  * onLuminosityCalculate({ scope, object1Group, object2Group })
@@ -62,19 +84,29 @@ export function onLuminosityCalculate({ scope /*, object1Group, object2Group */ 
     }
   }
 
-  // 2b) Інфопанель: baseline (без NaN — якщо число невалідне, не віддаємо realValue/realUnit)
-  const o1RealOk = Number.isFinite(l1) && l1 > 0;
-  setBaselineResult({
-    libIndex: data?.object1?.libIndex ?? null,
-    realValue: o1RealOk ? l1 : null,
-    realUnit:  o1RealOk ? u1 : null,
-    scaledMeters: baselineDiameter,  // діаметр базового кола на мапі
-    name: data?.object1?.name || '',
-    description: data?.object1?.description || '',
-    color: color1,
-    uiLeftLabelKey:  'luminosity.labels.o1.left',   // "Світність"
-    uiRightLabelKey: 'luminosity.labels.o1.right',  // "Діаметр (площа кола ∝ світності)"
-  });
+// 2b) Інфопанель (уніфіковане API)
+const o1RealOk = Number.isFinite(l1) && l1 > 0;
+
+addGroup({
+  id: 'luminosity_o1',
+  title: data?.object1?.name || '',
+  color: color1,
+  groupType: 'baseline',
+  uiLeftLabelKey:  'luminosity.labels.o1.left',   // "Світність"
+  uiRightLabelKey: 'luminosity.labels.o1.right',  // "Діаметр (площа кола ∝ світності)"
+});
+appendVariant({
+  id: 'luminosity_o1',
+  variant: 'single',
+  realValue: o1RealOk ? l1 : null,
+  realUnit:  o1RealOk ? u1 : null,
+  // Для baseline у «Світності» показуємо ДІАМЕТР (м)
+  scaledMeters: baselineDiameter
+});
+if (String(data?.object1?.description || '').trim()) {
+  setGroupDescription({ id: 'luminosity_o1', description: data.object1.description });
+}
+
 
   // ——— LOCK O1 UI ДО RESET + START SESSION ———
   const baselineValid = o1RealOk && baselineDiameter > 0;
@@ -108,30 +140,34 @@ export function onLuminosityCalculate({ scope /*, object1Group, object2Group */ 
     }
   }
 
-  // 4) Інфопанель: результат О2
-  const o2RealOk = Number.isFinite(l2) && l2 > 0;
-  const scaledDiameterMeters = res && Number(res.scaledRadiusMeters) > 0
-    ? 2 * Number(res.scaledRadiusMeters)
-    : 0;
+  // 4) Інфопанель: результат О2 (уніфіковане API; scaledMeters = ДІАМЕТР)
+const o2RealOk = Number.isFinite(l2) && l2 > 0;
+const scaledDiameterMeters = res && Number(res.scaledRadiusMeters) > 0 ? 2 * Number(res.scaledRadiusMeters) : 0;
 
-  addResult({
-    libIndex: data?.object2?.libIndex ?? null,
-    realValue: o2RealOk ? l2 : null,
-    realUnit:  o2RealOk ? u2 : null,
-    scaledMeters: scaledDiameterMeters,
-    name: data?.object2?.name || '',
-    description: data?.object2?.description || '',
-    color: color2,
-    invisibleReason: res?.tooLarge ? 'tooLarge' : null,
-    requiredBaselineMeters: res?.requiredBaselineMeters ?? null
-  });
+const groupId = `luminosity_o2_${luminosityResultSeq}`;
+addGroup({
+  id: groupId,
+  title: data?.object2?.name || '',
+  color: color2,
+  groupType: 'item',
+  // для item використовуємо ті самі лівий/правий лейбли, що й у baseline
+  uiLeftLabelKey:  'luminosity.labels.o1.left',
+  uiRightLabelKey: 'luminosity.labels.o1.right',
+});
+if (String(data?.object2?.description || '').trim()) {
+  setGroupDescription({ id: groupId, description: data.object2.description });
+}
+appendVariant({
+  id: groupId,
+  variant: 'single',
+  realValue: o2RealOk ? l2 : null,
+  realUnit:  o2RealOk ? u2 : null,
+  scaledMeters: scaledDiameterMeters,
+  invisibleReason: res?.tooLarge ? 'tooLarge' : null,
+  requiredBaselineMeters: res?.requiredBaselineMeters ?? null
+});
 
-  // Консоль для діагностики (акуратний формат)
-  console.log(
-    '[mode:luminosity] D1=%sm; L1=%s%s; L2=%s%s → D2=%sm',
-    baselineDiameter,
-    o1RealOk ? l1.toLocaleString() : '—', o1RealOk ? u1 : '',
-    o2RealOk ? l2.toLocaleString() : '—', o2RealOk ? u2 : '',
-    scaledDiameterMeters
-  );
+// [NEW] запам'ятати вибраний О2
+__pushSelectedO2(data);
+
 }

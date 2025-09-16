@@ -1,5 +1,5 @@
 // /cabinet/js/appliers/univers_distance_applier.js
-// Відтворення сцени «Відстані» БЕЗ кліку по «Розрахувати».
+// Відтворення сцени «Відстань» БЕЗ кліку по «Розрахувати».
 // Малює О1 і ПО ЧЕРЗІ всі О2, викликаючи еталонний обробник режиму.
 // Додає одноразовий «сторож»: на перший рух центру повністю очищує шар і перемальовує сцену.
 
@@ -58,7 +58,7 @@ import { onDistanceCalculate } from '/js/events/distance_buttons.js';
     // без dispatchEvent
   }
 
-  // Нормалізуємо масив О2 (беремо d.o2s або одинарний d.o2)
+  // Нормалізуємо масив О2 (беремо univers_distance.o2s або одинарний univers_distance.o2)
   function collectO2s(d) {
     if (Array.isArray(d?.o2s) && d.o2s.length) return d.o2s.filter(Boolean);
     if (d?.o2) return [d.o2];
@@ -82,13 +82,17 @@ import { onDistanceCalculate } from '/js/events/distance_buttons.js';
 
       try {
         const q2 = { ...query, __univers_distance_applier_reapplied: true };
+        // невеличка пауза, щоб reset відпрацював
+        await new Promise(r => setTimeout(r, 0));
         await applyUniversDistanceScene(q2);
       } catch (e) {
-        console.error('[univers_distance_applier] repaint after center change failed:', e);
+        console.error('[univers_distance_applier] reapply after first center move failed:', e);
       }
     };
 
+    // запам’ятати, щоб мати можливість зняти, якщо станеться повний reset
     pendingCenterOnce = once;
+
     for (const ev of CENTER_EVS) {
       window.addEventListener(ev, once, { once: true });
     }
@@ -103,11 +107,11 @@ import { onDistanceCalculate } from '/js/events/distance_buttons.js';
 
     if (!o1?.objectId || !o2s.length) return;
 
-    // 1) Відкрити режим і підставити О1 (категорія, назва, діаметр)
+    // 1) Відкрити режим і підставити О1 (назва/ід і базовий діаметр у метрах)
     setDetailsOpen('univers_distance');
-    setSelectValue('distCategoryObject1', o1.categoryKey, o1.categoryKey);
-    setSelectValue('distObject1',         o1.objectId,   o1.name);
-    setNumberInput('distBaselineDiameter', o1.baselineDiameterMeters);
+    // У «Відстані» О1 — лише один селектор
+    setSelectValue('distObject1',       o1.objectId, o1.name);
+    setNumberInput('distCircleObject1', o1.baselineDiameterMeters);
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник (без кліків і без change/input)
     for (const item of o2s) {

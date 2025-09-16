@@ -13,14 +13,46 @@
 import { getDistanceData } from '../data/data_distance.js';
 import { setDistanceBaseline, addDistanceCircle, resetDistanceScale } from '../calc/calculate_distance.js';
 
-import { setBaselineResult, addResult } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
   setCircleLabelTextById,
 } from '../globe/circles.js';
 
+// [NEW] Акумуляція вибраних О2 для збереження сцени
+const __distanceSelectedO2s = [];
+
+function __pushSelectedO2(data) {
+  try {
+    const cat = String(data?.object2?.category || '').trim();
+    const name = String(data?.object2?.name || '').trim();
+    const objectId = String(data?.object2?.userId || data?.object2?.name || '').trim(); // офіційний id або fallback=назва
+    if (!cat || !objectId) return;
+    __distanceSelectedO2s.push({ categoryKey: cat, objectId, name: name || null });
+  } catch (_) {}
+}
+
+function __resetSelectedO2s() {
+  __distanceSelectedO2s.length = 0;
+}
+
+// Публічний геттер для серіалізатора
+try {
+  (window.orbit ||= {});
+  window.orbit.getUniversDistanceSelectedO2s = () => __distanceSelectedO2s.slice();
+} catch (_) {}
+
 // Лічильник для унікальних id кіл О2
+// Скидання лічильника та вибраних О2 на глобальний UI-RESET
+try {
+  window.addEventListener('orbit:ui-reset', () => {
+    distanceResultSeq = 0;
+    __resetSelectedO2s();
+  });
+} catch {}
+
 let distanceResultSeq = 0;
 
 /**
@@ -60,20 +92,33 @@ export function onDistanceCalculate({ scope /*, object1Group, object2Group */ })
     }
   }
 
-  // 2b) Інфопанель: baseline
-  const o1RealOk = Number.isFinite(realD1) && realD1 > 0;
-  setBaselineResult({
-    libIndex: data?.object1?.libIndex ?? null,
-    realValue: o1RealOk ? realD1 : null,
-    realUnit:  o1RealOk ? u1 : null,
-    scaledMeters: baselineDiameter,  // діаметр базового кола на мапі (м)
-    name: data?.object1?.name || '',
-    description: data?.object1?.description || '',
-    color: color1,
-    // Для «Відстані» над О1 мають бути діаметри:
-    uiLeftLabelKey:  'diameter.labels.o1.left',   // "Діаметр"
-    uiRightLabelKey: 'diameter.labels.o1.right',  // "Масштабований діаметр"
+// 2b) Інфопанель (уніфіковане API)
+const o1RealOk = Number.isFinite(realD1) && realD1 > 0;
+
+addGroup({
+  id: 'distance_o1',
+  title: data?.object1?.name || '',
+  color: color1,
+  groupType: 'baseline',
+  // baseline у «Відстані» — це діаметри
+  uiLeftLabelKey:  'diameter.labels.o1.left',   // "Діаметр"
+  uiRightLabelKey: 'diameter.labels.o1.right',  // "Масштабований діаметр"
+});
+appendVariant({
+  id: 'distance_o1',
+  variant: 'single',
+  realValue: o1RealOk ? realD1 : null,
+  realUnit:  o1RealOk ? u1 : null,
+  // Для baseline показуємо ДІАМЕТР (м)
+  scaledMeters: baselineDiameter
+});
+if (String(data?.object1?.description || '').trim()) {
+  setGroupDescription({
+    id: 'distance_o1',
+    description: data.object1.description
   });
+}
+
 
   // ——— LOCK O1 UI ДО RESET + START SESSION ———
   const baselineValid = o1RealOk && baselineDiameter > 0;
@@ -113,20 +158,37 @@ export function onDistanceCalculate({ scope /*, object1Group, object2Group */ })
     ? 2 * Number(res.scaledRadiusMeters)
     : 0;
 
-  addResult({
-    libIndex: data?.object2?.libIndex ?? null,
-    realValue: o2RealOk ? dist2 : null,
-    realUnit:  o2RealOk ? u2 : null,
-    scaledMeters: scaledDiameterMeters, // діаметр, але в підписах О2 показуємо відстань → радіус
-    name: data?.object2?.name || '',
-    description: data?.object2?.description || '',
-    color: color2,
-    invisibleReason: res?.tooLarge ? 'tooLarge' : null,
-    requiredBaselineMeters: res?.requiredBaselineMeters ?? null,
-    // Спеціальні лейбли для О2 у «Відстані»
-    uiLeftLabelKey:  'distance.labels.o2.left',   // "Відстань до Землі"
-    uiRightLabelKey: 'distance.labels.o2.right',  // "Масштабована відстань (радіус)"
+const groupId = `distance_o2_${distanceResultSeq}`;
+
+addGroup({
+  id: groupId,
+  title: data?.object2?.name || '',
+  color: color2,
+  groupType: 'item',
+  uiLeftLabelKey:  'distance.labels.o2.left',   // "Відстань до Землі"
+  uiRightLabelKey: 'distance.labels.o2.right',  // "Масштабована відстань (радіус)"
+});
+if (String(data?.object2?.description || '').trim()) {
+  setGroupDescription({
+    id: groupId,
+    description: data.object2.description
   });
+}
+
+appendVariant({
+  id: groupId,
+  variant: 'single',
+  realValue: o2RealOk ? dist2 : null,
+  realUnit:  o2RealOk ? u2 : null,
+  // ВАЖЛИВО: для О2 у «Відстані» scaledMeters = РАДІУС
+  scaledMeters: (res && Number(res.scaledRadiusMeters) > 0) ? Number(res.scaledRadiusMeters) : 0,
+  invisibleReason: res?.tooLarge ? 'tooLarge' : null,
+  requiredBaselineMeters: res?.requiredBaselineMeters ?? null
+});
+
+
+  // Запам'ятати щойно доданий О2 для серіалізації сцени
+__pushSelectedO2(data);
 
   // Консоль для діагностики
   console.log(

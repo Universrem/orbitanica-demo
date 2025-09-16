@@ -63,20 +63,24 @@ import { getCurrentLang } from '/js/i18n.js';
           if (norm.length) return norm;
         }
       }
-    } catch (err) {
-      console.warn('[univers_distance_serializer] Error reading O2 from state:', err);
+    } catch (e) {
+      console.warn('[univers_distance_serializer] state O2 read failed:', e);
     }
 
-    // Фолбек: поточний вибір у випадайках → масив із 1 елемента або порожній
+    // Фолбек: беремо одноразово пару селекторів О2 з панелі
     const cat2 = readSelectInfo('distCategoryObject2');
     const obj2 = readSelectInfo('distObject2');
-    const one = normO2({ categoryKey: cat2.value, objectId: obj2.value, name: obj2.label });
+    const one = normO2({
+      categoryKey: cat2.value,
+      objectId: obj2.value,
+      name: obj2.label
+    });
     return one ? [one] : [];
   }
 
   // ---------- serializer ----------
   const serializer = function serializeUniversDistanceScene() {
-    // О1
+    // О1 (увага: у «Відстані» один селектор об'єкта)
     const obj1 = readSelectInfo('distObject1');
     const baselineMeters = readNumberOrNull('distCircleObject1');
 
@@ -97,7 +101,7 @@ import { getCurrentLang } from '/js/i18n.js';
       center: getCenterOrNull(),
       univers_distance: {
         o1: {
-          // для O1 категорії в UI немає
+          categoryKey: null,                 // у «Відстані» О1 без категорії
           name: obj1.label,
           objectId: obj1.value,
           baselineDiameterMeters: baselineMeters

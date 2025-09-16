@@ -163,6 +163,8 @@ function render() {
   listEl.innerHTML = '';
   baselineSubtitleShown = false;
   itemSubtitleShown = false;
+  let lastBaselineSubtitle = '';
+
 
 
   const lib = getUniverseLibrary();
@@ -214,8 +216,21 @@ if (it.groupType === 'baseline') {
     uiLeftLabelKey: it.uiLeftLabelKey,
     uiRightLabelKey: it.uiRightLabelKey
   });
+  lastBaselineSubtitle = subtitleText(it);
+
 }
-// Для item (О2) підзаголовок НЕ показуємо
+// Для item (О2) покажемо один підзаголовок, якщо він відрізняється від baseline
+if (!itemSubtitleShown) {
+  const txtItem = subtitleText(it);
+  if (txtItem && txtItem !== lastBaselineSubtitle) {
+    appendSubtitleIfNeeded({
+      type: 'item',
+      uiLeftLabelKey: it.uiLeftLabelKey,
+      uiRightLabelKey: it.uiRightLabelKey
+    });
+  }
+}
+
 
 
       // Заголовок групи
