@@ -1,29 +1,59 @@
-// full/js/events/geo_area_buttons.js
+// /full/js/events/geo_area_buttons.js
 'use strict';
 
 /**
  * Обробник для режиму «Географія → Площа».
- * Робить рівно те, що описано в Контракті:
- *   1) бере StandardData з адаптера;
- *   2) задає baseline у калькуляторі;
- *   3) додає коло для О2 через калькулятор;
- *   4) викликає системні рендери кіл та інфопанель.
- *
- * Жодних сторонніх залежностей, DOM-хаків чи доступів до інших режимів.
+ * Побудовано за еталоном «Діаметри»:
+ *  - є локальний буфер обраних О2 + публічний геттер (для серіалізатора);
+ *  - стабільний лічильник результатів для О2 (кольори/ID кіл);
+ *  - на глобальний UI-RESET скидаємо лічильник і буфер О2.
  */
 
 import { getGeoAreaData } from '../data/data_geo_area.js';
 import { setGeoAreaBaseline, addGeoAreaCircle, resetGeoAreaScale } from '../calc/calculate_geo_area.js';
 
-import { setBaselineResult, addResult } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
   setCircleLabelTextById,
 } from '../globe/circles.js';
 
-// Лічильник для унікальних id кіл О2
+// ——— СТАН СЕСІЇ ———
+
+// Лічильник для унікальних id/кольорів О2 (скидається на UI-RESET)
 let geoAreaResultSeq = 0;
+
+// Локальний список вибраних О2 (накопичується під час створення сцени)
+const __geoAreaSelectedO2s = [];
+
+// Додати один О2 до списку (без побічних ефектів)
+function __pushSelectedO2(item) {
+  try {
+    const categoryKey = String(item?.object2?.category || item?.object2?.categoryKey || '').trim();
+    const name = String(item?.object2?.name || '').trim();
+    const objectId = String(
+      item?.object2?.userId || item?.object2?.objectId || item?.object2?.name || ''
+    ).trim(); // офіц. id або fallback=назва
+    if (!categoryKey || !objectId) return;
+    __geoAreaSelectedO2s.push({ categoryKey, objectId, name: name || null });
+  } catch (_) {}
+}
+
+// Публічний геттер для серіалізатора geo_area_serializer.js
+try {
+  (window.orbit ||= {});
+  window.orbit.getGeoAreaSelectedO2s = () => __geoAreaSelectedO2s.slice();
+} catch (_) {}
+
+// ——— ГЛОБАЛЬНІ ПОДІЇ ———
+try {
+  window.addEventListener('orbit:ui-reset', () => {
+    geoAreaResultSeq = 0;
+    __geoAreaSelectedO2s.length = 0;
+  });
+} catch {}
+
 
 /**
  * onGeoAreaCalculate({ scope, object1Group, object2Group })
@@ -42,7 +72,8 @@ export function onGeoAreaCalculate({ scope /*, object1Group, object2Group */ }) 
   const s1 = Number(data?.object1?.valueReal);
   const u1 = data?.object1?.unit || 'km²';
 
-  resetGeoAreaScale(); // чистий стан на кожен розрахунок
+  // Завжди оновлюємо внутрішній масштаб
+  resetGeoAreaScale();
   setGeoAreaBaseline({
     valueReal: s1,
     unit: u1,
@@ -56,7 +87,6 @@ export function onGeoAreaCalculate({ scope /*, object1Group, object2Group */ }) 
   if (baselineRadius > 0) {
     const id = addGeodesicCircle(baselineRadius, color1, baselineId);
     if (id) {
-      // підпис: просто назва О1
       const label = String(data?.object1?.name || '').trim();
       if (label) setCircleLabelTextById(id, label);
     }
@@ -64,17 +94,24 @@ export function onGeoAreaCalculate({ scope /*, object1Group, object2Group */ }) 
 
   // 2b) Інфопанель: baseline
   const o1RealOk = Number.isFinite(s1) && s1 > 0;
-  setBaselineResult({
-    libIndex: data?.object1?.libIndex ?? null,
+  addGroup({
+    id: 'geo_area_o1',
+    title: data?.object1?.name || '',
+    color: color1,
+    groupType: 'baseline',
+    uiLeftLabelKey:  'ui.geo.area.o1.left',
+    uiRightLabelKey: 'ui.geo.area.o1.right',
+  });
+  appendVariant({
+    id: 'geo_area_o1',
+    variant: 'single',
     realValue: o1RealOk ? s1 : null,
     realUnit:  o1RealOk ? u1 : null,
-    scaledMeters: baselineDiameter,  // діаметр базового кола на мапі
-    name: data?.object1?.name || '',
-    description: data?.object1?.description || '',
-    color: color1,
-    uiLeftLabelKey:  'ui.geo.area.o1.left',   // "Площа"
-    uiRightLabelKey: 'ui.geo.area.o1.right',  // "→ Діаметр (площа ∝ площі)"
+    scaledMeters: baselineDiameter
   });
+  if (String(data?.object1?.description || '').trim()) {
+    setGroupDescription({ id: 'geo_area_o1', description: data.object1.description });
+  }
 
   // ——— LOCK O1 UI ДО RESET + START SESSION ———
   const baselineValid = o1RealOk && baselineDiameter > 0;
@@ -86,7 +123,6 @@ export function onGeoAreaCalculate({ scope /*, object1Group, object2Group */ }) 
       o1group.querySelectorAll('select, input, button, textarea')
         .forEach(el => { el.disabled = true; });
     }
-    // Позначити початок активної сесії (для попередження при зміні мови)
     try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
   }
 
@@ -114,24 +150,36 @@ export function onGeoAreaCalculate({ scope /*, object1Group, object2Group */ }) 
     ? 2 * Number(res.scaledRadiusMeters)
     : 0;
 
-  addResult({
-    libIndex: data?.object2?.libIndex ?? null,
-    realValue: o2RealOk ? s2 : null,
-    realUnit:  o2RealOk ? u2 : null,
-    scaledMeters: scaledDiameterMeters,
-    name: data?.object2?.name || '',
-    description: data?.object2?.description || '',
+  const groupId = `geo_area_o2_${geoAreaResultSeq}`;
+  addGroup({
+    id: groupId,
+    title: data?.object2?.name || '',
     color: color2,
+    groupType: 'item',
+    uiLeftLabelKey:  'ui.geo.area.o1.left',
+    uiRightLabelKey: 'ui.geo.area.o1.right',
     invisibleReason: res?.tooLarge ? 'tooLarge' : null,
     requiredBaselineMeters: res?.requiredBaselineMeters ?? null
   });
+  appendVariant({
+    id: groupId,
+    variant: 'single',
+    realValue: o2RealOk ? s2 : null,
+    realUnit:  o2RealOk ? u2 : null,
+    scaledMeters: scaledDiameterMeters
+  });
+  if (String(data?.object2?.description || '').trim()) {
+    setGroupDescription({ id: groupId, description: data.object2.description });
+  }
+
+  __pushSelectedO2(data);
 
   // Консоль для діагностики
   console.log(
-    '[mode:geo:area] D1=%sm; S1=%s%s; S2=%s%s → D2=%sm',
+    '[mode:geo:area] O1: A=%s%s → Dscaled=%s; O2: A=%s%s → Dscaled=%s',
+    o1RealOk ? s1 : '—', o1RealOk ? u1 : '',
     baselineDiameter,
-    o1RealOk ? s1.toLocaleString() : '—', o1RealOk ? u1 : '',
-    o2RealOk ? s2.toLocaleString() : '—', o2RealOk ? u2 : '',
+    o2RealOk ? s2 : '—', o2RealOk ? u2 : '',
     scaledDiameterMeters
   );
 }

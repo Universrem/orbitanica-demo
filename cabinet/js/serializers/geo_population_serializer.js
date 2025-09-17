@@ -1,5 +1,5 @@
 // /cabinet/js/serializers/geo_population_serializer.js
-// Серіалізатор режиму «Geography → Population» з підтримкою масиву О2 (o2s).
+// Серіалізатор режиму «Географія → Населення» з підтримкою масиву О2 (o2s).
 // Працює незалежно від порядку завантаження: якщо місток ще не готовий — стає в чергу.
 
 import { getCurrentLang } from '/js/i18n.js';
