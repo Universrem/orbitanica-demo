@@ -1,33 +1,63 @@
-// full/js/events/math_buttons.js
+// /full/js/events/math_buttons.js
 'use strict';
 
 /**
- * Еталонний обробник для режиму «Математика».
- * Робить рівно те, що описано в Контракті:
- *   1) бере StandardData з адаптера;
- *   2) задає baseline у калькуляторі;
- *   3) додає коло для О2 через калькулятор;
- *   4) викликає системні рендери кіл та інфопанель.
- *
- * Жодних сторонніх залежностей, DOM-хаків чи доступів до інших режимів.
+ * Обробник для режиму «Математика».
+ * Побудовано за еталоном «Діаметри»:
+ *  - є локальний буфер обраних О2 + публічний геттер (для серіалізатора);
+ *  - стабільний лічильник результатів для О2 (кольори/ID кіл);
+ *  - на глобальний UI-RESET скидаємо лічильник і буфер О2.
  */
 
 import { getMathData } from '../data/data_math.js';
 import { setMathBaseline, addMathCircle, resetMathScale } from '../calc/calculate_math.js';
 
-import { setBaselineResult, addResult } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
   setCircleLabelTextById,
 } from '../globe/circles.js';
 
-// Лічильник для унікальних id кіл О2
+// ——— СТАН СЕСІЇ ———
+
+// Лічильник для унікальних id/кольорів О2 (скидається на UI-RESET)
 let mathResultSeq = 0;
+
+// Локальний список вибраних О2 (накопичується під час створення сцени)
+const __mathSelectedO2s = [];
+
+// Додати один О2 до списку (без побічних ефектів)
+function __pushSelectedO2(item) {
+  try {
+    const categoryKey = String(item?.object2?.category || item?.object2?.categoryKey || '').trim();
+    const name = String(item?.object2?.name || '').trim();
+    const objectId = String(
+      item?.object2?.userId || item?.object2?.objectId || item?.object2?.name || ''
+    ).trim(); // офіц. id або fallback=назва
+    if (!categoryKey || !objectId) return;
+    __mathSelectedO2s.push({ categoryKey, objectId, name: name || null });
+  } catch (_) {}
+}
+
+// Публічний геттер для серіалізатора math_serializer.js
+try {
+  (window.orbit ||= {});
+  window.orbit.getMathSelectedO2s = () => __mathSelectedO2s.slice();
+} catch (_) {}
+
+// ——— ГЛОБАЛЬНІ ПОДІЇ ———
+try {
+  window.addEventListener('orbit:ui-reset', () => {
+    mathResultSeq = 0;
+    __mathSelectedO2s.length = 0;
+  });
+} catch {}
+
 
 /**
  * onMathCalculate({ scope, object1Group, object2Group })
- * Викликається системою (panel_buttons.js) для режиму math.
+ * Викликається системою (panel_buttons.js) для режиму «математика».
  */
 export function onMathCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Зібрати дані
@@ -38,12 +68,13 @@ export function onMathCalculate({ scope /*, object1Group, object2Group */ }) {
   const color2 = getColorForKey(`math:o2:${++mathResultSeq}`);
 
   // 2) Baseline у калькуляторі
-  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0;
-  const v1 = Number(data?.object1?.valueReal);
+  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // D1 (м) — масштабований діаметр на мапі
+  const v1 = Number(data?.object1?.valueReal);                         // реальне число/величина
   const u1Raw = data?.object1?.unit || 'unit';
   const u1 = u1Raw && u1Raw.toLowerCase() !== 'unit' ? u1Raw : null;
 
-  resetMathScale(); // чистий стан на кожен розрахунок
+  // Завжди оновлюємо внутрішній масштаб
+  resetMathScale();
   setMathBaseline({
     valueReal: v1,
     unit: u1,
@@ -57,27 +88,31 @@ export function onMathCalculate({ scope /*, object1Group, object2Group */ }) {
   if (baselineRadius > 0) {
     const id = addGeodesicCircle(baselineRadius, color1, baselineId);
     if (id) {
-      // підпис: просто назва О1
       const label = String(data?.object1?.name || '').trim();
       if (label) setCircleLabelTextById(id, label);
     }
   }
 
-  // 2b) Інфопанель: baseline (без NaN — якщо число невалідне, не віддаємо realValue/realUnit)
+  // 2b) Інфопанель: baseline
   const o1RealOk = Number.isFinite(v1) && v1 > 0;
-  setBaselineResult({
-    libIndex: data?.object1?.libIndex ?? null,
-    realValue: o1RealOk ? v1 : null,
-    realUnit:  o1RealOk ? u1 : null,
-    scaledMeters: baselineDiameter,  // діаметр базового кола на мапі
-    name: data?.object1?.name || '',
-    description: data?.object1?.description || '',
+  addGroup({
+    id: 'math_o1',
+    title: data?.object1?.name || '',
     color: color1,
-    // ЄДИНА зміна під математику — написи над О1:
-    // "Число → Діаметр (площа кола пропорційна числу)"
+    groupType: 'baseline',
     uiLeftLabelKey:  'ui.math.o1.left',
     uiRightLabelKey: 'ui.math.o1.right',
   });
+  appendVariant({
+    id: 'math_o1',
+    variant: 'single',
+    realValue: o1RealOk ? v1 : null,
+    realUnit:  o1RealOk ? u1 : null,
+    scaledMeters: baselineDiameter
+  });
+  if (String(data?.object1?.description || '').trim()) {
+    setGroupDescription({ id: 'math_o1', description: data.object1.description });
+  }
 
   // ——— LOCK O1 UI ДО RESET + START SESSION ———
   const baselineValid = o1RealOk && baselineDiameter > 0;
@@ -89,7 +124,6 @@ export function onMathCalculate({ scope /*, object1Group, object2Group */ }) {
       o1group.querySelectorAll('select, input, button, textarea')
         .forEach(el => { el.disabled = true; });
     }
-    // Позначити початок активної сесії (для попередження при зміні мови)
     try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
   }
 
@@ -118,23 +152,38 @@ export function onMathCalculate({ scope /*, object1Group, object2Group */ }) {
     ? 2 * Number(res.scaledRadiusMeters)
     : 0;
 
-  addResult({
-    libIndex: data?.object2?.libIndex ?? null,
-    realValue: o2RealOk ? v2 : null,
-    realUnit:  o2RealOk ? u2 : null,
-    scaledMeters: scaledDiameterMeters,
-    name: data?.object2?.name || '',
-    description: data?.object2?.description || '',
+  const groupId = `math_o2_${mathResultSeq}`;
+  addGroup({
+    id: groupId,
+    title: data?.object2?.name || '',
     color: color2,
+    groupType: 'item',
+    uiLeftLabelKey:  'ui.math.o1.left',
+    uiRightLabelKey: 'ui.math.o1.right',
     invisibleReason: res?.tooLarge ? 'tooLarge' : null,
     requiredBaselineMeters: res?.requiredBaselineMeters ?? null
   });
+  appendVariant({
+    id: groupId,
+    variant: 'single',
+    realValue: o2RealOk ? v2 : null,
+    realUnit:  o2RealOk ? u2 : null,
+    scaledMeters: scaledDiameterMeters
+  });
+  if (String(data?.object2?.description || '').trim()) {
+    setGroupDescription({ id: groupId, description: data.object2.description });
+  }
 
-  // Консоль для діагностики (акуратний формат)
+  __pushSelectedO2(data);
+
+  // Консоль для діагностики
   const u1s = u1 ? u1 : '';
   const u2s = u2 ? u2 : '';
-  console.log('[mode:math] D1=%sm; V1=%s%s; V2=%s%s → D2=%sm', baselineDiameter,
-    o1RealOk ? v1.toLocaleString() : '—', o1RealOk ? u1s : '',
-    o2RealOk ? v2.toLocaleString() : '—', o2RealOk ? u2s : '',
-    scaledDiameterMeters);
+  console.log(
+    '[mode:math] O1: V=%s%s → Dscaled=%s; O2: V=%s%s → Dscaled=%s',
+    o1RealOk ? v1 : '—', o1RealOk ? u1s : '',
+    baselineDiameter,
+    o2RealOk ? v2 : '—', o2RealOk ? u2s : '',
+    scaledDiameterMeters
+  );
 }

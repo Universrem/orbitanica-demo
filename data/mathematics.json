@@ -1,5 +1,233 @@
 [
   {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^2",
+    "name_ua": "10^2",
+    "name_es": "10^2",
+    "description_en": "The number 100 (10 squared).",
+    "description_ua": "Число 100 (10 у квадраті).",
+    "description_es": "El número 100 (diez al cuadrado).",
+    "quantity": { "value": 100, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^3",
+    "name_ua": "10^3",
+    "name_es": "10^3",
+    "description_en": "The number 1000 (10 cubed).",
+    "description_ua": "Число 1000 (10 у кубі).",
+    "description_es": "El número 1000 (diez al cubo).",
+    "quantity": { "value": 1000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^4",
+    "name_ua": "10^4",
+    "name_es": "10^4",
+    "description_en": "The number 10000 (10 to the fourth power).",
+    "description_ua": "Число 10000 (10 у четвертому степені).",
+    "description_es": "El número 10000 (diez a la cuarta potencia).",
+    "quantity": { "value": 10000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^5",
+    "name_ua": "10^5",
+    "name_es": "10^5",
+    "description_en": "The number 100000 (10 to the fifth power).",
+    "description_ua": "Число 100000 (10 у п'ятому степені).",
+    "description_es": "El número 100000 (diez a la quinta potencia).",
+    "quantity": { "value": 100000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^6",
+    "name_ua": "10^6",
+    "name_es": "10^6",
+    "description_en": "The number 1000000 (10 to the sixth power).",
+    "description_ua": "Число 1000000 (10 у шостому степені).",
+    "description_es": "El número 1000000 (diez a la sexta potencia).",
+    "quantity": { "value": 1000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^7",
+    "name_ua": "10^7",
+    "name_es": "10^7",
+    "description_en": "The number 10000000 (10 to the seventh power).",
+    "description_ua": "Число 10000000 (10 у сьомому степені).",
+    "description_es": "El número 10000000 (diez a la séptima potencia).",
+    "quantity": { "value": 10000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^8",
+    "name_ua": "10^8",
+    "name_es": "10^8",
+    "description_en": "The number 100000000 (10 to the eighth power).",
+    "description_ua": "Число 100000000 (10 у восьмому степені).",
+    "description_es": "El número 100000000 (diez a la octava potencia).",
+    "quantity": { "value": 100000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^9",
+    "name_ua": "10^9",
+    "name_es": "10^9",
+    "description_en": "The number 1000000000 (10 to the ninth power).",
+    "description_ua": "Число 1000000000 (10 у дев'ятому степені).",
+    "description_es": "El número 1000000000 (diez a la novena potencia).",
+    "quantity": { "value": 1000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^10",
+    "name_ua": "10^10",
+    "name_es": "10^10",
+    "description_en": "The number 10000000000 (10 to the tenth power).",
+    "description_ua": "Число 10000000000 (10 у десятому степені).",
+    "description_es": "El número 10000000000 (diez a la décima potencia).",
+    "quantity": { "value": 10000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^11",
+    "name_ua": "10^11",
+    "name_es": "10^11",
+    "description_en": "The number 100000000000 (10 to the eleventh power).",
+    "description_ua": "Число 100000000000 (10 у одинадцятому степені).",
+    "description_es": "El número 100000000000 (diez a la undécima potencia).",
+    "quantity": { "value": 100000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^12",
+    "name_ua": "10^12",
+    "name_es": "10^12",
+    "description_en": "The number 1000000000000 (10 to the twelfth power).",
+    "description_ua": "Число 1000000000000 (10 у дванадцятому степені).",
+    "description_es": "El número 1000000000000 (diez a la duodécima potencia).",
+    "quantity": { "value": 1000000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^13",
+    "name_ua": "10^13",
+    "name_es": "10^13",
+    "description_en": "The number 10000000000000 (10 to the thirteenth power).",
+    "description_ua": "Число 10000000000000 (10 у тринадцятому степені).",
+    "description_es": "El número 10000000000000 (diez a la decimotercera potencia).",
+    "quantity": { "value": 10000000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^14",
+    "name_ua": "10^14",
+    "name_es": "10^14",
+    "description_en": "The number 100000000000000 (10 to the fourteenth power).",
+    "description_ua": "Число 100000000000000 (10 у чотирнадцятому степені).",
+    "description_es": "El número 100000000000000 (diez a la decimocuarta potencia).",
+    "quantity": { "value": 100000000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^15",
+    "name_ua": "10^15",
+    "name_es": "10^15",
+    "description_en": "The number 1000000000000000 (10 to the fifteenth power).",
+    "description_ua": "Число 1000000000000000 (10 у п'ятнадцятому степені).",
+    "description_es": "El número 1000000000000000 (diez a la decimoquinta potencia).",
+    "quantity": { "value": 1000000000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^16",
+    "name_ua": "10^16",
+    "name_es": "10^16",
+    "description_en": "The number 10000000000000000 (10 to the sixteenth power).",
+    "description_ua": "Число 10000000000000000 (10 у шістнадцятому степені).",
+    "description_es": "El número 10000000000000000 (diez a la decimosexta potencia).",
+    "quantity": { "value": 10000000000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^17",
+    "name_ua": "10^17",
+    "name_es": "10^17",
+    "description_en": "The number 100000000000000000 (10 to the seventeenth power).",
+    "description_ua": "Число 100000000000000000 (10 у сімнадцятому степені).",
+    "description_es": "El número 100000000000000000 (diez a la decimoséptima potencia).",
+    "quantity": { "value": 100000000000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^18",
+    "name_ua": "10^18",
+    "name_es": "10^18",
+    "description_en": "The number 1000000000000000000 (10 to the eighteenth power).",
+    "description_ua": "Число 1000000000000000000 (10 у вісімнадцятому степені).",
+    "description_es": "El número 1000000000000000000 (diez a la decimoctava potencia).",
+    "quantity": { "value": 1000000000000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^19",
+    "name_ua": "10^19",
+    "name_es": "10^19",
+    "description_en": "The number 10000000000000000000 (10 to the nineteenth power).",
+    "description_ua": "Число 10000000000000000000 (10 у дев'ятнадцятому степені).",
+    "description_es": "El número 10000000000000000000 (diez a la decimonovena potencia).",
+    "quantity": { "value": 10000000000000000000, "unit": "unit" }
+  },
+  {
+    "category_en": "Powers",
+    "category_ua": "Степені",
+    "category_es": "Potencias",
+    "name_en": "10^20",
+    "name_ua": "10^20",
+    "name_es": "10^20",
+    "description_en": "The number 100000000000000000000 (10 to the twentieth power).",
+    "description_ua": "Число 100000000000000000000 (10 у двадцятому степені).",
+    "description_es": "El número 100000000000000000000 (diez a la vigésima potencia).",
+    "quantity": { "value": 100000000000000000000, "unit": "unit" }
+  },
+  {
     "category_en": "Numbers",
     "category_ua": "Числа",
     "category_es": "Números",
@@ -47,42 +275,7 @@
     "description_es": "El número 11.",
     "quantity": { "value": 11, "unit": "unit" }
   },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "3²",
-    "name_ua": "3²",
-    "name_es": "3²",
-    "description_en": "The number 9.",
-    "description_ua": "Число 9",
-    "description_es": "El número 9.",
-    "quantity": { "value": 9, "unit": "unit" }
-  },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "10³",
-    "name_ua": "10³",
-    "name_es": "10³",
-    "description_en": "The number 1000.",
-    "description_ua": "Число 1000",
-    "description_es": "El número 1000.",
-    "quantity": { "value": 1000, "unit": "unit" }
-  },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "10⁵",
-    "name_ua": "10⁵",
-    "name_es": "10⁵",
-    "description_en": "The number 100000.",
-    "description_ua": "Число 100000",
-    "description_es": "El número 100000.",
-    "quantity": { "value": 100000, "unit": "unit" }
-  },
+ 
   {
     "category_en": "Square roots",
     "category_ua": "Квадратний корінь",
@@ -179,30 +372,7 @@
     "description_es": "Tau, igual a 2π.",
     "quantity": { "value": 6.283185307179586, "unit": "unit" }
   },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "2¹⁰",
-    "name_ua": "2¹⁰",
-    "name_es": "2¹⁰",
-    "description_en": "2 to the power of 10.",
-    "description_ua": "2 у степені 10.",
-    "description_es": "2 a la potencia de 10.",
-    "quantity": { "value": 1024, "unit": "unit" }
-  },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "2²⁰",
-    "name_ua": "2²⁰",
-    "name_es": "2²⁰",
-    "description_en": "2 to the power of 20.",
-    "description_ua": "2 у степені 20.",
-    "description_es": "2 a la potencia de 20.",
-    "quantity": { "value": 1048576, "unit": "unit" }
-  },
+
   {
     "category_en": "Square roots",
     "category_ua": "Квадратний корінь",
@@ -227,18 +397,7 @@
     "description_es": "Raíz cuadrada de e.",
     "quantity": { "value": 1.6487212707001282, "unit": "unit" }
   },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "3⁴",
-    "name_ua": "3⁴",
-    "name_es": "3⁴",
-    "description_en": "3 to the 4th power.",
-    "description_ua": "3 у 4-му степені.",
-    "description_es": "3 a la cuarta potencia.",
-    "quantity": { "value": 81, "unit": "unit" }
-  },
+
   {
     "category_en": "Powers",
     "category_ua": "Степені",
@@ -250,30 +409,6 @@
     "description_ua": "5 у 3-му степені.",
     "description_es": "5 a la tercera potencia.",
     "quantity": { "value": 125, "unit": "unit" }
-  },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "10²",
-    "name_ua": "10²",
-    "name_es": "10²",
-    "description_en": "10 to the 2nd power.",
-    "description_ua": "10 у 2-му степені.",
-    "description_es": "10 a la segunda potencia.",
-    "quantity": { "value": 100, "unit": "unit" }
-  },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "2³²",
-    "name_ua": "2³²",
-    "name_es": "2³²",
-    "description_en": "2 to the 32nd power.",
-    "description_ua": "2 у 32-му степені.",
-    "description_es": "2 a la potencia 32.",
-    "quantity": { "value": 4294967296, "unit": "unit" }
   },
   {
     "category_en": "Logarithms",
@@ -298,30 +433,6 @@
     "description_ua": "Натуральний логарифм числа 10.",
     "description_es": "Logaritmo natural de 10.",
     "quantity": { "value": 2.302585092994046, "unit": "unit" }
-  },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "e^π",
-    "name_ua": "e^π",
-    "name_es": "e^π",
-    "description_en": "e raised to the power of pi.",
-    "description_ua": "e у степені π.",
-    "description_es": "e elevado a π.",
-    "quantity": { "value": 23.140692632779267, "unit": "unit" }
-  },
-  {
-    "category_en": "Powers",
-    "category_ua": "Степені",
-    "category_es": "Potencias",
-    "name_en": "π²",
-    "name_ua": "π²",
-    "name_es": "π²",
-    "description_en": "Pi squared.",
-    "description_ua": "Пі у квадраті.",
-    "description_es": "Pi al cuadrado.",
-    "quantity": { "value": 9.869604401089358, "unit": "unit" }
   }
 
 

@@ -1,6 +1,6 @@
 // /cabinet/js/serializers/math_serializer.js
 // Серіалізатор режиму «Math» з підтримкою масиву О2 (o2s).
-// Працює незалежно від порядку завантаження: якщо місток ще не готовий — стає в чергу.
+// Якщо місток ще не готовий — стає в чергу.
 
 import { getCurrentLang } from '/js/i18n.js';
 
@@ -84,7 +84,7 @@ import { getCurrentLang } from '/js/i18n.js';
     // О2 (масив)
     const o2s = readO2Array();
 
-    // Мінімальна валідність: має бути О1 та хоча б один О2
+    // Мінімальна валідність
     if (!obj1.value || o2s.length === 0) {
       console.warn('[math_serializer] Incomplete data: need O1 and at least one O2');
       return null;

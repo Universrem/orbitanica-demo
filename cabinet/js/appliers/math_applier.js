@@ -1,11 +1,11 @@
-// /cabinet/js/appliers/univers_mass_applier.js
-// Відтворення сцени «Маса» БЕЗ кліку по «Розрахувати».
+// /cabinet/js/appliers/math_applier.js
+// Відтворення сцени «Математика» БЕЗ кліку по «Розрахувати».
 // Малює О1 і ПО ЧЕРЗІ всі О2, викликаючи еталонний обробник режиму.
 // Додає одноразовий «сторож»: на перший рух центру повністю очищує шар і перемальовує сцену.
 
-import { onMassCalculate } from '/js/events/mass_buttons.js';
+import { onMathCalculate } from '/js/events/math_buttons.js';
 
-(function registerUniversMassApplier(){
+(function registerMathApplier(){
   'use strict';
 
   // ---- control for single pending "first center move" handler
@@ -67,7 +67,7 @@ import { onMassCalculate } from '/js/events/mass_buttons.js';
 
   // ---------- одноразовий «сторож» першої зміни центру (без накопичення) ----------
   function setupFirstCenterRepaint(query) {
-    if (!query || query.__univers_mass_applier_reapplied) return;
+    if (!query || query.__math_applier_reapplied) return;
 
     // перед установкою нового — прибрати попередній, якщо ще не спрацював
     clearPendingCenterOnce();
@@ -81,10 +81,10 @@ import { onMassCalculate } from '/js/events/mass_buttons.js';
       } catch (_) {}
 
       try {
-        const q2 = { ...query, __univers_mass_applier_reapplied: true };
-        await applyUniversMassScene(q2);
+        const q2 = { ...query, __math_applier_reapplied: true };
+        await applyMathScene(q2);
       } catch (e) {
-        console.error('[univers_mass_applier] repaint after center change failed:', e);
+        console.error('[math_applier] repaint after center change failed:', e);
       }
     };
 
@@ -95,32 +95,32 @@ import { onMassCalculate } from '/js/events/mass_buttons.js';
   }
 
   // ---------- головний аплаєр ----------
-  async function applyUniversMassScene(query) {
-    const scope = document.getElementById('univers_mass') || document;
-    const d = query?.univers_mass || {};
+  async function applyMathScene(query) {
+    const scope = document.getElementById('math') || document;
+    const d = query?.math || {};
     const o1 = d.o1 || {};
     const o2s = collectO2s(d);
 
     if (!o1?.objectId || !o2s.length) return;
 
     // 1) Відкрити режим і підставити О1 (категорія, назва, діаметр)
-    setDetailsOpen('univers_mass');
-    setSelectValue('massCategoryObject1', o1.categoryKey, o1.categoryKey);
-    setSelectValue('massObject1',         o1.objectId,   o1.name);
-    // ВАЖЛИВО: режим «Маса» читає baseline з #massCircleObject1
-    setNumberInput('massCircleObject1',   o1.baselineDiameterMeters);
+    setDetailsOpen('math');
+    setSelectValue('mathCategoryObject1', o1.categoryKey, o1.categoryKey);
+    setSelectValue('mathObject1',         o1.objectId,   o1.name);
+    // ВАЖЛИВО: режим «Математика» читає baseline з #mathBaselineDiameter
+    setNumberInput('mathBaselineDiameter', o1.baselineDiameterMeters);
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник (без кліків і без change/input)
     for (const item of o2s) {
       if (!item) continue;
 
-      setSelectValue('massCategoryObject2', item.categoryKey, item.categoryKey);
-      setSelectValue('massObject2',         item.objectId,   item.name);
+      setSelectValue('mathCategoryObject2', item.categoryKey, item.categoryKey);
+      setSelectValue('mathObject2',         item.objectId,   item.name);
 
       try {
-        onMassCalculate({ scope });
+        onMathCalculate({ scope });
       } catch (e) {
-        console.error('[univers_mass_applier] onMassCalculate failed for O2:', item, e);
+        console.error('[math_applier] onMathCalculate failed for O2:', item, e);
       }
 
       // невеличка пауза між кроками
@@ -134,11 +134,11 @@ import { onMassCalculate } from '/js/events/mass_buttons.js';
   // ---------- реєстрація або постановка в чергу ----------
   function registerOrQueue() {
     if (window?.orbit?.registerSceneApplier) {
-      window.orbit.registerSceneApplier('univers_mass', applyUniversMassScene);
+      window.orbit.registerSceneApplier('math', applyMathScene);
     } else {
       (window.__orbit_pending_appliers__ ||= []).push({
-        mode: 'univers_mass',
-        fn: applyUniversMassScene
+        mode: 'math',
+        fn: applyMathScene
       });
     }
   }
