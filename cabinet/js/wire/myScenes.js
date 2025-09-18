@@ -19,6 +19,35 @@ let escHandlerEdit = null;
 let escHandlerConfirm = null;
 let currentRows = [];
 
+// --- toast: показ короткого повідомлення поверх сторінки ---
+function showCabToast(msgKey = 'scenes.link_copied') {
+  const text = tStrict(msgKey);
+  if (!text) return;
+
+  let root = document.getElementById('cab-toast-root');
+  if (!root) {
+    root = document.createElement('div');
+    root.id = 'cab-toast-root';
+    document.body.appendChild(root);
+  }
+  const el = document.createElement('div');
+  el.className = 'cab-toast';
+  el.textContent = text;
+  el.setAttribute('role','status');
+  el.setAttribute('aria-live','polite');
+  root.appendChild(el);
+
+  // старт анімації
+  void el.offsetWidth;
+  el.classList.add('show');
+
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 200);
+  }, 1600);
+}
+
+
 // --- i18n: без хардкод-фолбеків ---
 function tStrict(key) {
   const val = t(key);
@@ -223,12 +252,14 @@ async function onShare(sceneId) {
     const url = `${window.location.origin}/?s=${code}`;
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(url);
+      showCabToast('scenes.link_copied');
     } else {
       const ta = createEl('textarea', '');
       ta.value = url;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand('copy');
+      showCabToast('scenes.link_copied');
       ta.remove();
     }
     setStatus(tStrict('scenes.link_copied'));

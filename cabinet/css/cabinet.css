@@ -16,10 +16,120 @@
   display:flex; align-items:center; justify-content:center;
 }
 .cab-modal{
-  width:min(460px,92vw); background:#fff; border-radius:16px;
-  padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.2);
+  width: min(460px, 92vw);
+  max-height: 92vh;                 /* ✅ обмежуємо по в’юпорту */
+  display: flex;                    /* ✅ дає змогу тілу рости/скролитись */
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
 }
+
+/* Тіло модалки: скрол усередині */
+.cab-modal-body{
+  flex: 1;
+  min-height: 0;
+  overflow-y: scroll;                 /* як у #left-panel */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+
+  /* Firefox — 1:1 як у #left-panel / .info-scroll */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.35) transparent;
+}
+/* Cabinet scroll = left-panel */
+.cab-modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+.cab-modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cab-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+}
+.cab-modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Контейнер списку сцен у модалці */
+.cab-scenes-list{
+  display: block;
+  padding: 4px 0;
+}
+
 .cab-modal-title{ margin:0 0 10px 0; }
+/* ===== Cabinet toast (копійовано) ===== */
+#cab-toast-root{
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 4000;
+  pointer-events: none;
+}
+.cab-toast{
+  background: #111;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.2;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.cab-toast.show{
+  opacity: 1;
+  transform: translateY(0);
+}
+/* ===== Edit modal form ===== */
+.cab-form{ display:block; }
+
+.cab-form-row{ margin:0; }
+
+/* За замовчуванням: label над полем (Title, Description) */
+.cab-form-row label{
+  display:block;
+  font-weight:600;
+  margin:8px 0 4px;
+}
+
+/* Поля на всю ширину */
+.cab-form-row input[type="text"],
+.cab-form-row textarea{
+  width:100%;
+  box-sizing:border-box;
+}
+
+/* Description — висота і ресайз */
+#sc-edit-desc{
+  min-height:100px;
+  resize:vertical;
+}
+
+/* Рядок Public: label і чекбокс в один рядок */
+.cab-form-row label[for="sc-edit-public"]{
+  display:inline-flex;
+  align-items:center;
+  margin:8px 8px 10px 0;   /* відступ праворуч перед чекбоксом */
+  font-weight:600;
+}
+#sc-edit-public{
+  vertical-align:middle;
+  width:16px; height:16px;
+}
+
+/* Кнопки праворуч з відступом згори */
+.cab-form-actions{
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+  margin-top:10px;
+}
+
 .cab-input{
   width:100%; padding:10px; border:1px solid #ddd; border-radius:10px; margin-bottom:8px;
 }

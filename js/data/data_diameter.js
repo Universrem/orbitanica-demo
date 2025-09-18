@@ -43,43 +43,48 @@ function getCatKey(rec) {
 function toMetersViaConverter(value, unit) {
   const v = Number(value);
   if (!Number.isFinite(v)) return NaN;
-  const u = (unit && String(unit)) || getBaseUnit('distance') || 'm';
+  const u = (unit && String(unit)) || getBaseUnit('diameter') || 'km';
   try {
-    // база 'distance' = метри
-    return convertToBase(v, u, 'distance');
+    // convertToBase для 'diameter' уже повертає значення в МЕТРАХ у вашій реалізації
+    return convertToBase(v, u, 'diameter');
   } catch {
     return NaN;
   }
 }
 
+
+
 // Прочитати діаметр у метрах з офіційного чи юзерського запису
 function readDiameterMeters(source) {
   // 1) офіційний формат univers: { diameter: { value, unit } }
   if (source?.diameter && typeof source.diameter === 'object') {
-    const vm = toMetersViaConverter(source.diameter.value, source.diameter.unit || 'm');
-    if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
+    const rawUnit = String(source.diameter.unit || 'km').trim();
+    const vm = toMetersViaConverter(source.diameter.value, rawUnit);
+    if (Number.isFinite(vm)) return { valueReal: vm, unit: rawUnit };
   }
 
   // 2) юзерський через модалку: attrs.diameter { value, unit }
   if (source?.attrs?.diameter && typeof source.attrs.diameter === 'object') {
-    const vm = toMetersViaConverter(
-      source.attrs.diameter.value,
-      source.attrs.diameter.unit || source.unit || 'm'
-    );
-    if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
+    const rawUnit = String(source.attrs.diameter.unit || source.unit || 'km').trim();
+    const vm = toMetersViaConverter(source.attrs.diameter.value, rawUnit);
+    if (Number.isFinite(vm)) return { valueReal: vm, unit: rawUnit };
   }
 
   // 3) можливі плоскі поля (сумісність)
   if (source && typeof source === 'object') {
+    const rawUnit = String(
+      (source.diameterUnit ?? source.unit ?? (source.diameter && source.diameter.unit) ?? 'km')
+    ).trim();
     const vm = toMetersViaConverter(
       source.diameterValue ?? source.value ?? source.diameter,
-      source.unit ?? (source.diameter && source.diameter.unit) ?? 'm'
+      rawUnit
     );
-    if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
+    if (Number.isFinite(vm)) return { valueReal: vm, unit: rawUnit };
   }
 
-  return { valueReal: NaN, unit: 'm' };
+  return { valueReal: NaN, unit: 'km' };
 }
+
 
 // Діаметр базового кола О1 (м)
 function readBaselineDiameterMeters(scope) {

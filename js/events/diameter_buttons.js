@@ -79,7 +79,7 @@ export function onDiameterCalculate({ scope /*, object1Group, object2Group */ })
   // 2) Baseline у калькуляторі
   const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // D1 (м) — масштабований діаметр на мапі
   const v1 = Number(data?.object1?.diameterReal);                      // V1 (м) — реальний діаметр
-  const u1 = data?.object1?.unit || 'm';
+  const u1 = data?.object1?.unit || 'km';
 
   // Завжди оновлюємо внутрішній масштаб (геометрія кола залежить від центру)
   resetDiameterScale();
@@ -139,7 +139,7 @@ if (String(data?.object1?.description || '').trim()) {
 
   // 3) О2: обчислити через калькулятор
   const v2 = Number(data?.object2?.diameterReal); // V2 (м)
-  const u2 = data?.object2?.unit || 'm';
+  const u2 = data?.object2?.unit || 'km';
   const res = addDiameterCircle({
     diameterReal: v2,
     unit: u2,
@@ -186,10 +186,11 @@ __pushSelectedO2(data);
 
 
   // Консоль для діагностики
-  console.log(
-  '[mode:diameter] O1: D(m)=%s → Dscaled=%s; O2: V(m)=%s → Dscaled=%s',
-  o1RealOk ? v1 : '—', baselineDiameter,
-  o2RealOk ? v2 : '—', scaledDiameterMeters
+console.log(
+  '[mode:diameter] O1: D(%s)=%s → Dscaled(m)=%s; O2: V(%s)=%s → Dscaled(m)=%s',
+  o1RealOk ? u1 : '-', o1RealOk ? v1 : '—', baselineDiameter,
+  o2RealOk ? u2 : '-', o2RealOk ? v2 : '—', scaledDiameterMeters
 );
+
 
 }

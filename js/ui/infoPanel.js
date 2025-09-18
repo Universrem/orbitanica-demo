@@ -29,7 +29,7 @@ const locale = () => LOCALES[getCurrentLang?.()] || 'uk-UA';
 const fmtNumber = v => (typeof v === 'number' ? v : Number(v)).toLocaleString(locale());
 function fmtMeters(m) {
   if (m == null || !isFinite(m)) return '';
-  if (m >= 1000) return `${(m / 1000).toLocaleString(locale(), { maximumFractionDigits: 3 })} ${t('unit.km')}`;
+  if (m >= 1000) return `${(m / 1000).toLocaleString(locale(), { maximumFractionDigits: 2 })} ${t('unit.km')}`;
   return `${m.toLocaleString(locale(), { maximumFractionDigits: 2 })} ${t('unit.m')}`;
 }
 const UNIT_KEY = { mm: 'unit.mm', cm: 'unit.cm', m: 'unit.m', km: 'unit.km' };
