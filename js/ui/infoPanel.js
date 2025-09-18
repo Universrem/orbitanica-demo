@@ -277,12 +277,16 @@ if (!itemSubtitleShown) {
         pref.textContent = formatHistoryVariantPrefix(v.variant);
         sub.appendChild(pref);
 
-        const real = (v.realValue != null && v.realUnit) ? `${fmtNumber(v.realValue)} ${fmtUnit(v.realUnit)}` : '';
-        const scaled = (v.scaledMeters != null) ? fmtMeters(v.scaledMeters) : '';
-        if (real || scaled) {
-          const sep = document.createTextNode(` ${real}${(real && scaled) ? ' \u2192 ' : ''}${scaled}`);
-          sub.appendChild(sep);
-        }
+const hasReal = (v.realValue != null && isFinite(v.realValue));
+const real = hasReal
+  ? (v.realUnit ? `${fmtNumber(v.realValue)} ${fmtUnit(v.realUnit)}` : `${fmtNumber(v.realValue)}`)
+  : '';
+const scaled = (v.scaledMeters != null) ? fmtMeters(v.scaledMeters) : '';
+if (real || scaled) {
+  const sep = document.createTextNode(` ${real}${(real && scaled) ? ' \u2192 ' : ''}${scaled}`);
+  sub.appendChild(sep);
+}
+
 
         if (v.invisibleReason === 'tooLarge') {
           const badge = document.createElement('span');
@@ -362,7 +366,11 @@ listEl.appendChild(row);
       nameSpan.addEventListener('mouseleave', hideHover);
     }
 
-    const real = (it.realValue != null && it.realUnit) ? `${fmtNumber(it.realValue)} ${fmtUnit(it.realUnit)}` : '';
+    const hasReal = (it.realValue != null && isFinite(it.realValue));
+const real = hasReal
+  ? (it.realUnit ? `${fmtNumber(it.realValue)} ${fmtUnit(it.realUnit)}` : `${fmtNumber(it.realValue)}`)
+  : '';
+
     const scaled = (it.scaledMeters != null) ? fmtMeters(it.scaledMeters) : '';
 
     row.appendChild(dot);

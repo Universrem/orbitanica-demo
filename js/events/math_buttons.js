@@ -70,8 +70,10 @@ export function onMathCalculate({ scope /*, object1Group, object2Group */ }) {
   // 2) Baseline у калькуляторі
   const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // D1 (м) — масштабований діаметр на мапі
   const v1 = Number(data?.object1?.valueReal);                         // реальне число/величина
-  const u1Raw = data?.object1?.unit || 'unit';
-  const u1 = u1Raw && u1Raw.toLowerCase() !== 'unit' ? u1Raw : null;
+const u1Raw = data?.object1?.unit || 'unit';
+const u1 = u1Raw && u1Raw.toLowerCase() !== 'unit' ? u1Raw : null;
+
+
 
   // Завжди оновлюємо внутрішній масштаб
   resetMathScale();
@@ -129,8 +131,8 @@ export function onMathCalculate({ scope /*, object1Group, object2Group */ }) {
 
   // 3) О2: обчислити через калькулятор
   const v2 = Number(data?.object2?.valueReal);
-  const u2Raw = data?.object2?.unit || 'unit';
-  const u2 = u2Raw && u2Raw.toLowerCase() !== 'unit' ? u2Raw : null;
+const u2Raw = data?.object2?.unit || 'unit';
+const u2 = u2Raw && u2Raw.toLowerCase() !== 'unit' ? u2Raw : null;
   const res = addMathCircle({
     valueReal: v2,
     unit: u2,
