@@ -110,36 +110,55 @@ function renderSignedButtons(isSigned) {
   let btnMy   = document.getElementById('btn-my-scenes');
 
   if (isSigned) {
-    if (!btnSave) {
-      btnSave = document.createElement('button');
-      btnSave.id = 'btn-save-scene';
-      btnSave.className = 'top-icon-button';
-      btnSave.setAttribute('aria-label', 'Save scene');
-      btnSave.title = 'Save scene';
-      const img = document.createElement('img');
-      img.className = 'top-icon';
-      img.src = '/res/icons/save.png';
-      img.alt = '';
-      btnSave.appendChild(img);
-      rail.insertBefore(btnSave, anchor);
-    }
-    if (!btnMy) {
-      btnMy = document.createElement('button');
-      btnMy.id = 'btn-my-scenes';
-      btnMy.className = 'top-icon-button';
-      btnMy.setAttribute('aria-label', 'My scenes');
-      btnMy.title = 'My scenes';
-      const img = document.createElement('img');
-      img.className = 'top-icon';
-      img.src = '/res/icons/scene.png';
-      img.alt = '';
-      btnMy.appendChild(img);
-      rail.insertBefore(btnMy, anchor);
-    }
-  } else {
-    if (btnSave) btnSave.remove();
-    if (btnMy)   btnMy.remove();
+  // ---- SAVE SCENE ----
+  if (!btnSave) {
+    const labelSave = t('ui.topbar.save_scene') || 'Save scene';
+    btnSave = document.createElement('button');
+    btnSave.id = 'btn-save-scene';
+    btnSave.className = 'top-icon-button has-tip';
+    btnSave.setAttribute('aria-label', labelSave);
+    btnSave.setAttribute('data-tip', labelSave);
+
+    const img = document.createElement('img');
+    img.className = 'top-icon';
+    img.src = '/res/icons/save.png';
+    img.alt = '';
+    btnSave.appendChild(img);
+
+    // діємо так само, як стрічка: кидаємо подію
+    btnSave.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('cabinet:save-scene'));
+    });
+
+    rail.insertBefore(btnSave, anchor);
   }
+
+  // ---- MY SCENES ----
+  if (!btnMy) {
+    const labelMy = t('ui.topbar.my_scenes') || 'My scenes';
+    btnMy = document.createElement('button');
+    btnMy.id = 'btn-my-scenes';
+    btnMy.className = 'top-icon-button has-tip';
+    btnMy.setAttribute('aria-label', labelMy);
+    btnMy.setAttribute('data-tip', labelMy);
+
+    const img = document.createElement('img');
+    img.className = 'top-icon';
+    img.src = '/res/icons/scene.png';
+    img.alt = '';
+    btnMy.appendChild(img);
+
+    btnMy.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('cabinet:open-my-scenes'));
+    });
+
+    rail.insertBefore(btnMy, anchor);
+  }
+} else {
+  if (btnSave) btnSave.remove();
+  if (btnMy)   btnMy.remove();
+}
+
 }
 
 
@@ -188,7 +207,10 @@ renderSignedButtons(false);
   // ARIA + title
   const label = authed ? t('ui.topbar.sign_out') : t('ui.topbar.sign_in');
   btn.setAttribute('aria-label', label);
-  btn.title = email ? `${label} (${email})` : label;
+  btn.removeAttribute('title');           // прибираємо нативний тултіп
+btn.classList.add('has-tip');
+btn.setAttribute('data-tip', label);    // показуємо наш тултіп
+
 
 // Топбар-кнопки (Save/My)
 renderSignedButtons(authed);
