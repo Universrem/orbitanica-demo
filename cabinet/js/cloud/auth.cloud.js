@@ -2,7 +2,7 @@
 // API для входу через лист (magic link) та виходу.
 // Використання у UI: import { signInWithEmail, signOut, getSession, watchAuth } from './auth.cloud.js';
 
-import { getSupabase, EMAIL_REDIRECT_TO } from './config.js';
+import { getSupabase } from './config.js';
 
 /** Валідація email (проста, але надійна для UI) */
 function isValidEmail(email) {
@@ -32,7 +32,7 @@ export async function signInWithEmail(email) {
   const { error } = await supabase.auth.signInWithOtp({
     email: String(email).trim(),
     options: {
-      emailRedirectTo: EMAIL_REDIRECT_TO,
+      emailRedirectTo: window.location.origin + '/',
       shouldCreateUser: true
     }
   });
