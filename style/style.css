@@ -320,6 +320,23 @@ summary {
   border-radius: 0;
   background-color: transparent;
 }
+
+/* Ліва панель: іконки для "Налаштування" та "FAQ" */
+#left-panel > details#settings > summary::before {
+  width: 18px;
+  height: 18px;
+  background: url('/res/icons/settings.png') no-repeat center / contain;
+  border-radius: 0;
+  background-color: transparent;
+}
+#left-panel > details#faq > summary::before {
+  width: 18px;
+  height: 18px;
+  background: url('/res/icons/help.png') no-repeat center / contain;
+  border-radius: 0;
+  background-color: transparent;
+}
+
 #left-panel > details > summary:hover {
   color: #0077cc;
 }

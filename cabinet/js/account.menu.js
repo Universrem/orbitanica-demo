@@ -100,6 +100,48 @@ function closeSignInModal() {
 // Іконки (поклади /res/icons/user-auth.png; гість використовує чинний user.png)
 const ICON_GUEST = '/res/icons/user.png';
 const ICON_AUTH  = '/res/icons/user-auth.png';
+// Додавання/видалення кнопок у топбарі (без CSS/hidden)
+function renderSignedButtons(isSigned) {
+  const rail   = document.getElementById('right-rail');
+  const anchor = document.getElementById('lang-menu'); // вставляємо ПЕРЕД мовним меню
+  if (!rail || !anchor) return;
+
+  let btnSave = document.getElementById('btn-save-scene');
+  let btnMy   = document.getElementById('btn-my-scenes');
+
+  if (isSigned) {
+    if (!btnSave) {
+      btnSave = document.createElement('button');
+      btnSave.id = 'btn-save-scene';
+      btnSave.className = 'top-icon-button';
+      btnSave.setAttribute('aria-label', 'Save scene');
+      btnSave.title = 'Save scene';
+      const img = document.createElement('img');
+      img.className = 'top-icon';
+      img.src = '/res/icons/save.png';
+      img.alt = '';
+      btnSave.appendChild(img);
+      rail.insertBefore(btnSave, anchor);
+    }
+    if (!btnMy) {
+      btnMy = document.createElement('button');
+      btnMy.id = 'btn-my-scenes';
+      btnMy.className = 'top-icon-button';
+      btnMy.setAttribute('aria-label', 'My scenes');
+      btnMy.title = 'My scenes';
+      const img = document.createElement('img');
+      img.className = 'top-icon';
+      img.src = '/res/icons/scene.png';
+      img.alt = '';
+      btnMy.appendChild(img);
+      rail.insertBefore(btnMy, anchor);
+    }
+  } else {
+    if (btnSave) btnSave.remove();
+    if (btnMy)   btnMy.remove();
+  }
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('btn-user');
@@ -108,6 +150,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const img = btn.querySelector('img.top-icon');
   const pop = createPopover();
   positionPopover(btn, pop);
+
+  // Початково сховати (гість) — до приходу стану auth
+  // старт: гість → кнопок нема
+renderSignedButtons(false);
+
 
   // Стартовий стан
   refreshIconAndAria();
@@ -132,17 +179,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ————— helpers —————
   async function refreshIconAndAria() {
-    const email = await getUserEmail().catch(() => null);
-    const authed = !!email;
+  const email = await getUserEmail().catch(() => null);
+  const authed = !!email;
 
-    // Іконка
-    if (img) img.src = authed ? ICON_AUTH : ICON_GUEST;
+  // Іконка
+  if (img) img.src = authed ? ICON_AUTH : ICON_GUEST;
 
-    // ARIA + title
-    const label = authed ? t('ui.topbar.sign_out') : t('ui.topbar.sign_in');
-    btn.setAttribute('aria-label', label);
-    btn.title = email ? `${label} (${email})` : label;
-  }
+  // ARIA + title
+  const label = authed ? t('ui.topbar.sign_out') : t('ui.topbar.sign_in');
+  btn.setAttribute('aria-label', label);
+  btn.title = email ? `${label} (${email})` : label;
+
+// Топбар-кнопки (Save/My)
+renderSignedButtons(authed);
+
+}
+
 
   function createPopover() {
     let el = document.getElementById('cab-account-popover');

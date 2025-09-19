@@ -532,6 +532,22 @@
     "en": "Other",
     "es": "Otro"
   },
+  "panel_title_options": {
+  "ua": "Опції",
+  "en": "Options",
+  "es": "Opciones"
+},
+"panel_title_settings": {
+  "ua": "Налаштування",
+  "en": "Settings",
+  "es": "Configuración"
+},
+"panel_title_faq": {
+  "ua": "Питання та відповіді",
+  "en": "FAQ",
+  "es": "Preguntas frecuentes"
+},
+
   "panel_placeholder_category": {
   "ua": "Виберіть категорію",
   "en": "Select category",

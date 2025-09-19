@@ -436,6 +436,13 @@ export function initLeftPanel(t) {
         }
       ]
     } */
+{ type: 'note', i18nKey: 'panel_title_options', text: t('panel_title_options'), className: 'panel-section-title' },
+
+{ id: 'settings', title: t('panel_title_settings') },
+
+{ id: 'faq', title: t('panel_title_faq') },
+
+
   ];
 
   // ==== Reactivity на зміну мови (всередині initLeftPanel, щоб мати t у замиканні)
