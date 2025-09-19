@@ -924,6 +924,7 @@
   "en": "1 August 2025",
   "es": "1 de agosto de 2025"
 },
+"ui.topbar.blog":         { "ua": "Блог", "en": "Blog", "es": "Blog" },
   "ui.topbar.sign_in": {
     "ua": "Увійти",
     "en": "Sign in",

@@ -100,6 +100,23 @@ function closeSignInModal() {
 // Іконки (поклади /res/icons/user-auth.png; гість використовує чинний user.png)
 const ICON_GUEST = '/res/icons/user.png';
 const ICON_AUTH  = '/res/icons/user-auth.png';
+let LAST_AUTHED = false;
+
+function setTip(el, label) {
+  if (!el) return;
+  el.classList.add('has-tip');
+  el.setAttribute('aria-label', label);
+  el.setAttribute('data-tip', label);
+  el.removeAttribute('title');
+}
+
+function refreshTopbarTips(authed) {
+  setTip(document.getElementById('btn-blog'),        t('ui.topbar.blog'));
+  setTip(document.getElementById('btn-user'),        authed ? t('ui.topbar.sign_out') : t('ui.topbar.sign_in'));
+  setTip(document.getElementById('btn-save-scene'),  t('ui.topbar.save_scene'));
+  setTip(document.getElementById('btn-my-scenes'),   t('ui.topbar.my_scenes'));
+}
+
 // Додавання/видалення кнопок у топбарі (без CSS/hidden)
 function renderSignedButtons(isSigned) {
   const rail   = document.getElementById('right-rail');
@@ -129,8 +146,8 @@ function renderSignedButtons(isSigned) {
     btnSave.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent('cabinet:save-scene'));
     });
+rail.insertBefore(btnSave, anchor);
 
-    rail.insertBefore(btnSave, anchor);
   }
 
   // ---- MY SCENES ----
@@ -153,10 +170,14 @@ function renderSignedButtons(isSigned) {
     });
 
     rail.insertBefore(btnMy, anchor);
+    refreshTopbarTips(true);
+
   }
 } else {
   if (btnSave) btnSave.remove();
   if (btnMy)   btnMy.remove();
+  refreshTopbarTips(false);
+
 }
 
 }
@@ -169,14 +190,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const img = btn.querySelector('img.top-icon');
   const pop = createPopover();
   positionPopover(btn, pop);
+  refreshTopbarTips(false);
 
   // Початково сховати (гість) — до приходу стану auth
   // старт: гість → кнопок нема
-renderSignedButtons(false);
+  renderSignedButtons(false);
 
 
   // Стартовий стан
   refreshIconAndAria();
+
+  document.addEventListener('languageChanged', () => refreshTopbarTips(LAST_AUTHED));
+window.addEventListener('orbit:lang-change', () => refreshTopbarTips(LAST_AUTHED));
+
 
   // Живе оновлення при зміні сесії
   watchAuth(() => {
@@ -207,6 +233,9 @@ renderSignedButtons(false);
   // ARIA + title
   const label = authed ? t('ui.topbar.sign_out') : t('ui.topbar.sign_in');
   btn.setAttribute('aria-label', label);
+  LAST_AUTHED = authed;
+  refreshTopbarTips(authed);
+
   btn.removeAttribute('title');           // прибираємо нативний тултіп
 btn.classList.add('has-tip');
 btn.setAttribute('data-tip', label);    // показуємо наш тултіп
@@ -214,6 +243,7 @@ btn.setAttribute('data-tip', label);    // показуємо наш тулті�
 
 // Топбар-кнопки (Save/My)
 renderSignedButtons(authed);
+
 
 }
 
