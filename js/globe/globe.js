@@ -2,7 +2,8 @@
 'use strict';
 
 import { Globe, XYZ, Vector } from '../../lib/og.es.js';
-import { initCamera } from "./camera.js";
+import { initCamera, getCameraAPI, updateAltimeterReadout } from "./camera.js";
+import { initCircleFocusController } from "./circle_focus.controller.js";
 import { initMarkers } from "./markers.js";
 
 // Базовий шар OSM
@@ -38,6 +39,9 @@ export const globus = new Globe({
 // Шар підписів/крапок
 export const labelsLayer = new Vector("labelsLayer", { visibility: true });
 globus.planet.addLayer(labelsLayer);
+
+// Контейнер нижньої панелі кнопок кіл
+const circleToolbarEl = document.getElementById('circle-toolbar');
 
 // ───────────────────────────────────────────────────────────────
 // Захист від сторонніх очищень/видалень шарів під час «Старт»
@@ -95,3 +99,24 @@ globus.planet.addLayer(labelsLayer);
 // Підключаємо модулі камери та маркерів
 initCamera(globus);
 initMarkers(globus);
+
+// Публічний адаптер камери для контролера кнопок
+const cameraAPI = getCameraAPI(globus);
+
+// Запуск контролера кнопок кіл (якщо контейнер існує)
+if (circleToolbarEl) {
+  initCircleFocusController({
+    container: circleToolbarEl,
+    cameraAPI
+  });
+}
+
+// Безперервне оновлення лічильника висоти (ліворуч угорі)
+(function startAltimeterLoop() {
+  function frame() {
+    updateAltimeterReadout(globus);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+

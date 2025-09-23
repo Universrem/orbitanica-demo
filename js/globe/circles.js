@@ -443,8 +443,47 @@ export function addGeodesicCircle(radiusMeters, color = 'rgba(255,0,0,0.8)', id 
 
   // підстрахуємось від можливого стороннього кліру у цьому ж тіку
   try { requestAnimationFrame(() => { try { __ensureLayersSynced(); } catch {} }); } catch { __ensureLayersSynced(); }
+  __scheduleCirclesUpdated();
   return rec.id;
 }
+
+// === Circles → UI buttons bridge (event: 'circles:updated') ===
+let __circlesEmitScheduled = false;
+
+function __buildCirclesPayload() {
+  const { lon, lat } = __getCurrentCenter();
+  const out = [];
+  for (const rec of REG.values()) {
+    if (!rec || !Number.isFinite(rec.radiusMeters) || rec.radiusMeters <= 0 || !rec.color) continue;
+    let name = rec.nameText;
+    if ((!name || !name.length) && rec.nameKey) {
+      name = __resolveNameFromKey(rec.nameKey) || '';
+    }
+    out.push({
+      id: rec.id,
+      name: name || 'Circle',
+      color: rec.color,
+      lon,
+      lat,
+      radiusM: rec.radiusMeters
+    });
+  }
+  return out;
+}
+
+function __emitCirclesUpdatedNow() {
+  __circlesEmitScheduled = false;
+  const circles = __buildCirclesPayload();
+  document.dispatchEvent(new CustomEvent('circles:updated', { detail: { circles } }));
+}
+
+function __scheduleCirclesUpdated() {
+  if (__circlesEmitScheduled) return;
+  __circlesEmitScheduled = true;
+  try { requestAnimationFrame(__emitCirclesUpdatedNow); }
+  catch { __emitCirclesUpdatedNow(); }
+}
+
 
 // Сумісність з існуючими імпортами
 export function setCircleLabelTextById(id, text) { setLabelTextById(id, text); }
@@ -471,17 +510,22 @@ function __redrawAllFromRegistry() {
     try { __clearRecEntities(rec); __drawRecord(rec); }
     catch (e) { console.error('[circles] redraw failed', e); }
   }
+  __scheduleCirclesUpdated();
 }
 
 function __fullClear() {
   try { circlesLayer.clear(); } catch {}
   try { labelsLayer.clear(); } catch {}
   clearRegistry();
+  __scheduleCirclesUpdated();
+
 }
 
 // ───────────────────────────────────────────────────────────────────────────────
 // Події
 window.addEventListener('orbit:center-changed', __redrawAllFromRegistry);
+window.addEventListener('orbit:center-changed', __scheduleCirclesUpdated);
+
 
 const __onLangChange = () => {
   for (const rec of REG.values()) {
@@ -490,6 +534,8 @@ const __onLangChange = () => {
     else txt = rec.nameText || '';
     if (txt) setLabelTextById(rec.id, txt);
   }
+  __scheduleCirclesUpdated();
+
 };
 document.addEventListener('languageChanged', __onLangChange);
 window.addEventListener('orbit:lang-change', __onLangChange);

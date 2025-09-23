@@ -1462,3 +1462,67 @@ body.modal-open { overflow: hidden; }
 #left-panel .section-content .scene-like-btn .heart-fill {
   font-family: "Segoe UI Symbol","Noto Color Emoji","Apple Color Emoji",system-ui,sans-serif;
 }
+/* === Circle focus toolbar & altimeter === */
+#altimeter {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  z-index: 1000;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.6);
+  pointer-events: none;
+}
+
+#circle-toolbar {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  padding: 6px 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  backdrop-filter: blur(6px);
+  background: rgba(0,0,0,.25);
+}
+
+#circle-toolbar::-webkit-scrollbar { height: 8px; }
+#circle-toolbar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.35);
+  border-radius: 4px;
+}
+
+#circle-toolbar .circle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255,255,255,.85);
+  color: #111;
+  font: 500 12px/1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .12s ease, background-color .12s ease, opacity .12s ease;
+  opacity: .95;
+}
+
+#circle-toolbar .circle-btn:hover { transform: translateY(-1px); opacity: 1; }
+#circle-toolbar .circle-btn:active { transform: translateY(0); opacity: .9; }
+
+#circle-toolbar .circle-btn__dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.15) inset;
+}
+
+#circle-toolbar .circle-btn__label {
+  display: inline-block;
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
