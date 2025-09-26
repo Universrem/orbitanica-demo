@@ -15,6 +15,7 @@ let __cam = null;
 let __isFlying = false;
 let __flightToken = 0;
 let __endTimer = null;
+let __currentGlobus = null; // Додано для зберігання поточного globus
 
 /** Повертає OG-камеру. */
 function getCam(globus) {
@@ -27,6 +28,7 @@ function normLon(lonDeg) {
   // уникаємо двозначності рівно на шві
   return x === -180 ? (180 - Number.EPSILON) : x;
 }
+
 /** Підігнати цільову довготу під поточну, уникнувши «телепорту» через антимеридіан. */
 function wrapLonNear(startLon, targetLon) {
   // 1) нормалізуємо обидві довготи у [-180,180)
@@ -50,6 +52,25 @@ function wrapLonNear(startLon, targetLon) {
   }
 
   return t;
+}
+
+// Функція для зупинки інерції камери (винесено для локального використання)
+function stopCameraInertia(globus) {
+  const renderer = globus?.planet?.renderer;
+  const nav = renderer?.controls?.mouseNavigation;
+  const canvas = renderer?.handler?.canvas || document.getElementById('globe-container') || window;
+
+  const stop = () => {
+    try { if (nav && typeof nav.stop === 'function') nav.stop(); } catch {}
+  };
+
+  // Викликаємо зупинку негайно
+  stop();
+  
+  // Додатково зупиняємо при подіях, що можуть відбутися одразу після кліку
+  const stopSoon = () => setTimeout(stop, 10);
+  try { canvas.addEventListener('mouseup', stopSoon, { passive: true, once: true }); } catch {}
+  try { canvas.addEventListener('touchend', stopSoon, { passive: true, once: true }); } catch {}
 }
 
 // Глушіння інерції миші/скролу — плавно підлітає і одразу зупиняється
@@ -113,9 +134,9 @@ function flyToNadir({ globus, lon, lat, radiusM, altitudeM, durationMs = DEFAULT
     if (typeof cam._numFrames === 'number') cam._numFrames = frames;
 
     const curLL = (typeof cam.getLonLat === 'function') ? cam.getLonLat() : null;
-const curLon = curLL ? curLL.lon : 0;
-const tLon = wrapLonNear(curLon, normLon(lon));
-const target = new LonLat(tLon, lat, finalH);
+    const curLon = curLL ? curLL.lon : 0;
+    const tLon = wrapLonNear(curLon, normLon(lon));
+    const target = new LonLat(tLon, lat, finalH);
 
     if (typeof cam.flyLonLat === 'function') {
       cam.flyLonLat(target);
@@ -145,6 +166,11 @@ const cameraAPI = {
   flyToNadir: (opts) => flyToNadir(opts),
   isBusy: () => __isFlying,
   abort: () => abort(),
+  stopInertia: () => { // Новий метод для зупинки інерції
+    if (__currentGlobus) {
+      stopCameraInertia(__currentGlobus);
+    }
+  }
 };
 
 /** Скасувати поточний політ. */
@@ -163,11 +189,12 @@ export function initCamera(globus) {
   if (!cam) return;
 
   __cam = cam;
+  __currentGlobus = globus; // Зберігаємо посилання на globus
   cam.maxAltitude = 15_000_000;
   if (typeof cam.update === 'function') cam.update();
-  // Разово підв’язуємо глушіння інерції миші/скролу
-_setupInertiaKill(globus);
-
+  
+  // Видаляємо глобальне глушіння інерції - коментуємо цей рядок
+  // _setupInertiaKill(globus);
 }
 
 /** Оновлення камери за подіями UI/маркерів. */

@@ -17,6 +17,8 @@
  * @typedef {Object} CameraAPI
  * @property {(opts: { lon:number, lat:number, altitudeM:number, durationMs?:number }) => void} flyToNadir
  * @property {() => number | undefined} [getFovDeg]
+ * @property {() => boolean} [isBusy]
+ * @property {() => void} [stopInertia] // Новий метод
  */
 
 const DEG = Math.PI / 180;
@@ -142,19 +144,23 @@ export function initCircleFocusController({
     }
   };
 
- const handleClick = (circle) => {
-  // Якщо камера вже летить — ігноруємо клік (щоб не плодити конкуренцію анімацій)
-  if (typeof cameraAPI?.isBusy === 'function' && cameraAPI.isBusy()) return;
+  const handleClick = (circle) => {
+    // Якщо камера вже летить — ігноруємо клік (щоб не плодити конкуренцію анімацій)
+    if (typeof cameraAPI?.isBusy === 'function' && cameraAPI.isBusy()) return;
 
-  // Визначаємо ціль (центр або антипод), але висоту НЕ рахуємо тут
-  const fov = getFovDeg();
-  const { lon, lat /* , altitudeM */ } = computeTarget(circle, fov, planetRadiusM);
+    // Зупиняємо інерцію камери перед польотом (локально тільки для цього кліку)
+    if (typeof cameraAPI.stopInertia === 'function') {
+      cameraAPI.stopInertia();
+    }
 
-  // Делегуємо все камері: лише координати + радіус.
-  // НЕ передаємо durationMs і НЕ передаємо altitudeM — камера вирішує сама (крок 1).
-  cameraAPI.flyToNadir({ lon, lat, radiusM: circle.radiusM });
-};
+    // Визначаємо ціль (центр або антипод), але висоту НЕ рахуємо тут
+    const fov = getFovDeg();
+    const { lon, lat /* , altitudeM */ } = computeTarget(circle, fov, planetRadiusM);
 
+    // Делегуємо все камері: лише координати + радіус.
+    // НЕ передаємо durationMs і НЕ передаємо altitudeM — камера вирішує сама (крок 1).
+    cameraAPI.flyToNadir({ lon, lat, radiusM: circle.radiusM });
+  };
 
   const render = () => {
     clearContainer(container);

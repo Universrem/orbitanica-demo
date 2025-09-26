@@ -9,5 +9,5 @@ export function estimateAltitudeM(radiusM, fovDeg = 45, planetRadiusM = 6_371_00
   const deltaEff = Math.min(delta, Math.PI - delta);  // не більше півсфери
   const k = 1.15;                                     // невеликий запас
   const h = planetRadiusM * (k * deltaEff) / Math.tan(fov / 2);
-  return Math.max(50, Math.min(h, 15_000_000));
+  return Math.max(10, Math.min(h, 15_000_000));
 }
