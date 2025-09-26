@@ -221,7 +221,6 @@ function __getCurrentCenter() {
     const ll = entities[entities.length - 1].getLonLat();
     return { lon: ll.lon, lat: ll.lat };
   }
-  placeMarker(defaultCenterLon, defaultCenterLat, { silent: true, suppressEvent: true });
   return { lon: defaultCenterLon, lat: defaultCenterLat };
 }
 

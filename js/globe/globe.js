@@ -30,7 +30,7 @@ export const globus = new Globe({
   view: {
     lat    : defaultCenterLat,
     lon    : defaultCenterLon,
-    range  : 10_000_000,
+    range  : 3_000_000,
     tilt   : 0,
     heading: 0
   }
@@ -139,7 +139,7 @@ initCamera(globus);
     try {
       const lon = (typeof window.defaultCenterLon === 'number') ? window.defaultCenterLon : 24;
       const lat = (typeof window.defaultCenterLat === 'number') ? window.defaultCenterLat : 49.84;
-      api.flyToNadir({ lon, lat, radiusM: 50_000 });
+      api.flyToNadir({ lon, lat, altitudeM: 3_000_000 });
     } catch (e) {
       // мовчазно ігноруємо
     }
