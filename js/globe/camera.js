@@ -52,6 +52,34 @@ function wrapLonNear(startLon, targetLon) {
   return t;
 }
 
+// Глушіння інерції миші/скролу — плавно підлітає і одразу зупиняється
+function _setupInertiaKill(globus) {
+  const renderer = globus?.planet?.renderer;
+  const nav = renderer?.controls?.mouseNavigation;
+  const canvas = renderer?.handler?.canvas || document.getElementById('globe-container') || window;
+
+  const stop = () => {
+    try { if (nav && typeof nav.stop === 'function') nav.stop(); } catch {}
+  };
+
+  // Відпускання кнопок миші
+  try { renderer?.events?.on?.('lup', stop); } catch {}
+  try { renderer?.events?.on?.('rup', stop); } catch {}
+  try { renderer?.events?.on?.('mup', stop); } catch {}
+
+  // Вихід курсора/тач-жести
+  try { canvas.addEventListener('mouseleave', stop, { passive: true }); } catch {}
+  try { canvas.addEventListener('touchend', stop,   { passive: true }); } catch {}
+  try { canvas.addEventListener('touchcancel', stop,{ passive: true }); } catch {}
+
+  // Колесо миші — короткий debounce і стоп
+  let wheelTimer = null;
+  const onWheel = () => {
+    if (wheelTimer) clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(stop, 140);
+  };
+  try { canvas.addEventListener('wheel', onWheel, { passive: true }); } catch {}
+}
 
 /** Акуратне завершення польоту. */
 function finalizeFlight(token) {
@@ -137,6 +165,9 @@ export function initCamera(globus) {
   __cam = cam;
   cam.maxAltitude = 15_000_000;
   if (typeof cam.update === 'function') cam.update();
+  // Разово підв’язуємо глушіння інерції миші/скролу
+_setupInertiaKill(globus);
+
 }
 
 /** Оновлення камери за подіями UI/маркерів. */
