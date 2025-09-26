@@ -98,6 +98,54 @@ const circleToolbarEl = document.getElementById('circle-toolbar');
 
 // Підключаємо модулі камери та маркерів
 initCamera(globus);
+// Умовний автополіт: тільки якщо користувач нічого не зробив за перші ~250 мс
+(function setupConditionalInitialFocus() {
+  const api = getCameraAPI();
+  const container = document.getElementById('globe-container') || document.body;
+
+  let cancelled = false;
+  let timer = null;
+
+  const cancel = () => {
+    if (cancelled) return;
+    cancelled = true;
+    if (timer) { clearTimeout(timer); timer = null; }
+    removeListeners();
+  };
+
+  const onAnyUserAction = () => cancel();
+
+  function addListeners() {
+    container.addEventListener('pointerdown', onAnyUserAction, { once: true, passive: true });
+    container.addEventListener('wheel', onAnyUserAction, { once: true, passive: true });
+    container.addEventListener('keydown', onAnyUserAction, { once: true, passive: true });
+    container.addEventListener('click', onAnyUserAction, { once: true, passive: true });
+    // якщо у тебе є власна подія зміни центру — зніме автополіт:
+    window.addEventListener('orbit:center-changed', onAnyUserAction, { once: true });
+  }
+  function removeListeners() {
+    container.removeEventListener('pointerdown', onAnyUserAction);
+    container.removeEventListener('wheel', onAnyUserAction);
+    container.removeEventListener('keydown', onAnyUserAction);
+    container.removeEventListener('click', onAnyUserAction);
+    window.removeEventListener('orbit:center-changed', onAnyUserAction);
+  }
+
+  addListeners();
+  timer = setTimeout(() => {
+    if (cancelled) return;
+    removeListeners();
+    // Стартовий фокус: до дефолтного центру, масштаб — за формулою в camera.js
+    try {
+      const lon = (typeof window.defaultCenterLon === 'number') ? window.defaultCenterLon : 24;
+      const lat = (typeof window.defaultCenterLat === 'number') ? window.defaultCenterLat : 49.84;
+      api.flyToNadir({ lon, lat, radiusM: 50_000 });
+    } catch (e) {
+      // мовчазно ігноруємо
+    }
+  }, 250);
+})();
+
 initMarkers(globus);
 
 // Публічний адаптер камери для контролера кнопок

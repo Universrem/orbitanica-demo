@@ -1,122 +1,196 @@
-// camera.js - ФІКСОВАНА ВЕРСІЯ
+// /js/globe/camera.js
+// Єдина точка керування камерою. Без костилів.
+// Крок 1: уніфікована тривалість, захист від конкурентних польотів, обробка markerMoved.
 
 'use strict';
 
 import { markerLayer, defaultCenterLat, defaultCenterLon } from "./globe.js";
+import { estimateAltitudeM } from "./camera_math.js";
 import { LonLat } from '../../lib/og.es.js';
 
-let isFlying = false;
-let currentFlightToken = 0;
+const DEFAULT_FLY_MS = 1200;
+const MIN_FRAMES = 60;
 
+let __cam = null;
+let __isFlying = false;
+let __flightToken = 0;
+let __endTimer = null;
+
+/** Повертає OG-камеру. */
+function getCam(globus) {
+  return globus?.planet?.camera || globus?.camera || __cam;
+}
+
+/** Нормалізація довготи до інтервалу [-180, 180). */
+function normLon(lonDeg) {
+  let x = ((lonDeg + 180) % 360 + 360) % 360 - 180;
+  // уникаємо двозначності рівно на шві
+  return x === -180 ? (180 - Number.EPSILON) : x;
+}
+/** Підігнати цільову довготу під поточну, уникнувши «телепорту» через антимеридіан. */
+function wrapLonNear(startLon, targetLon) {
+  // 1) нормалізуємо обидві довготи у [-180,180)
+  const s = normLon(startLon);
+  let t = normLon(targetLon);
+
+  // 2) вибираємо найближчий «екземпляр» t відносно s, додаючи/віднімаючи 360 за потреби
+  let d = t - s;
+  if (d > 180) t -= 360;
+  else if (d < -180) t += 360;
+
+  // 3) повторно нормалізуємо у [-180,180)
+  t = normLon(t);
+
+  // 4) якщо різниця ≈ 180°, зрушуємо на епсилон, щоб задати однозначний напрямок польоту
+  let delta = Math.abs(t - s);
+  if (delta > 180) delta = 360 - delta;
+  if (Math.abs(delta - 180) < 1e-9) {
+    // легкий поштовх у бік найкоротшого шляху
+    t = normLon(t + (t > s ? -1e-6 : 1e-6));
+  }
+
+  return t;
+}
+
+
+/** Акуратне завершення польоту. */
+function finalizeFlight(token) {
+  if (token !== __flightToken) return; // вже скасовано/перезапущено
+  __isFlying = false;
+  if (__endTimer) {
+    clearTimeout(__endTimer);
+    __endTimer = null;
+  }
+}
+
+/** Публічний політ «у надір» над точкою (lon,lat) з висотою під коло. */
+function flyToNadir({ globus, lon, lat, radiusM, altitudeM, durationMs = DEFAULT_FLY_MS }) {
+  const cam = getCam(globus);
+  if (!cam) return;
+
+  // обчислюємо висоту єдиним способом
+  const finalH = (typeof altitudeM === 'number' && altitudeM > 0)
+    ? altitudeM
+    : estimateAltitudeM(radiusM || 0, cam.getFov ? cam.getFov() : 45);
+
+  // скасувати попередній політ (м'яко)
+  abort();
+
+  __isFlying = true;
+  const myToken = ++__flightToken;
+
+  try {
+    // підігнати кількість кадрів під тривалість (≈60fps)
+    const frames = Math.max(MIN_FRAMES, Math.floor((durationMs || DEFAULT_FLY_MS) / 16));
+    if (typeof cam._numFrames === 'number') cam._numFrames = frames;
+
+    const curLL = (typeof cam.getLonLat === 'function') ? cam.getLonLat() : null;
+const curLon = curLL ? curLL.lon : 0;
+const tLon = wrapLonNear(curLon, normLon(lon));
+const target = new LonLat(tLon, lat, finalH);
+
+    if (typeof cam.flyLonLat === 'function') {
+      cam.flyLonLat(target);
+    } else if (typeof cam.setLonLat === 'function') {
+      cam.setLonLat(target);
+    }
+
+    // Страховка завершення: через durationMs скинемо прапор, якщо події від OG нема.
+    __endTimer = setTimeout(() => finalizeFlight(myToken), durationMs || DEFAULT_FLY_MS);
+
+    // Якщо OG має подію/зворотній виклик завершення — підпишемось один раз.
+    // (без прив'язки до конкретного API, просто пробуємо)
+    try {
+      if (!cam.__orbitDoneHooked && typeof cam.on === 'function') {
+        cam.on('moveend', () => finalizeFlight(myToken));
+        cam.__orbitDoneHooked = true;
+      }
+    } catch {}
+  } catch (err) {
+    console.error('[camera] flyToNadir error:', err);
+    finalizeFlight(myToken); // щоб не «завис» прапор
+  }
+}
+
+/** Зовнішній апі для контролерів. */
+const cameraAPI = {
+  flyToNadir: (opts) => flyToNadir(opts),
+  isBusy: () => __isFlying,
+  abort: () => abort(),
+};
+
+/** Скасувати поточний політ. */
+function abort() {
+  __flightToken++;
+  __isFlying = false;
+  if (__endTimer) {
+    clearTimeout(__endTimer);
+    __endTimer = null;
+  }
+}
+
+/** Ініціалізація камери (разово). */
 export function initCamera(globus) {
-    const cam = globus.planet ? globus.planet.camera : globus.camera;
-    if (cam) {
-        cam.maxAltitude = 15_000_000;
-        cam.update();
-        const threeCam = cam.camera;
-        if (threeCam) { 
-            threeCam.far = 200_000_000; 
-            threeCam.updateProjectionMatrix(); 
-        }
-        
-        setTimeout(() => {
-            updateCameraView(globus, { type: 'initial' });
-        }, 100);
+  const cam = getCam(globus);
+  if (!cam) return;
+
+  __cam = cam;
+  cam.maxAltitude = 15_000_000;
+  if (typeof cam.update === 'function') cam.update();
+}
+
+/** Оновлення камери за подіями UI/маркерів. */
+export function updateCameraView(globus, context = { type: 'initial' }) {
+  const cam = getCam(globus);
+  if (!cam) return;
+
+  if (context.type === 'initial') {
+    // вже зроблено в initCamera, нічого не робимо
+    return;
+  }
+
+  if (context.type === 'markerMoved') {
+    try {
+      // знайдемо активний маркер
+      const ents = markerLayer?.getEntities ? markerLayer.getEntities() : null;
+      const ent = ents && ents.length ? ents[0] : null;
+      const ll = ent?.lonLat || null;
+      if (!ll) return;
+
+      // Летимо до маркера, зберігаючи поточний масштаб (висоту)
+      const currentH = (cam.getHeight ? cam.getHeight() :
+                       (cam.getAltitude ? cam.getAltitude() : null));
+
+      const altitudeM = typeof currentH === 'number' && currentH > 0 ? currentH : undefined;
+
+      flyToNadir({
+        globus,
+        lon: ll.lon,
+        lat: ll.lat,
+        radiusM: undefined,   // не змінюємо масштаб
+        altitudeM,
+        durationMs: DEFAULT_FLY_MS
+      });
+    } catch (e) {
+      console.warn('[camera] markerMoved handler failed:', e);
     }
+    return;
+  }
 }
 
-export function updateCameraView(globus, context) {
-    const cam = globus.planet.camera;
-    const entities = markerLayer.getEntities();
-    const centerLL = entities.length
-        ? entities.slice(-1)[0].getLonLat()
-        : new LonLat(defaultCenterLon, defaultCenterLat);
-
-    if (context.type === 'initial') {
-        cam._numFrames = 180;
-        cam.flyLonLat(new LonLat(centerLL.lon, centerLL.lat, 3_000_000));
-    }
+/** Доступ до API камери для інших модулів. */
+export function getCameraAPI() {
+  return cameraAPI;
 }
 
-export function getCameraAPI(globus) {
-    const cam = globus?.planet?.camera;
-    const ellipsoid = globus?.planet?.ellipsoid;
-    if (!cam || !ellipsoid) return null;
-
-    const R = 6_371_008.8;
-    const DEG = Math.PI / 180;
-
-    const normLon = (lon) => {
-        let L = lon; 
-        while (L < -180) L += 360; 
-        while (L >= 180) L -= 360; 
-        return L;
-    };
-
-    const getFov = () => {
-        const threeCam = cam.camera;
-        return (threeCam && threeCam.fov) ? threeCam.fov : 45;
-    };
-
-    const estimateAlt = (radiusM, fovDeg) => {
-        const delta = Math.max(0, Math.min(Math.PI, radiusM / R));
-        const eff = Math.min(delta, Math.PI - delta);
-        const fovR = Math.max(15*DEG, Math.min(90*DEG, fovDeg*DEG));
-        const k = 1.15;
-        const h = (k * R * eff) / Math.tan(fovR / 2);
-        return Math.min(Math.max(h, 10), 30_000_000);
-    };
-
-    return {
-        getFovDeg() { 
-            return getFov();
-        },
-
-        flyToNadir({ lon, lat, radiusM, altitudeM, durationMs = 2500 }) {
-            if (!cam || isFlying) return;
-
-            isFlying = true;
-            currentFlightToken++;
-            const token = currentFlightToken;
-
-            console.log('🚀 START flight to:', lon, lat, 'token:', token);
-
-            const fov = this.getFovDeg();
-            const finalH = altitudeM > 0 ? altitudeM : 
-                          radiusM > 0 ? estimateAlt(radiusM, fov) : 1_000_000;
-
-            const targetLL = new LonLat(normLon(lon), lat);
-
-            // Мінімальний політ без зайвих stopFlying
-            try {
-                cam._numFrames = Math.max(60, Math.floor(durationMs / 16));
-                cam.flyLonLat(new LonLat(targetLL.lon, targetLL.lat, finalH));
-                
-                // Простий завершення польоту
-                setTimeout(() => {
-                    if (token === currentFlightToken) {
-                        isFlying = false;
-                        console.log('✅ FINISHED flight token:', token);
-                    }
-                }, durationMs + 200);
-                
-            } catch (error) {
-                isFlying = false;
-                console.error('❌ Flight error:', error);
-            }
-        }
-    };
-}
-
+/** Лічильник висоти (UI). */
 export function updateAltimeterReadout(globus) {
-    const el = document.getElementById('altimeter');
-    const cam = globus?.planet?.camera;
-    
-    if (el && cam) {
-        try {
-            const h = cam.getHeight ? cam.getHeight() : 
-                     cam.getAltitude ? cam.getAltitude() : 0;
-            el.textContent = Math.round(h).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' m';
-        } catch (e) {}
-    }
+  const cam = getCam(globus);
+  const el = document.getElementById('altimeter');
+  if (!el || !cam) return;
+  try {
+    const h = cam.getHeight ? cam.getHeight() :
+             (cam.getAltitude ? cam.getAltitude() : 0);
+    el.textContent = Math.round(h).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' m';
+  } catch {}
 }

@@ -142,11 +142,19 @@ export function initCircleFocusController({
     }
   };
 
-  const handleClick = (circle) => {
-    const fov = getFovDeg();
-    const { lon, lat, altitudeM } = computeTarget(circle, fov, planetRadiusM);
-    cameraAPI.flyToNadir({ lon, lat, radiusM: circle.radiusM, durationMs: flyDurationMs });
-  };
+ const handleClick = (circle) => {
+  // Якщо камера вже летить — ігноруємо клік (щоб не плодити конкуренцію анімацій)
+  if (typeof cameraAPI?.isBusy === 'function' && cameraAPI.isBusy()) return;
+
+  // Визначаємо ціль (центр або антипод), але висоту НЕ рахуємо тут
+  const fov = getFovDeg();
+  const { lon, lat /* , altitudeM */ } = computeTarget(circle, fov, planetRadiusM);
+
+  // Делегуємо все камері: лише координати + радіус.
+  // НЕ передаємо durationMs і НЕ передаємо altitudeM — камера вирішує сама (крок 1).
+  cameraAPI.flyToNadir({ lon, lat, radiusM: circle.radiusM });
+};
+
 
   const render = () => {
     clearContainer(container);
