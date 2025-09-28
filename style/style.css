@@ -227,6 +227,45 @@ body {
   display: none !important;
 }
 
+/* ====== MODE BADGE (over globe, top-center) ====== */
+#mode-badge {
+  position: fixed;
+  top: 62px;                /* нижче шапки (#top-bar height: 50px) */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 900;             /* під модалками (1000), поверх глобуса */
+  padding: 8px 14px;
+  border-radius: 12px;
+
+  /* Напівпрозорий «скляний» фон як у нижніх оверлеїв */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(1.2) blur(6px);
+  -webkit-backdrop-filter: saturate(1.2) blur(6px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+
+  font: 600 14px/1.1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #0b0b0b;
+
+  opacity: 0;
+  pointer-events: none;     /* не перехоплюємо кліки по глобусу */
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+#mode-badge.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0); /* легкий підйом при показі */
+}
+
+/* На вузьких екранах — трохи менший відступ зверху */
+@media (max-width: 640px) {
+  #mode-badge {
+    top: 56px;
+    padding: 7px 12px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+}
+
 /* ====== DETAILS & SUMMARY: прибрати стандартні маркери ====== */
 details > summary::-webkit-details-marker,
 details > summary::marker {
@@ -404,13 +443,6 @@ summary {
   color: inherit;           /* базовий колір як у панелі */
 }
 
-/* Тільки колір заголовка міняємо на синій */
-#left-panel .section-content .public-scene-item:hover .public-scene-title,
-#left-panel .section-content .public-scene-item:focus-visible .public-scene-title,
-#left-panel .section-content .public-scene-item.is-active .public-scene-title {
-  color: #0b5cff;           /* той самий синій, що і для режимів */
-}
-
 /* --- Submodes (Всесвіт: Діаметр/Відстань/Світність/Маса) --- */
 /* Додаємо клас .submode-item у розмітку цих пунктів */
 #left-panel .section-content .submode-item {
@@ -418,13 +450,17 @@ summary {
   font-style: italic;  /* курсив */
   /* інші властивості (відступи, іконки, сімейство шрифту) успадковуються як у сусідів */
 }
-/* --- Активний/відкритий пункт (сцена або підрежим) --- */
-/* --- Активний/відкритий пункт --- */
-/* Для сцен: лише колір заголовка (фон/рамки не потрібні) */
-#left-panel .section-content .public-scene-item.is-active .public-scene-title,
-#left-panel .section-content .public-scene-item:focus-visible .public-scene-title {
+/* Сцена: синій заголовок при наведенні, фокусі всередині, та коли активна */
+#left-panel .section-content .public-scene-item:hover .public-scene-title{
+  color: #464545;
+}
+
+
+#left-panel .section-content .public-scene-item:focus-within .public-scene-title,
+#left-panel .section-content .public-scene-item.is-active .public-scene-title {
   color: #0b5cff;
 }
+
 
 /* (Підрежими залишаємо як є; змін не вносимо) */
 /* Легкий ховер лише для підрежимів (для сцен — вимкнено) */
@@ -1372,8 +1408,22 @@ body.modal-open { overflow: hidden; }
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;   /* максимум 2 рядки */
   line-clamp: 2;           /* сучасним браузерам */
+  white-space: normal;     /* перенос у межах 2 рядків */
   overflow: hidden;
+  text-overflow: ellipsis; /* крапки в кінці 2-го рядка */
 }
+/* Розкриття заголовка повністю при наведенні/фокусі/активі */
+#left-panel .section-content .public-scene-item:hover .public-scene-title,
+#left-panel .section-content .public-scene-item:focus-within .public-scene-title,
+#left-panel .section-content .public-scene-item.is-active .public-scene-title {
+  display: block;             /* знімаємо -webkit-box */
+  -webkit-line-clamp: unset;  /* прибираємо обмеження */
+  line-clamp: unset;
+  white-space: normal;        /* багаторядковий текст */
+  overflow: visible;
+  text-overflow: clip;
+}
+
 
 /* Опис: 1 рядок із крапками */
 #left-panel .section-content .public-scene-desc {
@@ -1384,6 +1434,26 @@ body.modal-open { overflow: hidden; }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* Активна сцена: заголовок завжди синій, опис — розгорнутий */
+#left-panel .section-content .public-scene-item.is-active .public-scene-title {
+  color: #0b5cff;
+}
+
+#left-panel .section-content .public-scene-item.is-active .public-scene-desc {
+  white-space: normal;     /* дозволяємо перенос */
+  overflow: visible;
+  text-overflow: clip;
+  display: block;          /* повний текст, як при :hover */
+}
+
+/* При наведенні на картку — показуємо повний опис, без обрізання */
+#left-panel .section-content .public-scene-item:hover .public-scene-desc,
+#left-panel .section-content .public-scene-item:focus-within .public-scene-desc {
+  white-space: normal;      /* дозволяємо перенос */
+  overflow: visible;
+  text-overflow: clip;
+  display: block;
 }
 
 /* Статистика: ♥ і 👁 акуратно по рядку */

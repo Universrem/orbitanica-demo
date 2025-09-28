@@ -56,6 +56,16 @@ function ensureListAreas(detailsEl) {
   }
   return { content, cards, footer };
 }
+
+// Позначає кнопку сцени активною, прибираючи актив з інших
+function setActiveSceneButton(btn) {
+  const root = document.getElementById('left-panel');
+  if (!root) return;
+  root.querySelectorAll('.section-content .public-scene-item.is-active')
+    .forEach(el => el.classList.remove('is-active'));
+  btn.classList.add('is-active');
+}
+
 // Єдиний шлях застосувати публічну сцену: спочатку м'який reset, потім apply
 function applyPublicScene(scene) {
   try {
@@ -104,22 +114,27 @@ likeBtn.setAttribute('aria-pressed', likedInit ? 'true' : 'false');
 
     stats.append(likeBtn, viewsSpan);
 
-    // Клік по картці: спершу +1 перегляд, потім чисте застосування сцени
-    btn.addEventListener('click', async () => {
-      try {
-        if (row?.id) {
-          const cur = Number(row.views ?? 0) || 0;
-          viewsSpan.textContent = `👁 ${cur + 1}`;
-          row.views = cur + 1;
-          await incrementSceneView(row.id);
-        }
-      } catch (e) {
-        // якщо не вдалось — повертаємо попереднє число
-        viewsSpan.textContent = `👁 ${row.views ?? 0}`;
-        console.error('[views]', e);
-      }
-      applyPublicScene(row);
-    });
+    // Клік по картці: +1 перегляд → чисте застосування сцени → позначаємо активною
+btn.addEventListener('click', async () => {
+  try {
+    if (row?.id) {
+      const cur = Number(row.views ?? 0) || 0;
+      viewsSpan.textContent = `👁 ${cur + 1}`;
+      row.views = cur + 1;
+      await incrementSceneView(row.id);
+    }
+  } catch (e) {
+    viewsSpan.textContent = `👁 ${row.views ?? 0}`;
+    console.error('[views]', e);
+  }
+
+  // 1) повний reset + 2) apply сцени
+  applyPublicScene(row);
+
+  // 3) фіксуємо активну картку (персистентно, незалежно від hover/focus)
+  setActiveSceneButton(btn);
+});
+
 
     // Клік по сердечку: toggle лайк (не запускає застосування сцени)
 likeBtn.addEventListener('click', async (ev) => {
@@ -292,5 +307,13 @@ export function initPublicScenesPanel() {
       }
     });
   }
+  // Сцени: знімати .is-active тільки при натисканні кнопки Reset у лівій панелі
+  root.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-action="reset"]');
+    if (!btn) return;
+    root.querySelectorAll('.section-content .public-scene-item.is-active')
+      .forEach(el => el.classList.remove('is-active'));
+  });
+
 }
 
