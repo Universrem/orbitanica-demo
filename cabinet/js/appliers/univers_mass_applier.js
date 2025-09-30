@@ -4,6 +4,8 @@
 // Додає одноразовий «сторож»: на перший рух центру повністю очищує шар і перемальовує сцену.
 
 import { onMassCalculate } from '/js/events/mass_buttons.js';
+import { setModeLabelKeys } from '/js/ui/infoPanel.js';
+
 
 (function registerUniversMassApplier(){
   'use strict';
@@ -109,6 +111,12 @@ import { onMassCalculate } from '/js/events/mass_buttons.js';
     setSelectValue('massObject1',         o1.objectId,   o1.name);
     // ВАЖЛИВО: режим «Маса» читає baseline з #massCircleObject1
     setNumberInput('massCircleObject1',   o1.baselineDiameterMeters);
+    // Підпис інфопанелі: Всесвіт: Маса (існуючі ключі словника)
+    setModeLabelKeys({
+      modeKey: 'panel_title_univers',
+      subKey:  'panel_title_univers_mass'
+    });
+
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник (без кліків і без change/input)
     for (const item of o2s) {

@@ -23,8 +23,7 @@ import {
   addHistoryCircle,
   resetHistoryScale
 } from '../calc/calculate_history.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
@@ -76,6 +75,9 @@ window.addEventListener('orbit:ui-reset', () => {
 export function onHistoryCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Дані
   const data = getHistoryData(scope);
+  // Підпис інфопанелі: «Історія»
+  setModeLabelKeys({ modeKey: 'panel_title_history' });
+
   const pivot = Number(data?.pivotYear) || (new Date()).getFullYear();
 
   // Кольори

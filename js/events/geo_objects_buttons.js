@@ -10,18 +10,10 @@
  */
 
 import { getGeoObjectsData } from '../data/data_geo_objects.js';
-import {
-  setGeoObjectsBaseline,
-  addGeoObjectsCircle,
-  resetGeoObjectsScale
-} from '../calc/calculate_geo_objects.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+import { setGeoObjectsBaseline, addGeoObjectsCircle, resetGeoObjectsScale } from '../calc/calculate_geo_objects.js';
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
-import {
-  addGeodesicCircle,
-  setCircleLabelTextById,
-} from '../globe/circles.js';
+import { addGeodesicCircle, setCircleLabelTextById } from '../globe/circles.js';
 
 // ——— СТАН СЕСІЇ ———
 
@@ -71,6 +63,11 @@ try {
 export function onGeoObjectsCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Зібрати дані
   const data = getGeoObjectsData(scope);
+  // Підпис інфопанелі: «Географія: Об’єкти»
+  setModeLabelKeys({
+    modeKey: 'panel_title_geo',
+    subKey:  'panel_title_geo_objects'
+  });
 
   // Кольори — стабільні для baseline, різні для кожного О2
   const color1 = getColorForKey('geo_objects:baseline');

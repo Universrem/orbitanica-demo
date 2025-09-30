@@ -11,8 +11,7 @@
 
 import { getMathData } from '../data/data_math.js';
 import { setMathBaseline, addMathCircle, resetMathScale } from '../calc/calculate_math.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
@@ -62,6 +61,8 @@ try {
 export function onMathCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Зібрати дані
   const data = getMathData(scope);
+  // Підпис інфопанелі: «Математика»
+  setModeLabelKeys({ modeKey: 'panel_title_math' });
 
   // Кольори — стабільні для baseline, різні для кожного О2
   const color1 = getColorForKey('math:baseline');

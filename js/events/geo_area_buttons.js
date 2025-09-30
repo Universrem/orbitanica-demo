@@ -11,8 +11,7 @@
 
 import { getGeoAreaData } from '../data/data_geo_area.js';
 import { setGeoAreaBaseline, addGeoAreaCircle, resetGeoAreaScale } from '../calc/calculate_geo_area.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
@@ -62,6 +61,11 @@ try {
 export function onGeoAreaCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Зібрати дані
   const data = getGeoAreaData(scope);
+  // Підпис інфопанелі: «Географія: Площа»
+  setModeLabelKeys({
+    modeKey: 'panel_title_geo',
+    subKey:  'panel_title_geo_area'
+  });
 
   // Кольори — стабільні для baseline, різні для кожного О2
   const color1 = getColorForKey('geo_area:baseline');

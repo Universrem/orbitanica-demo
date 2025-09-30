@@ -11,8 +11,7 @@
 
 import { getGeoPopulationData } from '../data/data_geo_population.js';
 import { setGeoPopulationBaseline, addGeoPopulationCircle, resetGeoPopulationScale } from '../calc/calculate_geo_population.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import { addGeodesicCircle, setCircleLabelTextById } from '../globe/circles.js';
 
@@ -52,6 +51,11 @@ try {
 export function onGeoPopulationCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) дані
   const data = getGeoPopulationData(scope);
+  // Підпис інфопанелі: «Географія: Населення»
+  setModeLabelKeys({
+    modeKey: 'panel_title_geo',
+    subKey:  'panel_title_geo_population'
+  });
 
   const color1 = getColorForKey('geo_population:baseline');
   const color2 = getColorForKey(`geo_population:o2:${++geoPopulationResultSeq}`);

@@ -11,8 +11,7 @@
 
 import { getMoneyData } from '../data/data_money.js';
 import { setMoneyBaseline, addMoneyCircle, resetMoneyScale } from '../calc/calculate_money.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
@@ -62,6 +61,8 @@ try {
 export function onMoneyCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Зібрати дані
   const data = getMoneyData(scope);
+  // Підпис інфопанелі: «Гроші»
+  setModeLabelKeys({ modeKey: 'panel_title_money' });
 
   // Кольори — стабільні для baseline, різні для кожного О2
   const color1 = getColorForKey('money:baseline');

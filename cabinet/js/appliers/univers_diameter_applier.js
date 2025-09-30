@@ -4,6 +4,7 @@
 // Додає одноразовий «сторож»: на перший рух центру повністю очищує шар і перемальовує сцену.
 
 import { onDiameterCalculate } from '/js/events/diameter_buttons.js';
+import { setModeLabelKeys } from '/js/ui/infoPanel.js';
 
 (function registerUniversDiameterApplier(){
   'use strict';
@@ -109,6 +110,12 @@ import { onDiameterCalculate } from '/js/events/diameter_buttons.js';
     setSelectValue('diamObject1',         o1.objectId,   o1.name);
     //ВАЖЛИВО: режим «Діаметри» читає baseline з #diamCircleObject1
     setNumberInput('diamCircleObject1',   o1.baselineDiameterMeters);
+    // Підпис інфопанелі: Всесвіт: Діаметр
+    setModeLabelKeys({
+      modeKey: 'panel_title_univers',
+      subKey:  'panel_title_univers_diameter'
+    });
+
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник (без кліків і без change/input)
     for (const item of o2s) {

@@ -652,6 +652,22 @@ hr {
   background: rgba(0,0,0,.15);       /* колір лінії */
   border-radius: 999px;              /* «hairline» вигляд */
 }
+/* Підпис режиму — як заголовок "Scaling results" */
+#info-panel .info-panel__mode {
+  margin: 6px 0 4px;
+  text-align: center;
+
+  /* типографіка як у заголовка */
+  color: #666;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.2;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 
 .info-panel__row .scaled {

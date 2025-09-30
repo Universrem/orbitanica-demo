@@ -4,6 +4,7 @@
 // Ставить «сторож» першого руху центру: повний reset і повторне застосування.
 
 import { onLuminosityCalculate } from '/js/events/luminosity_buttons.js';
+import { setModeLabelKeys } from '/js/ui/infoPanel.js';
 
 (function registerUniversLuminosityApplier(){
   'use strict';
@@ -83,6 +84,12 @@ import { onLuminosityCalculate } from '/js/events/luminosity_buttons.js';
     setSelectValue('lumiCategoryObject1', o1.categoryKey, o1.categoryKey);
     setSelectValue('lumiObject1',         o1.objectId,    o1.name);
     setNumberInput('lumiCircleObject1',   o1.baselineDiameterMeters);
+    // Підпис інфопанелі: Всесвіт: Світність (ключі вже є у словнику)
+    setModeLabelKeys({
+      modeKey: 'panel_title_univers',
+      subKey:  'panel_title_univers_luminosity'
+    });
+
 
     // 2) Послідовно підставляти О2 і викликати штатний обробник
     for (const item of o2s) {

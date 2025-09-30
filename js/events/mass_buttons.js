@@ -12,8 +12,7 @@
 
 import { getMassData } from '../data/data_mass.js';
 import { setMassBaseline, addMassCircle, resetMassScale } from '../calc/calculate_mass.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
@@ -55,6 +54,12 @@ try {
 export function onMassCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Зібрати дані
   const data = getMassData(scope);
+  // Підпис інфопанелі: «Всесвіт: Маса»
+  setModeLabelKeys({
+    modeKey: 'panel_title_univers',
+    subKey:  'panel_title_univers_mass'
+  });
+
 
   // Кольори — стабільні для baseline, різні для кожного О2
   const color1 = getColorForKey('mass:baseline');

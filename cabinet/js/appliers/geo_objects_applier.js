@@ -3,6 +3,7 @@
 // Одноразовий «сторож»: на перший рух центру робимо повний reset і перемальовуємо.
 
 import { onGeoObjectsCalculate } from '/js/events/geo_objects_buttons.js';
+import { setModeLabelKeys } from '/js/ui/infoPanel.js';
 
 (function registerGeoObjectsApplier(){
   'use strict';
@@ -85,6 +86,12 @@ import { onGeoObjectsCalculate } from '/js/events/geo_objects_buttons.js';
     setSelectValue('geoObjObject1',         o1.objectId,   o1.name);
     // ВАЖЛИВО: baseline читається з #geoObjBaselineDiameter (у метрах)
     setNumberInput('geoObjBaselineDiameter', o1.baselineDiameterMeters);
+    // Підпис інфопанелі: «Географія: Об’єкти»
+    setModeLabelKeys({
+      modeKey: 'panel_title_geo',
+      subKey:  'panel_title_geo_objects'
+    });
+
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник
     for (const item of o2s) {

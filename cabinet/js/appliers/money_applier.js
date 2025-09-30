@@ -4,6 +4,7 @@
 // Додає одноразовий «сторож»: на перший рух центру повністю очищує шар і перемальовує сцену.
 
 import { onMoneyCalculate } from '/js/events/money_buttons.js';
+import { setModeLabelKeys } from '/js/ui/infoPanel.js';
 
 (function registerMoneyApplier(){
   'use strict';
@@ -109,6 +110,11 @@ import { onMoneyCalculate } from '/js/events/money_buttons.js';
     setSelectValue('moneyObject1',         o1.objectId,   o1.name);
     // ВАЖЛИВО: режим «Гроші» читає baseline з #moneyBaselineDiameter
     setNumberInput('moneyBaselineDiameter', o1.baselineDiameterMeters);
+    // Підпис інфопанелі: «Гроші»
+    setModeLabelKeys({
+      modeKey: 'panel_title_money'
+    });
+
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник (без кліків і без change/input)
     for (const item of o2s) {

@@ -14,8 +14,7 @@
 
 import { getLuminosityData } from '../data/data_luminosity.js';
 import { setLuminosityBaseline, addLuminosityCircle, resetLuminosityScale } from '../calc/calculate_luminosity.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
@@ -54,6 +53,11 @@ try {
 export function onLuminosityCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Зібрати дані
   const data = getLuminosityData(scope);
+  // Підпис інфопанелі: «Всесвіт: Світність»
+  setModeLabelKeys({
+    modeKey: 'panel_title_univers',
+    subKey:  'panel_title_univers_luminosity'
+  });
 
   // Кольори — стабільні для baseline, різні для кожного О2
   const color1 = getColorForKey('luminosity:baseline');

@@ -11,12 +11,11 @@ let titleEl = null;
 let listEl = null;
 let toggleLabelEl = null;
 let toggleBtn = null;
-
+let modeEl = null;
+let modeLabelState = { modeKey: '', subKey: '' };
 let showDescriptions = false;
-
 let ipHover = null;
 let hoverTimer = null;
-// Прапорці для одноразових підписів над О1 та О2
 let baselineSubtitleShown = false;
 let itemSubtitleShown = false;
 
@@ -68,6 +67,13 @@ function hideHover() {
   clearTimeout(hoverTimer);
   if (ipHover) ipHover.style.display = 'none';
 }
+function computeModeLabel() {
+  const a = modeLabelState.modeKey ? t(modeLabelState.modeKey) : '';
+  const b = modeLabelState.subKey ? t(modeLabelState.subKey) : '';
+  if (a && b) return `${a}: ${b}`;
+  return a || b || '';
+}
+
 
 function ensureDom() {
   if (panelEl) return;
@@ -119,6 +125,12 @@ function ensureDom() {
   header.className = 'info-header';
   header.appendChild(titleWrap);
 
+  modeEl = document.createElement('div');
+  modeEl.className = 'info-panel__mode';
+  modeEl.textContent = computeModeLabel();
+  header.appendChild(modeEl);
+
+
   const scroll = document.createElement('div');
   scroll.className = 'info-scroll';
   scroll.appendChild(listEl);
@@ -151,6 +163,8 @@ function ensureDom() {
   const onLang = () => {
     titleEl.textContent = t('ui.info_panel.title');
     if (toggleLabelEl) toggleLabelEl.textContent = t('ui.info_panel.descriptions');
+    if (modeEl) modeEl.textContent = computeModeLabel();
+
     updateDescSwitch();
     render();
   };
@@ -427,6 +441,9 @@ export function clearInfoPanel(opts = {}) {
     return;
   }
   items.length = 0;
+  modeLabelState = { modeKey: '', subKey: '' };
+  if (modeEl) modeEl.textContent = '';
+
   showDescriptions = false;
   updateDescSwitch();
   hideHover();
@@ -446,6 +463,16 @@ export function addResult({ libIndex, realValue, realUnit, scaledMeters, name, d
   items.push({ type: 'item', libIndex, realValue, realUnit, scaledMeters, name, description, color, uiLeftLabelKey, uiRightLabelKey, invisibleReason, requiredBaselineMeters });
   render();
 }
+export function setModeLabelKeys({ modeKey = '', subKey = '' } = {}) {
+  ensureDom();
+  modeLabelState = {
+    modeKey: String(modeKey || ''),
+    subKey: String(subKey || '')
+  };
+  if (modeEl) modeEl.textContent = computeModeLabel();
+}
+
+
 // ─────────────────────────────────────────────────────────────
 // V2 API: інфопанель повністю покладається на дані режиму
 export function setBaselineResultV2({ name, description, thumbUrl, realValue, realUnit, scaledMeters, color, uiLeftLabelKey, uiRightLabelKey, invisibleReason = null, requiredBaselineMeters = null }) {

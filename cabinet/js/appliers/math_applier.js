@@ -4,6 +4,7 @@
 // Додає одноразовий «сторож»: на перший рух центру повністю очищує шар і перемальовує сцену.
 
 import { onMathCalculate } from '/js/events/math_buttons.js';
+import { setModeLabelKeys } from '/js/ui/infoPanel.js';
 
 (function registerMathApplier(){
   'use strict';
@@ -109,6 +110,11 @@ import { onMathCalculate } from '/js/events/math_buttons.js';
     setSelectValue('mathObject1',         o1.objectId,   o1.name);
     // ВАЖЛИВО: режим «Математика» читає baseline з #mathBaselineDiameter
     setNumberInput('mathBaselineDiameter', o1.baselineDiameterMeters);
+    // Підпис інфопанелі: «Математика»
+    setModeLabelKeys({
+      modeKey: 'panel_title_math'
+    });
+
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник (без кліків і без change/input)
     for (const item of o2s) {

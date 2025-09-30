@@ -4,6 +4,7 @@
 // Додає одноразовий «сторож»: на перший рух центру повністю очищує шар і перемальовує сцену.
 
 import { onGeoAreaCalculate } from '/js/events/geo_area_buttons.js';
+import { setModeLabelKeys } from '/js/ui/infoPanel.js';
 
 (function registerGeoAreaApplier(){
   'use strict';
@@ -109,6 +110,12 @@ import { onGeoAreaCalculate } from '/js/events/geo_area_buttons.js';
     setSelectValue('geoAreaObject1',         o1.objectId,   o1.name);
     // ВАЖЛИВО: режим «Гео → Площа» читає baseline з #geoAreaBaselineDiameter
     setNumberInput('geoAreaBaselineDiameter', o1.baselineDiameterMeters);
+    // Підпис інфопанелі: «Географія: Площа»
+    setModeLabelKeys({
+      modeKey: 'panel_title_geo',
+      subKey:  'panel_title_geo_area'
+    });
+
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник (без кліків і без change/input)
     for (const item of o2s) {

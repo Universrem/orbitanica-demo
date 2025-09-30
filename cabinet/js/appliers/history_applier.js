@@ -4,6 +4,7 @@
 // Додає одноразовий «сторож»: на перший рух центру повністю очищує шар і перемальовує сцену.
 
 import { onHistoryCalculate } from '/js/events/history_buttons.js';
+import { setModeLabelKeys } from '/js/ui/infoPanel.js';
 
 (function registerHistoryApplier(){
   'use strict';
@@ -110,6 +111,11 @@ function setupFirstCenterRepaint(query) {
     setSelectValue('histCategoryObject1', o1.categoryKey, o1.categoryKey);
     setSelectValue('histObject1',         o1.objectId,   o1.name);
     setNumberInput('historyBaselineDiameter', o1.baselineDiameterMeters);
+    // Підпис інфопанелі: «Історія»
+    setModeLabelKeys({
+      modeKey: 'panel_title_history'
+    });
+
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник (без кліків і без change/input)
     for (const item of o2s) {

@@ -4,6 +4,7 @@
 // Додає одноразовий «сторож»: на перший рух центру повністю очищує шар і перемальовує сцену.
 
 import { onGeoPopulationCalculate } from '/js/events/geo_population_buttons.js';
+import { setModeLabelKeys } from '/js/ui/infoPanel.js';
 
 (function registerGeoPopulationApplier(){
   'use strict';
@@ -109,6 +110,12 @@ import { onGeoPopulationCalculate } from '/js/events/geo_population_buttons.js';
     setSelectValue('geoPopObject1',         o1.objectId,   o1.name);
     // ВАЖЛИВО: режим «Гео → Населення» читає baseline з #geoPopBaselineDiameter
     setNumberInput('geoPopBaselineDiameter', o1.baselineDiameterMeters);
+    // Підпис інфопанелі: «Географія: Населення»
+    setModeLabelKeys({
+      modeKey: 'panel_title_geo',
+      subKey:  'panel_title_geo_population'
+    });
+
 
     // 2) ПОСЛІДОВНО застосувати кожний О2 через еталонний обробник (без кліків і без change/input)
     for (const item of o2s) {

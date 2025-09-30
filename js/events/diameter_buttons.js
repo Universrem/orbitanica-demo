@@ -12,13 +12,9 @@
 
 import { getDiameterData } from '../data/data_diameter.js';
 import { setDiameterBaseline, addDiameterCircle, resetDiameterScale } from '../calc/calculate_diameter.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
-import {
-  addGeodesicCircle,
-  setCircleLabelTextById,
-} from '../globe/circles.js';
+import { addGeodesicCircle, setCircleLabelTextById } from '../globe/circles.js';
 
 // ——— СТАН СЕСІЇ ———
 
@@ -71,6 +67,14 @@ try {
 export function onDiameterCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Зібрати дані
   const data = getDiameterData(scope);
+// Підпис режиму: використовуємо наявні ключі перекладу
+// "Всесвіт: Діаметр" / "Universe: Diameter" / "Universo: Diámetro"
+setModeLabelKeys({
+  modeKey: 'panel_title_univers',
+  subKey: 'panel_title_univers_diameter'
+});
+
+
 
   // Кольори — стабільні для baseline, різні для кожного О2
   const color1 = getColorForKey('diameter:baseline');

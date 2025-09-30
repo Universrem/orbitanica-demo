@@ -12,9 +12,7 @@
 
 import { getDistanceData } from '../data/data_distance.js';
 import { setDistanceBaseline, addDistanceCircle, resetDistanceScale } from '../calc/calculate_distance.js';
-
-import { addGroup, appendVariant, setGroupDescription } from '../ui/infoPanel.js';
-
+import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '../ui/infoPanel.js';
 import { getColorForKey } from '../utils/color.js';
 import {
   addGeodesicCircle,
@@ -62,6 +60,11 @@ let distanceResultSeq = 0;
 export function onDistanceCalculate({ scope /*, object1Group, object2Group */ }) {
   // 1) Зібрати дані
   const data = getDistanceData(scope);
+  // Підпис інфопанелі: «Всесвіт: Відстань»
+  setModeLabelKeys({
+    modeKey: 'panel_title_univers',
+    subKey:  'panel_title_univers_distance'
+  });
 
   // Кольори — стабільні для baseline, різні для кожного О2
   const color1 = getColorForKey('distance:baseline');
