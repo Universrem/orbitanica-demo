@@ -655,7 +655,6 @@
     "en": "Descriptions",
     "es": "Descripciones"
   },
-  
   "create_modal_title_diameter": {
     "ua": "Новий об’єкт — Діаметри",
     "en": "New Object — Diameters",
@@ -956,6 +955,13 @@
   "auth.error.generic":           { "ua": "Щось пішло не так. Спробуйте ще раз.", "en": "Something went wrong. Please try again.", "es": "Algo salió mal. Vuelve a intentarlo." },
   "ui.topbar.my_scenes":          { "ua": "Мої сцени", "en": "My scenes", "es": "Mis escenas" },
   "ui.topbar.save_scene":         { "ua": "Зберегти сцену", "en": "Save scene", "es": "Guardar escena" },
+  "ui.topbar.my_objects": {
+  "ua": "Мої об’єкти",
+  "en": "My objects",
+  "es": "Mis objetos"
+},
+"ui.user_mark": { "ua": "(корист.)", "en": "(user)", "es": "(usuario)" },
+
   "scenes.empty":                 { "ua": "Поки немає сцен.", "en": "No scenes yet.", "es": "Aún no hay escenas." },
   "scenes.untitled":              { "ua": "Без назви", "en": "Untitled", "es": "Sin título" },
   "scenes.open":                  { "ua": "Відкрити", "en": "Open", "es": "Abrir" },
@@ -977,7 +983,7 @@
   "scenes.field_description":  { "ua": "Опис", "en": "Description", "es": "Descripción" },
   "scenes.field_public":       { "ua": "Публічна", "en": "Public", "es": "Pública" },
   "scenes.edit": { "ua": "Редагувати", "en": "Edit", "es": "Editar" },
-
+  "field_mode": { "ua": "Режим", "en": "Mode", "es": "Modo" },
 
   "cab_save_title":               { "ua": "Зберегти сцену", "en": "Save scene", "es": "Guardar escena" },
   "cab_save_field_title":         { "ua": "Назва*", "en": "Title*", "es": "Título*" },
@@ -993,8 +999,9 @@
   "cab_save_btn_copied":          { "ua": "Скопійовано", "en": "Copied", "es": "Copiado" },
   "cab_save_btn_close":           { "ua": "Закрити", "en": "Close", "es": "Cerrar" },
   "cab_save_not_supported_title": { "ua": "Збереження цього режиму ще не під’єднане", "en": "Saving for this mode isn’t wired yet", "es": "Aún no conectado para este modo" },
-  "cab_save_not_supported_body":  { "ua": "Додамо серіалізатор режиму і все запрацює. Наразі підтримано «Історія».", "en": "Add a serializer for this mode and it will work. Currently ‘History’ is supported.", "es": "Añade un serializador para este modo y funcionará. Actualmente se admite «Historia»." }
-
+  "cab_save_not_supported_body":  { "ua": "Додамо серіалізатор режиму і все запрацює. Наразі підтримано «Історія».", "en": "Add a serializer for this mode and it will work. Currently ‘History’ is supported.", "es": "Añade un serializador para este modo y funcionará. Actualmente se admite «Historia»." },
+  "modal_field_desc":          { "ua": "Опис", "en": "Description", "es": "Descripción" }
+  
 }
 
 

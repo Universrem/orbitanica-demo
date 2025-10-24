@@ -5,6 +5,7 @@
 
 import { t } from '/js/i18n.js';
 import { signInWithEmail, signOut, getUserEmail, watchAuth } from '/cabinet/js/cloud/auth.cloud.js';
+
 // Експортований відкривач модалки входу (без глобалів/вікон)
 export function openCabinetSignInDialog() {
   openSignInModal(async (value, setError, close) => {
@@ -115,6 +116,7 @@ function refreshTopbarTips(authed) {
   setTip(document.getElementById('btn-user'),        authed ? t('ui.topbar.sign_out') : t('ui.topbar.sign_in'));
   setTip(document.getElementById('btn-save-scene'),  t('ui.topbar.save_scene'));
   setTip(document.getElementById('btn-my-scenes'),   t('ui.topbar.my_scenes'));
+  setTip(document.getElementById('btn-my-objects'),  t('ui.topbar.my_objects'));
 }
 
 // Додавання/видалення кнопок у топбарі (без CSS/hidden)
@@ -125,63 +127,83 @@ function renderSignedButtons(isSigned) {
 
   let btnSave = document.getElementById('btn-save-scene');
   let btnMy   = document.getElementById('btn-my-scenes');
+  let btnMyObj = document.getElementById('btn-my-objects');
 
   if (isSigned) {
-  // ---- SAVE SCENE ----
-  if (!btnSave) {
-    const labelSave = t('ui.topbar.save_scene') || 'Save scene';
-    btnSave = document.createElement('button');
-    btnSave.id = 'btn-save-scene';
-    btnSave.className = 'top-icon-button has-tip';
-    btnSave.setAttribute('aria-label', labelSave);
-    btnSave.setAttribute('data-tip', labelSave);
+    // ---- SAVE SCENE ----
+    if (!btnSave) {
+      const labelSave = t('ui.topbar.save_scene') || 'Save scene';
+      btnSave = document.createElement('button');
+      btnSave.id = 'btn-save-scene';
+      btnSave.className = 'top-icon-button has-tip';
+      btnSave.setAttribute('aria-label', labelSave);
+      btnSave.setAttribute('data-tip', labelSave);
 
-    const img = document.createElement('img');
-    img.className = 'top-icon';
-    img.src = '/res/icons/save.png';
-    img.alt = '';
-    btnSave.appendChild(img);
+      const img = document.createElement('img');
+      img.className = 'top-icon';
+      img.src = '/res/icons/save.png';
+      img.alt = '';
+      btnSave.appendChild(img);
 
-    // діємо так само, як стрічка: кидаємо подію
-    btnSave.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('cabinet:save-scene'));
-    });
-rail.insertBefore(btnSave, anchor);
+      // діємо так само, як стрічка: кидаємо подію
+      btnSave.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('cabinet:save-scene'));
+      });
+      rail.insertBefore(btnSave, anchor);
+    }
 
+    // ---- MY SCENES ----
+    if (!btnMy) {
+      const labelMy = t('ui.topbar.my_scenes') || 'My scenes';
+      btnMy = document.createElement('button');
+      btnMy.id = 'btn-my-scenes';
+      btnMy.className = 'top-icon-button has-tip';
+      btnMy.setAttribute('aria-label', labelMy);
+      btnMy.setAttribute('data-tip', labelMy);
+
+      const img = document.createElement('img');
+      img.className = 'top-icon';
+      img.src = '/res/icons/scene.png';
+      img.alt = '';
+      btnMy.appendChild(img);
+
+      btnMy.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('cabinet:open-my-scenes'));
+      });
+
+      rail.insertBefore(btnMy, anchor);
+      refreshTopbarTips(true);
+    }
+
+    // ---- MY OBJECTS ----
+    if (!btnMyObj) {
+      const labelObj = t('ui.topbar.my_objects') || 'My objects';
+      btnMyObj = document.createElement('button');
+      btnMyObj.id = 'btn-my-objects';
+      btnMyObj.className = 'top-icon-button has-tip';
+      btnMyObj.setAttribute('aria-label', labelObj);
+      btnMyObj.setAttribute('data-tip', labelObj);
+
+      const img = document.createElement('img');
+      img.className = 'top-icon';
+      img.src = '/res/icons/object.png';
+      img.alt = '';
+      btnMyObj.appendChild(img);
+
+      btnMyObj.addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('cabinet:open-my-objects'));
+      });
+
+      rail.insertBefore(btnMyObj, anchor);
+      refreshTopbarTips(true);
+    }
+  } else {
+    if (btnSave) btnSave.remove();
+    if (btnMy)   btnMy.remove();
+    if (btnMyObj) btnMyObj.remove();
+    refreshTopbarTips(false);
   }
-
-  // ---- MY SCENES ----
-  if (!btnMy) {
-    const labelMy = t('ui.topbar.my_scenes') || 'My scenes';
-    btnMy = document.createElement('button');
-    btnMy.id = 'btn-my-scenes';
-    btnMy.className = 'top-icon-button has-tip';
-    btnMy.setAttribute('aria-label', labelMy);
-    btnMy.setAttribute('data-tip', labelMy);
-
-    const img = document.createElement('img');
-    img.className = 'top-icon';
-    img.src = '/res/icons/scene.png';
-    img.alt = '';
-    btnMy.appendChild(img);
-
-    btnMy.addEventListener('click', () => {
-      document.dispatchEvent(new CustomEvent('cabinet:open-my-scenes'));
-    });
-
-    rail.insertBefore(btnMy, anchor);
-    refreshTopbarTips(true);
-
-  }
-} else {
-  if (btnSave) btnSave.remove();
-  if (btnMy)   btnMy.remove();
-  refreshTopbarTips(false);
-
 }
-
-}
-
 
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('btn-user');
@@ -193,16 +215,14 @@ document.addEventListener('DOMContentLoaded', () => {
   refreshTopbarTips(false);
 
   // Початково сховати (гість) — до приходу стану auth
-  // старт: гість → кнопок нема
   renderSignedButtons(false);
-
 
   // Стартовий стан
   refreshIconAndAria();
 
+  // Оновлення підказок при зміні мови
   document.addEventListener('languageChanged', () => refreshTopbarTips(LAST_AUTHED));
-window.addEventListener('orbit:lang-change', () => refreshTopbarTips(LAST_AUTHED));
-
+  window.addEventListener('orbit:lang-change', () => refreshTopbarTips(LAST_AUTHED));
 
   // Живе оновлення при зміні сесії
   watchAuth(() => {
@@ -212,6 +232,7 @@ window.addEventListener('orbit:lang-change', () => refreshTopbarTips(LAST_AUTHED
 
   // Відкриття/закриття поповера
   btn.addEventListener('click', (e) => {
+    // ВАЖЛИВО: не використовуємо stopImmediatePropagation, щоб не завадити іншим модулям
     e.stopPropagation();
     renderPopover(pop);
     toggle(pop);
@@ -222,31 +243,32 @@ window.addEventListener('orbit:lang-change', () => refreshTopbarTips(LAST_AUTHED
     if (e.key === 'Escape') hide(pop);
   });
 
+  // Тримати поповер прив’язаним до кнопки при ресайзі/скролі
+  const reposition = () => positionPopover(btn, pop);
+  window.addEventListener('resize', reposition);
+  window.addEventListener('scroll', reposition, { passive: true });
+
   // ————— helpers —————
   async function refreshIconAndAria() {
-  const email = await getUserEmail().catch(() => null);
-  const authed = !!email;
+    const email = await getUserEmail().catch(() => null);
+    const authed = !!email;
 
-  // Іконка
-  if (img) img.src = authed ? ICON_AUTH : ICON_GUEST;
+    // Іконка
+    if (img) img.src = authed ? ICON_AUTH : ICON_GUEST;
 
-  // ARIA + title
-  const label = authed ? t('ui.topbar.sign_out') : t('ui.topbar.sign_in');
-  btn.setAttribute('aria-label', label);
-  LAST_AUTHED = authed;
-  refreshTopbarTips(authed);
+    // ARIA + title
+    const label = authed ? t('ui.topbar.sign_out') : t('ui.topbar.sign_in');
+    btn.setAttribute('aria-label', label);
+    LAST_AUTHED = authed;
+    refreshTopbarTips(authed);
 
-  btn.removeAttribute('title');           // прибираємо нативний тултіп
-btn.classList.add('has-tip');
-btn.setAttribute('data-tip', label);    // показуємо наш тултіп
+    btn.removeAttribute('title');           // прибираємо нативний тултіп
+    btn.classList.add('has-tip');
+    btn.setAttribute('data-tip', label);    // показуємо наш тултіп
 
-
-// Топбар-кнопки (Save/My)
-renderSignedButtons(authed);
-
-
-}
-
+    // Топбар-кнопки (Save/My)
+    renderSignedButtons(authed);
+  }
 
   function createPopover() {
     let el = document.getElementById('cab-account-popover');
@@ -279,11 +301,10 @@ renderSignedButtons(authed);
       b.className = 'cab-item';
       b.setAttribute('role','menuitem');
       b.textContent = t('ui.topbar.sign_in');
-b.addEventListener('click', () => {
-  hide(el);
-  openCabinetSignInDialog();
-});
-
+      b.addEventListener('click', () => {
+        hide(el);
+        openCabinetSignInDialog();
+      });
       el.appendChild(b);
     } else {
       // Sign out (email)
@@ -294,9 +315,10 @@ b.addEventListener('click', () => {
       b.addEventListener('click', async () => {
         hide(el);
         try { await signOut(); } catch { /* no-op */ }
+        // ВАЖЛИВО: без «жорстких» reset. Нічого не чистимо самі й не блокуємо глобальні події.
+        // Якщо іншим модулям потрібен скидання UI — вони самі слухають свої події.
       });
       el.appendChild(b);
     }
   }
-
 });

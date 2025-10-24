@@ -363,4 +363,71 @@
 /* Дії — дрібний відступ зверху, розмір іконок лишається як налаштовано */
 .cab-scene-actions { margin-top: 6px; }
 
+/* === Edit Object modal (scoped) ============================================ */
+.cab-modal-overlay[data-modal="edit-object"]{
+  --cab-round: 4px;           /* 50% менші кути (було 16/10) */
+  --cab-f1: 16px;             /* Шрифт 1 */
+  --cab-f2: 14px;             /* Шрифт 2 */
+}
+
+/* сама модалка у цьому оверлеї */
+.cab-modal-overlay[data-modal="edit-object"] .cab-modal{
+  border-radius: var(--cab-round);
+}
+
+/* заголовок + мовні кнопки в ОДНОМУ рядку */
+.cab-modal-overlay[data-modal="edit-object"] .cab-modal-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.cab-modal-overlay[data-modal="edit-object"] .cab-modal-title{
+  font-weight:700; font-size:var(--cab-f1);
+}
+
+/* мовні кнопки */
+.cab-modal-overlay[data-modal="edit-object"] .cab-lang-switch{ display:flex; gap:6px; }
+.cab-modal-overlay[data-modal="edit-object"] .cab-lang-switch .cab-btn--chip{
+  font-size:8px;
+  line-height:1.6; padding:1px 4px;
+  border-radius:var(--cab-round);
+  border-width:1px; border-style:solid; border-color:#c9ced6;
+}
+.cab-modal-overlay[data-modal="edit-object"] .cab-lang-switch .cab-btn--chip.active{
+  background:#e9f2ff; border-color:#5b9bff;
+  box-shadow:inset 0 0 0 1px rgba(91,155,255,.15);
+}
+
+/* метадані (Mode/Category) — Шрифт 2 */
+.cab-modal-overlay[data-modal="edit-object"] .cab-edit-meta{
+  font-size:var(--cab-f2); 
+  color:#666; 
+  margin:1px 0;
+}
+
+/* ярлики "Name", "Description" — Шрифт 1 */
+.cab-modal-overlay[data-modal="edit-object"] .cab-form-row label{
+  font-size:var(--cab-f1); font-weight:600; margin:8px 0 4px;
+}
+
+/* поля вводу — Шрифт 2, рамка 2px, кути = --cab-round */
+.cab-modal-overlay[data-modal="edit-object"] .cab-form-row input,
+.cab-modal-overlay[data-modal="edit-object"] .cab-form-row textarea,
+.cab-modal-overlay[data-modal="edit-object"] .cab-form-row select{
+  font-size:var(--cab-f2);
+  border-radius:var(--cab-round);
+  border:1px solid #c9ced6;
+}
+
+/* рядок Value / Unit — простий текст (Шрифт 2) */
+.cab-modal-overlay[data-modal="edit-object"] #obj-edit-valueunit{
+  font-size:var(--cab-f2);
+  color:#333;
+  margin:6px 0 24px;
+}
+
+/* кнопки Save/Cancel — Шрифт 2, рамка 2px, кути = --cab-round */
+.cab-modal-overlay[data-modal="edit-object"] .cab-form-actions .cab-btn{
+  font-size:var(--cab-f2);
+  border-width:1px; border-color:#c9ced6; border-radius:var(--cab-round);
+}
+
 

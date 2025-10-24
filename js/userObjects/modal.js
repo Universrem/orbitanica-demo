@@ -1,4 +1,4 @@
-// full/js/userObjects/modal.js
+// /js/userObjects/modal.js
 'use strict';
 
 import { t, getCurrentLang } from '../i18n.js';
@@ -7,41 +7,232 @@ import { getStore } from './api.js';
 
 const ROOT_ID = 'modal-root';
 let unitsLoaded = false;
+// Marker "(корист.)" з i18n або дефолт
+const USER_MARK = () => (t('ui.user_mark') || '(корист.)');
+
+// Нормалізація тексту категорії для порівнянь (прибирає суфікс, трім, нижній регістр)
+function normalizeCategoryName(s) {
+  return String(s || '')
+    .replace(/\s*\((?:корист\.|user)\)\s*$/i, '')
+    .trim()
+    .toLowerCase();
+}
+
+// Повертає назву без суфіксу "(корист.)"
+function stripUserMark(s) {
+  return String(s || '').replace(/\s*\((?:корист\.|user)\)\s*$/i, '').trim();
+}
+
+// Юнікод-френдлі slugify: не «вбиває» кирилицю
+function slugifySafe(s) {
+  return String(s || '')
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}\s._/-]/gu, '')
+    .replace(/[\s._/]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase();
+}
+
+function slugify(s) {
+  return slugifySafe(s) || 'category';
+}
 
 /**
- * Збираємо підказки категорій:
- *  - з поточних селекторів категорій (обидва слоти)
- *  - з локальних користувацьких об'єктів (для поточної мови)
+ * Єдиний каталог категорій для модалки:
+ * - officialNamesLC: Set нормалізованих офіційних назв
+ * - officialByName: Map нормалізована назва -> офіційний ключ
+ * - userNamesLC: Set нормалізованих користувацьких назв
+ *
+ * ОФІЦІЙНІ: беремо з наявних селектів (тільки як джерело назв),
+ *           ключ (id) пробуємо отримати з window.ORB_CATEGORIES[mode]?.nameToKey (якщо проєкт це надає).
+ * КОРИСТУВАЦЬКІ: беремо з локального стора (getStore()).
  */
-function buildCategorySuggestions(mode) {
-  const s = new Set();
+function buildCategoryCatalog(mode) {
+  const officialNamesLC = new Set();
+  const officialByName = new Map();
+  const userNamesLC = new Set();
 
-  // з панелі (Діаметри)
-  const ids = ['diamCategoryObject1', 'diamCategoryObject2'];
-  ids.forEach(id => {
+  // 1) Офіційні (назви) — з видимих селекторів
+  const categorySelectIds = [
+    'diamCategoryObject1', 'diamCategoryObject2',
+    'distCategoryObject2', 'lumCategoryObject2',
+    'massCategoryObject2'
+  ];
+  const nameToKeyHook = (window.ORB_CATEGORIES && window.ORB_CATEGORIES[mode] && window.ORB_CATEGORIES[mode].nameToKey) || null;
+
+  categorySelectIds.forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
-    Array.from(sel.options).forEach(o => {
-      const v = (o && o.value || '').trim();
-      if (v) s.add(v);
+    Array.from(sel.options).forEach(opt => {
+      const raw = (opt.textContent || '').trim();
+      if (opt.disabled || opt.hidden) return;
+      const clean = stripUserMark(raw);
+      const norm = normalizeCategoryName(clean);
+      if (!norm) return;
+      // ігноруємо плейсхолдери
+      const ph = t('panel_placeholder_category');
+      if (ph && norm === normalizeCategoryName(ph)) return;
+
+      officialNamesLC.add(norm);
+      if (nameToKeyHook && !officialByName.has(norm)) {
+        const key = nameToKeyHook[clean] || nameToKeyHook[clean.toLowerCase()] || null;
+        if (key) officialByName.set(norm, key);
+      }
     });
   });
 
-  // з локального сховища
+  // 2) Користувацькі (назви) — з локального стора
   try {
+    const store = getStore();
+    const list = store.list(mode) || [];
     const lang = getCurrentLang();
-    (getStore().list(mode) || []).forEach(o => {
-      // підтримка як старого формату (o.category: string), так і нового (o.category_i18n)
-      const cat =
-        (typeof o.category === 'string' && o.category) ||
-        (o.category_i18n && (o.category_i18n[lang] || o.category_i18n[o.originalLang])) ||
-        '';
-      if (cat) s.add(cat);
+    list.forEach(o => {
+      const nm = (typeof o[`category_${lang}`] === 'string' && o[`category_${lang}`]) ||
+                 (typeof o.category === 'string' && o.category) || '';
+      if (!nm) return;
+      const clean = stripUserMark(nm);
+      const norm = normalizeCategoryName(clean);
+      if (norm) userNamesLC.add(norm);
     });
   } catch (_) {}
 
-  return Array.from(s).sort((a, b) => a.localeCompare(b, 'uk'));
+  return { officialNamesLC, officialByName, userNamesLC };
 }
+
+/**
+ * Формування списку значень для <datalist>:
+ * - офіційні назви (раз, без "(корист.)")
+ * - користувацькі, які не збігаються з офіційними (з "(корист.)")
+ */
+function buildCategoryListForDatalist(mode) {
+  const { officialNamesLC, userNamesLC } = buildCategoryCatalog(mode);
+  const result = new Set();
+
+  // офіційні назви (як з’являються у селекторах) — беремо напряму з селекторів
+  const categorySelectIds = [
+    'diamCategoryObject1', 'diamCategoryObject2',
+    'distCategoryObject2', 'lumCategoryObject2',
+    'massCategoryObject2'
+  ];
+  categorySelectIds.forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    Array.from(sel.options).forEach(opt => {
+      const raw = (opt.textContent || '').trim();
+      if (!opt.value || opt.disabled || opt.hidden) return;
+      const ph = t('panel_placeholder_category');
+      if (ph && normalizeCategoryName(stripUserMark(raw)) === normalizeCategoryName(ph)) return;
+
+      if (!raw) return;
+      const clean = stripUserMark(raw);
+      const norm = normalizeCategoryName(clean);
+      if (!norm) return;
+      // офіційні — без мітки
+      result.add(clean);
+    });
+  });
+
+  // користувацькі, що не дублюють офіційні — додаємо з міткою
+  const userMark = USER_MARK();
+  userNamesLC.forEach(norm => {
+    if (!officialNamesLC.has(norm)) {
+      // знайдемо «красивий» лейбл у сторі
+      try {
+        const store = getStore();
+        const list = store.list(mode) || [];
+        const lang = getCurrentLang();
+        const hit = list.find(o => {
+          const nm = (o.category_i18n && o.category_i18n[lang]) || o[`category_${lang}`] || o.category || '';
+          return normalizeCategoryName(stripUserMark(nm)) === norm;
+        });
+        const pretty = hit ? stripUserMark((hit.category_i18n && hit.category_i18n[lang]) || hit[`category_${lang}`] || hit.category || '') : norm;
+        result.add(`${pretty} ${userMark}`);
+      } catch (_) {}
+    }
+  });
+
+  return Array.from(result).sort((a, b) => a.localeCompare(b, 'uk'));
+}
+
+/**
+ * Визначає остаточний ключ категорії для збереження:
+ * - якщо назва відповідає офіційній (за нормалізацією) і відомий її ключ — повертає офіційний ключ;
+ * - інакше генерує безпечний slug.
+ */
+function resolveCategoryKey(mode, categoryName) {
+  const clean = stripUserMark(categoryName);
+  const norm = normalizeCategoryName(clean);
+  if (!norm) return 'category';
+
+  const { officialByName } = buildCategoryCatalog(mode);
+  const key = officialByName.get(norm);
+  if (key) return key;
+
+  return slugifySafe(clean);
+}
+
+/** Обробка presetCategory - перетворення ключа в назву */
+async function resolvePresetCategory(mode, presetCategory) {
+  if (!presetCategory) return '';
+
+  const allCategories = getCategoriesFromSelects(mode);
+  for (const category of allCategories) {
+    const cleanCategory = category.replace(/ \(корист\.\)$/, '').replace(/ \(user\)$/, '');
+    if (cleanCategory === presetCategory ||
+        category.includes(presetCategory) ||
+        slugify(cleanCategory) === presetCategory) {
+      return category;
+    }
+  }
+  return presetCategory;
+}
+
+function processCategoryInput(categoryInput) {
+  // Повертаємо чисту назву (без "(корист.)"), а не структуру з прапорцями
+  return stripUserMark(categoryInput || '');
+}
+
+function resolveCreateTitle(mode) {
+  const MAP = {
+    diameter:       ['panel_title_univers', 'panel_title_univers_diameter'],
+    distance:       ['panel_title_univers', 'panel_title_univers_distance'],
+    luminosity:     ['panel_title_univers', 'panel_title_univers_luminosity'],
+    mass:           ['panel_title_univers', 'panel_title_univers_mass'],
+    geo_objects:    ['panel_title_geo',     'panel_title_geo_objects'],
+    geo_area:       ['panel_title_geo',     'panel_title_geo_area'],
+    geo_population: ['panel_title_geo',     'panel_title_geo_population'],
+    money:          ['panel_title_money'],
+    math:           ['panel_title_math'],
+    history:        ['panel_title_history']
+  };
+
+  const pair = MAP[mode];
+  if (!pair) return t('ui.create_object') || 'New Object';
+  return pair.length === 1 ? t(pair[0]) : `${t(pair[0])}: ${t(pair[1])}`;
+}
+
+function getCategoriesFromSelects(mode) {
+  // зворотна сумісність: ця функція тепер повертає ГОТОВИЙ список для datalist
+  return buildCategoryListForDatalist(mode);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
+  );
+}
+
+async function ensureUnitsLoaded() {
+  if (unitsLoaded) return;
+  try {
+    await loadBaseUnits();
+  } finally {
+    unitsLoaded = true;
+  }
+}
+
+/* ───────────────────────────── ПУБЛІЧНИЙ API ───────────────────────────── */
 
 export async function openCreateModal({ mode = 'diameter', presetCategory = '', slot = 'object2' } = {}) {
   await ensureUnitsLoaded();
@@ -53,9 +244,12 @@ export async function openCreateModal({ mode = 'diameter', presetCategory = '', 
   }
 
   const lang = getCurrentLang();
-  const suggestions = buildCategorySuggestions(mode);
+  const categories = getCategoriesFromSelects(mode);
 
-  return new Promise((resolve) => {
+  // Правильно обробляємо presetCategory
+  const presetCategoryName = await resolvePresetCategory(mode, presetCategory);
+
+  return new Promise(async (resolve) => {
     const dispose = () => { root.innerHTML = ''; document.body.classList.remove('modal-open'); };
     document.body.classList.add('modal-open');
 
@@ -64,7 +258,7 @@ export async function openCreateModal({ mode = 'diameter', presetCategory = '', 
     wrap.innerHTML = `
       <div class="ouo-modal" role="dialog" aria-modal="true">
         <div class="ouo-modal__header">
-          <h3>${t('create_modal_title_diameter')}</h3>
+          <h3>${resolveCreateTitle(mode)}</h3>
         </div>
 
         <div class="ouo-modal__body">
@@ -73,9 +267,9 @@ export async function openCreateModal({ mode = 'diameter', presetCategory = '', 
             <span>${t('field_category')}</span>
             <input type="text" id="ouo-category" list="ouo-cat-list"
                    placeholder="${t('panel_placeholder_category_choose_or_enter')}"
-                   value="${escapeHtml(presetCategory)}">
+                   value="${escapeHtml(presetCategoryName)}">
             <datalist id="ouo-cat-list">
-              ${suggestions.map(v => `<option value="${escapeHtml(v)}"></option>`).join('')}
+              ${categories.map(v => `<option value="${escapeHtml(v)}"></option>`).join('')}
             </datalist>
           </label>
 
@@ -102,12 +296,6 @@ export async function openCreateModal({ mode = 'diameter', presetCategory = '', 
             <span>${t('field_description')}</span>
             <textarea id="ouo-desc" rows="3" placeholder=""></textarea>
           </label>
-
-          <!-- Фото (disabled) -->
-          <label class="ouo-field ouo-field--disabled">
-            <span>${t('field_image')}</span>
-            <input type="file" disabled>
-          </label>
         </div>
 
         <div class="ouo-modal__footer">
@@ -117,7 +305,9 @@ export async function openCreateModal({ mode = 'diameter', presetCategory = '', 
       </div>
     `;
 
-    // підтягуємо одиниці для режиму
+    await ensureUnitsLoaded();
+
+    // Заповнити список одиниць згідно з mode
     const unitSel = wrap.querySelector('#ouo-unit');
     (listUnits(mode) || []).forEach(u => {
       const opt = document.createElement('option');
@@ -126,72 +316,98 @@ export async function openCreateModal({ mode = 'diameter', presetCategory = '', 
       unitSel.appendChild(opt);
     });
 
-    // Закриття по кліку на фон / Скасувати
+    // Закриття модалки
     wrap.addEventListener('click', (e) => { if (e.target === wrap) { dispose(); resolve(null); } });
     wrap.querySelector('#ouo-cancel').addEventListener('click', () => { dispose(); resolve(null); });
 
-    // Підтвердження "Створити"
-    wrap.querySelector('#ouo-create').addEventListener('click', () => {
-      const category = wrap.querySelector('#ouo-category').value.trim();
-      const name = wrap.querySelector('#ouo-name').value.trim();
-      const value = parseFloat(wrap.querySelector('#ouo-value').value);
-      const unit = wrap.querySelector('#ouo-unit').value;
-      const desc = wrap.querySelector('#ouo-desc').value.trim();
-
-      const invalid = [];
-      if (!category) invalid.push('category');
-      if (!name) invalid.push('name');
-      if (!(value > 0)) invalid.push('value');
-      if (!unit) invalid.push('unit');
-
-      // скидаємо підсвітку
-      wrap.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-      invalid.forEach(k => wrap.querySelector(`#ouo-${k}`).classList.add('is-invalid'));
-      if (invalid.length) return;
-
-      // Формуємо запис: одночасно зберігаємо плоскі поля (name, category) для сумісності
-      // і i18n-поля (name_i18n, category_i18n, description_i18n) + originalLang.
-      const payload = {
-        mode,
-        originalLang: lang,
-        // плоскі поля (для сумісності з існуючими місцями використання)
-        name,
-        category,
-        // i18n-поля для розширення надалі
-        name_i18n: { [lang]: name },
-        category_i18n: { [lang]: category },
-        description_i18n: desc ? { [lang]: desc } : {},
-        // атрибути об'єкта (відразу закладаємо всі 4 типи, інші — null)
-        attrs: {
-          diameter:   { value, unit },
-          mass:       null,
-          luminosity: null,
-          distance:   null
-        },
-        imageUrl: null
-      };
-
-      const store = getStore();
-      const rec = store.add(payload);
-
-      dispose();
-      resolve({ object: rec, slot });
-
-      // Сповіщаємо систему
-      document.dispatchEvent(new CustomEvent('user-objects-added', {
-        detail: { mode, object: rec, slot }
-      }));
+    // Enter в полях — як клік "Створити"
+    wrap.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        const target = e.target;
+        const inText = target && (target.id === 'ouo-name' || target.id === 'ouo-value' || target.id === 'ouo-category');
+        if (inText) {
+          e.preventDefault();
+          wrap.querySelector('#ouo-create')?.click();
+        }
+      }
     });
 
-    root.innerHTML = '';
-    root.appendChild(wrap);
+    // Захист від подвійного сабміту
+    let submitting = false;
+
+    wrap.querySelector('#ouo-create').addEventListener('click', async () => {
+      if (submitting) return;
+      submitting = true;
+
+      const btn = wrap.querySelector('#ouo-create');
+      btn.disabled = true;
+
+      try {
+        const categoryInput = wrap.querySelector('#ouo-category').value.trim();
+        const name = wrap.querySelector('#ouo-name').value.trim();
+        const valueNum = wrap.querySelector('#ouo-value').value;
+        const value = Number(valueNum);
+        const unit = wrap.querySelector('#ouo-unit').value;
+        const desc = wrap.querySelector('#ouo-desc').value.trim();
+
+        // Обробляємо категорію
+        const categoryName = processCategoryInput(categoryInput);
+        const categoryKey  = resolveCategoryKey(mode, categoryName);
+
+        const invalid = [];
+        if (!categoryName) invalid.push('category');
+        if (!name) invalid.push('name');
+        if (!(value > 0)) invalid.push('value');
+        if (!unit) invalid.push('unit');
+
+        wrap.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        invalid.forEach(k => wrap.querySelector(`#ouo-${k}`).classList.add('is-invalid'));
+        if (invalid.length) return;
+
+        const payload = {
+          mode,
+          [`name_${lang}`]: name,
+          [`description_${lang}`]: desc || null,
+          category_key: categoryKey,
+          [`category_${lang}`]: categoryName,
+          value: value,
+          value2: null,
+          unit_key: unit,
+          unit2_key: null,
+          is_public: true,
+          status: 'published'
+        };
+
+        const store = getStore();
+        const rec = await store.add(payload); // тригери + оновлення univers_lib усередині
+
+        // Сигнали для UI (вузький і широкий канали)
+        const created = rec || payload;
+        try {
+          const detail = { mode, object: created, slot };
+          // вузькі події (щоб блоки одразу підкинули в селектор)
+          document.dispatchEvent(new CustomEvent('user-objects-added', { detail }));
+          document.dispatchEvent(new CustomEvent('user-objects-changed', { detail }));
+          // універсальна для бібліотеки
+          document.dispatchEvent(new CustomEvent('user-objects-updated', { detail }));
+          // допоміжний сигнал для всіх, хто слухає кеш бібліотеки
+          document.dispatchEvent(new CustomEvent('univers-lib-reloaded', { detail: { mode, reason: 'user-add', id: created.id } }));
+        } catch {}
+
+        dispose();
+        resolve({ object: created, slot });
+      } catch (err) {
+        console.error('[modal] create failed', err);
+        // залишаємо модалку відкритою для виправлення
+      } finally {
+        submitting = false;
+        btn.disabled = false;
+      }
+    });
+
+    const rootMount = document.getElementById(ROOT_ID);
+    rootMount.innerHTML = '';
+    rootMount.appendChild(wrap);
+    wrap.querySelector('#ouo-name').focus();
   });
 }
-
-function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-async function ensureUnitsLoaded() {
-  if (unitsLoaded) return;
-  try { await loadBaseUnits(); } finally { unitsLoaded = true; }
-}
-

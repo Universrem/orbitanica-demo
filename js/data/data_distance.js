@@ -1,4 +1,4 @@
-// full/js/data/data_distance.js
+// /js/data/data_distance.js
 'use strict';
 
 /**
@@ -97,9 +97,30 @@ function findOfficial(lib, { category, name }) {
   return null;
 }
 
-// Юзерський об’єкт зі стора (точне співпадіння назви+категорії)
+// Юзерський об'єкт зі стора або з кешу univers_lib
 function findUser(store, { type, category, name }) {
   if (!store) return null;
+  
+  // Спочатку шукаємо в актуальному кеші univers_lib
+  try {
+    const lib = getUniversLibrary('distance') || [];
+    const nName = low(name);
+    const nCat = low(category);
+    const currentLang = getCurrentLang?.() || 'ua';
+    
+    const libHit = lib.find(item => {
+      if (item.source !== 'user') return false;
+      // звіряємо саме локалізовану назву з бібліотеки з вибором користувача
+      const localizedName = pickLang(item, 'name', currentLang);
+      return low(localizedName) === nName && getCatKey(item) === nCat;
+    });
+
+    if (libHit) return libHit;
+  } catch (e) {
+    console.warn('[data_distance] univers_lib search failed:', e);
+  }
+  
+  // Фолбек на старий метод
   if (typeof store.getByName === 'function') {
     const hit = store.getByName(type, name, category);
     if (hit) return hit;
@@ -162,10 +183,12 @@ function readDistanceToEarthBase(source) {
   if (source && typeof source === 'object') {
     const vb = toBaseDistance(
       source.distanceToEarth ?? source.distance ?? source.value,
-      source.distanceUnit ?? source.unit ?? (source.distance_to_earth && source.distance_to_earth.unit) ?? DIST_BASE
+      // підтримка unit_key з Supabase і звичайного unit
+      source.distanceUnit ?? source.unit ?? source.unit_key ?? (source.distance_to_earth && source.distance_to_earth.unit) ?? DIST_BASE
     );
     if (Number.isFinite(vb)) return { valueReal: vb, unit: DIST_BASE };
   }
+
   return { valueReal: NaN, unit: DIST_BASE };
 }
 
@@ -185,6 +208,90 @@ function getVal(scope, sel) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// NEW: Snapshot-first зчитування О2 (з option.dataset.snapshot)
+
+function getSelectedOption(scope, selectId) {
+  const sel = scope?.querySelector(`#${selectId}`);
+  if (!sel || sel.tagName !== 'SELECT') return null;
+  const idx = sel.selectedIndex;
+  if (idx < 0) return null;
+  return sel.options[idx] || null;
+}
+
+function parseOptionSnapshot(opt) {
+  try {
+    const raw = opt?.dataset?.snapshot;
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    // Перевірка мінімуму
+    if (!s || typeof s !== 'object') return null;
+    const v = Number(s.value);
+    if (!Number.isFinite(v) || v <= 0) return null;
+    // unit обов’язково має бути рядком
+    const u = s.unit ? String(s.unit) : null;
+    if (!u) return null;
+    return s;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Нормалізувати snapshot у структуру «як у бібліотеці», щоб решта коду не відрізняла.
+ * ВАЖЛИВО: category_id заповнюємо з snapshot.category_key (або з селекта категорії).
+ */
+function normalizeSnapshotToLibRecord(snapshot, catKeyFromSelect) {
+  if (!snapshot) return null;
+  const rec = {
+    id: snapshot.id || null,
+    source: 'user',
+    is_user_object: true,
+
+    // імена/категорії для pickLang/getCatKey
+    name_ua: snapshot.name_ua ?? null,
+    name_en: snapshot.name_en ?? null,
+    name_es: snapshot.name_es ?? null,
+    name:    snapshot.name_en || snapshot.name_ua || snapshot.name_es || '',
+
+    category_id: snapshot.category_key || catKeyFromSelect || null,
+    category_en: null,
+    category_ua: null,
+    category_es: null,
+    category:    null,
+
+    // основне режимне поле
+    distance_to_earth: {
+      value: Number(snapshot.value),
+      unit:  String(snapshot.unit)
+    },
+
+    // описи — не обов'язкові
+    description_ua: snapshot.description_ua ?? null,
+    description_en: snapshot.description_en ?? null,
+    description_es: snapshot.description_es ?? null,
+  };
+
+  // валідація: значення має бути > 0
+  if (!Number.isFinite(rec.distance_to_earth.value) || rec.distance_to_earth.value <= 0) return null;
+  return rec;
+}
+
+/**
+ * Прочитати О2 зі snapshot, прикріпленого до обраного option у #distObject2.
+ * Повертає нормалізований «lib‐record» або null.
+ */
+function readO2FromSnapshot(scope) {
+  const opt = getSelectedOption(scope, 'distObject2');
+  if (!opt) return null;
+  const s = parseOptionSnapshot(opt);
+  if (!s) return null;
+
+  // categoryKey беремо з селекта категорій, якщо нема в snapshot
+  const catKeySelect = getVal(scope, '#distCategoryObject2');
+  return normalizeSnapshotToLibRecord(s, catKeySelect || null);
+}
+
+// ─────────────────────────────────────────────────────────────
 // Експорт
 
 /**
@@ -193,7 +300,8 @@ function getVal(scope, sel) {
  */
 export function getDistanceData(scope) {
   const lang  = getCurrentLang?.() || 'ua';
-  const lib   = getUniversLibrary();
+  const libO1 = getUniversLibrary('diameter') || [];
+  const libO2 = getUniversLibrary('distance') || [];
   const store = getStore();
 
   // Вибір користувача:
@@ -204,22 +312,30 @@ export function getDistanceData(scope) {
 
   // Офіційні/юзерські об’єкти
   // О1: шукаємо лише офіційний запис із валідним діаметром
-  const srcAll = Array.isArray(lib) ? lib : [];
-  let off1 = findOfficial(srcAll.filter(hasDiameter), { category: '', name: nameO1 });
-  const obj1 = off1?.obj || null; // О1 тільки з бібліотеки
+  const srcO1 = Array.isArray(libO1) ? libO1.filter(hasDiameter) : [];
+  let off1 = findOfficial(srcO1, { category: '', name: nameO1 });
+  const obj1 = off1?.obj || null; // О1 тільки з бібліотеки (diameter)
 
-  // О2: тільки ті, де є distance_to_earth
-  const src2 = srcAll.filter(hasDistanceToEarth);
-  let off2 = findOfficial(src2, { category: catO2, name: nameO2 });
-  if (!off2 && nameO2) off2 = findOfficial(src2, { category: '', name: nameO2 });
+  // О2: спроба №1 — SNAPSHOT-FIRST з option.dataset.snapshot
+  let obj2 = readO2FromSnapshot(scope);
 
-  // Юзерський О2 допустимо, якщо має валідний distance_to_earth
-  let user2 = findUser(store, { type: 'distance', category: catO2, name: nameO2 });
-  if (user2) {
-    const test = readDistanceToEarthBase(user2);
-    if (!Number.isFinite(test.valueReal) || test.valueReal <= 0) user2 = null;
+  // Якщо снапшота немає — працюємо як раніше: бібліотека/стор
+  let off2 = null;
+  if (!obj2) {
+    // О2: тільки ті, де є distance_to_earth
+    const src2 = (Array.isArray(libO2) ? libO2 : []).filter(hasDistanceToEarth);
+
+    off2 = findOfficial(src2, { category: catO2, name: nameO2 });
+    if (!off2 && nameO2) off2 = findOfficial(src2, { category: '', name: nameO2 });
+
+    // Юзерський О2 допустимо, якщо має валідний distance_to_earth
+    let user2 = findUser(store, { type: 'distance', category: catO2, name: nameO2 });
+    if (user2) {
+      const test = readDistanceToEarthBase(user2);
+      if (!Number.isFinite(test.valueReal) || test.valueReal <= 0) user2 = null;
+    }
+    obj2 = off2?.obj || user2 || null;
   }
-  const obj2 = off2?.obj || user2;
 
   const baselineDiameterMeters = readBaselineDiameterMeters(scope);
 
@@ -234,7 +350,7 @@ export function getDistanceData(scope) {
 
   // Значення у базових одиницях distance (DIST_BASE, зараз 'km')
   const { valueReal: d1Base, unit: u1 } = readDiameterBase(obj1);          // реальний діаметр О1 (у км)
-  const { valueReal: distBase, unit: u2 } = readDistanceToEarthBase(obj2); // відстань О2 до Землі (у км)
+  const { valueReal: distBase, unit: u2 } = readDistanceToEarthBase(obj2);  // відстань О2 до Землі (у км)
 
   return {
     modeId: 'distance',
@@ -258,7 +374,7 @@ export function getDistanceData(scope) {
       valueReal: Number.isFinite(distBase) ? distBase : NaN, // distance_to_earth у DIST_BASE
       unit: u2 || DIST_BASE,
       color: undefined,
-      libIndex: off2?.libIndex ?? -1,
+      libIndex: (off2 && off2.libIndex != null) ? off2.libIndex : -1,
       userId: obj2?.id || obj2?._id || undefined
     }
   };
