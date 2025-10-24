@@ -9,14 +9,13 @@ import {
   deleteScene,
 } from '/cabinet/js/cloud/scenes.cloud.js';
 import { openCabinetSignInDialog } from '/cabinet/js/account.menu.js';
+import { openDeleteModal } from '/cabinet/js/wire/deleteModal.js';
 
 const MODAL_KEY = 'my-scenes';
 const EDIT_MODAL_KEY = 'edit-scene';
-const CONFIRM_MODAL_KEY = 'confirm-delete';
 
 let escHandlerMain = null;
 let escHandlerEdit = null;
-let escHandlerConfirm = null;
 let currentRows = [];
 
 // --- toast: показ короткого повідомлення поверх сторінки ---
@@ -219,11 +218,28 @@ function renderList(rows) {
     });
 
     const btnDelete = iconBtn({
-      tipKey: 'scenes.delete',
-      aria: tStrict('scenes.delete'),
-      src: '/res/icons/delete.png',
-      onClick: () => openDeleteConfirm(row),
+  tipKey: 'scenes.delete',
+  aria: tStrict('scenes.delete'),
+  src: '/res/icons/delete.png',
+  onClick: async () => {
+    const ok = await openDeleteModal({
+      messageKey: 'confirm.delete.scene',
+      displayName: (row.title && row.title.trim()) || tStrict('scenes.untitled'),
     });
+    if (!ok) return;
+
+    try {
+      await deleteScene(row.id);
+      currentRows = (currentRows || []).filter(r => r.id !== row.id);
+      if (!currentRows.length) renderEmpty(); else renderList(currentRows);
+      setStatus('');
+    } catch (err) {
+      console.error(err);
+      setStatus(tStrict('errors.generic'));
+    }
+  },
+});
+
 
     actions.append(btnOpen, btnShare, btnToggle, btnEdit, btnDelete);
     card.append(title, desc, meta, actions);

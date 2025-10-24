@@ -7,6 +7,7 @@ import { getUserEmail } from '/cabinet/js/cloud/auth.cloud.js';
 import { listMine as listMineCloud } from '/cabinet/js/cloud/userObjects.cloud.js';
 import { getStore } from '/js/userObjects/api.js';
 import { openCabinetSignInDialog } from '/cabinet/js/account.menu.js';
+import { openDeleteModal } from '/cabinet/js/wire/deleteModal.js';
 
 const MODAL_KEY = 'my-objects';
 const EDIT_MODAL_KEY = 'edit-object';
@@ -376,7 +377,11 @@ function renderList(arr){
       src:'/res/icons/delete.png',
       tip:tStrict('scenes.delete','Delete'),
       onClick: async ()=>{
-        if (!confirm(tStrict('scenes.delete','Delete')+'?')) return;
+        const ok = await openDeleteModal({
+          messageKey: 'confirm.delete.object',
+          displayName: nameOf(row)
+        });
+        if (!ok) return;
         try{
           await getStore().remove(row.id, row.mode);
           rows = rows.filter(x=>x.id!==row.id);

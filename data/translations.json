@@ -1000,7 +1000,11 @@
   "cab_save_btn_close":           { "ua": "Закрити", "en": "Close", "es": "Cerrar" },
   "cab_save_not_supported_title": { "ua": "Збереження цього режиму ще не під’єднане", "en": "Saving for this mode isn’t wired yet", "es": "Aún no conectado para este modo" },
   "cab_save_not_supported_body":  { "ua": "Додамо серіалізатор режиму і все запрацює. Наразі підтримано «Історія».", "en": "Add a serializer for this mode and it will work. Currently ‘History’ is supported.", "es": "Añade un serializador para este modo y funcionará. Actualmente se admite «Historia»." },
-  "modal_field_desc":          { "ua": "Опис", "en": "Description", "es": "Descripción" }
+  "modal_field_desc":          { "ua": "Опис", "en": "Description", "es": "Descripción" },
+  "confirm.title": { "ua":"Підтвердження", "en":"Confirmation", "es":"Confirmación" },
+"confirm.delete.object": { "ua":"Видалити об’єкт: {name}?", "en":"Delete object: {name}?", "es":"¿Eliminar el objeto: {name}?" },
+"confirm.delete.scene": { "ua":"Видалити сцену: {name}?", "en":"Delete scene: {name}?", "es":"¿Eliminar la escena: {name}?" }
+
   
 }
 
