@@ -1,12 +1,12 @@
-// full/js/blocks/univers_diameter.js
+// /js/blocks/univers_diameter.js
 'use strict';
 
 /**
- * Блок режиму «Діаметри» (UI) за еталоном «Гроші».
- * - чекає завантаження univers-бібліотеки;
- * - будує селекти категорій і об’єктів (О1/О2);
- * - слухає reset / user-objects-* / languageChanged|lang-changed;
- * - не рахує нічого і не лізе в інші режими.
+ * Блок режиму «Діаметри» (UI) — snapshot-first, за аналогією з «Відстань» (О2).
+ * - О1 і О2: категорії/об'єкти з univers-бібліотеки 'diameter' (мердж офіційні + UGC);
+ * - для КОЖНОГО <option> прикріплюємо snapshot у dataset.snapshot (diameter {value,unit} тощо);
+ * - відновлення вибору за snapshot.id; локалізовані лейбли, UGC позначається (корист.);
+ * - слухаємо reload бібліотек, зміну мови, orbit:ui-reset.
  */
 
 import { t, getCurrentLang } from '../i18n.js';
@@ -14,223 +14,312 @@ import { loadUniversLibrary, getUniversLibrary } from '../data/univers_lib.js';
 import { getStore } from '../userObjects/api.js';
 import { attachO1QuickSuggest } from '../utils/o1QuickSuggest.js';
 
-// ─────────────────────────────────────────────────────────────
-// Утіліти
+/* ─────────────────────────────────────────────────────────────
+   Утіліти
+───────────────────────────────────────────────────────────── */
 
-const norm = s => String(s ?? '').trim();
-const low  = s => norm(s).toLowerCase();
+const s   = v => String(v ?? '').trim();
+const low = v => s(v).toLowerCase();
 
-function pickLang(rec, base, lang) {
-  if (!rec) return '';
-  const a = rec[`${base}_${lang}`];
-  const b = rec[`${base}_en`];
-  const c = rec[`${base}_ua`];
-  const d = rec[`${base}_es`];
-  const e = rec[base];
-  return norm(a || b || c || d || e || '');
+function currLangBase() {
+  const raw = (getCurrentLang && getCurrentLang()) || '';
+  const base = String(raw).toLowerCase().split(/[-_]/)[0];
+  return ['ua','en','es'].includes(base) ? base : 'ua';
 }
 
-// ключ категорії (узгоджений з адаптерами)
+function isUser(rec) {
+  return !!(rec?.is_user_object || rec?.source === 'user');
+}
+
+function hasValidDiameter(rec) {
+  const v = Number(rec?.diameter?.value);
+  return Number.isFinite(v) && v > 0;
+}
+
 function getCatKey(rec) {
-  return low(rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
+  return low(rec?.category_key ?? rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
 }
 
-// Канонічний вибір лейбла категорії без словників:
-// точна мова → en → ua → es → базове поле → key
-function getCategoryLabelByKey(lib, key, lang) {
-  const k = String(key || '').trim().toLowerCase();
-  const rows = Array.isArray(lib) ? lib.filter(r => getCatKey(r) === k) : [];
-  if (rows.length === 0) return norm(key);
-
-  const prefs = [`category_${lang}`, 'category_en', 'category_ua', 'category_es', 'category'];
-  for (const field of prefs) {
-    for (const r of rows) {
-      const v = r && r[field] ? String(r[field]).trim() : '';
-      if (v) return v;
-    }
-  }
-  return norm(key);
+function pickName(rec, lang) {
+  return s(rec?.[`name_${lang}`] ?? rec?.name);
 }
 
-function clearSelect(sel) {
-  if (!sel) return;
-  while (sel.firstChild) sel.removeChild(sel.firstChild);
+function pickCategoryI18n(rec) {
+  return {
+    ua: s(rec?.category_ua ?? rec?.category_i18n?.ua),
+    en: s(rec?.category_en ?? rec?.category_i18n?.en),
+    es: s(rec?.category_es ?? rec?.category_i18n?.es),
+  };
 }
 
-function addOption(sel, value, label) {
-  const opt = document.createElement('option');
-  opt.value = value;
-  opt.textContent = label;
-  sel.appendChild(opt);
+function pickCategoryLabel(i18n, lang) {
+  if (lang === 'ua' && i18n.ua) return i18n.ua;
+  if (lang === 'en' && i18n.en) return i18n.en;
+  if (lang === 'es' && i18n.es) return i18n.es;
+  return i18n.ua || i18n.en || i18n.es || '';
 }
 
-// ─────────────────────────────────────────────────────────────
-// Побудова списків
+function clearSelect(el) {
+  if (!el) return;
+  el.innerHTML = '';
+}
 
-function rebuildCategorySelects(scope) {
-  const lib  = getUniversLibrary() || [];
-  const lang = getCurrentLang?.() || 'ua';
+function getSelectedSnapshotId(sel) {
+  if (!sel) return '';
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt) return '';
+  try {
+    const snap = JSON.parse(opt.dataset.snapshot || '{}');
+    return snap.id ? String(snap.id) : '';
+  } catch { return ''; }
+}
+
+/**
+ * Прикріпити snapshot діаметра до option (для О1/О2 однаково).
+ * Snapshot формат:
+ * {
+ *   id, category_key,
+ *   value, unit,         // diameter.{value,unit}
+ *   name_ua, name_en, name_es,
+ *   description_ua, description_en, description_es,
+ *   category_ua, category_en, category_es (якщо є)
+ * }
+ */
+function attachDiameterSnapshot(opt, rec) {
+  if (!opt || !rec || !hasValidDiameter(rec)) return;
+  const d = rec.diameter;
+  const snap = {
+    id: rec?.id ?? null,
+    category_key: rec?.category_key ?? rec?.category_id ?? null,
+    value: Number(d?.value),
+    unit: s(d?.unit),
+    name_ua: rec?.name_ua ?? null,
+    name_en: rec?.name_en ?? null,
+    name_es: rec?.name_es ?? null,
+    description_ua: rec?.description_ua ?? null,
+    description_en: rec?.description_en ?? null,
+    description_es: rec?.description_es ?? null,
+    category_ua: rec?.category_ua ?? rec?.category_i18n?.ua ?? null,
+    category_en: rec?.category_en ?? rec?.category_i18n?.en ?? null,
+    category_es: rec?.category_es ?? rec?.category_i18n?.es ?? null
+  };
+  if (!Number.isFinite(snap.value) || snap.value <= 0 || !snap.unit) return;
+  try { opt.dataset.snapshot = JSON.stringify(snap); } catch {}
+  if (isUser(rec)) opt.dataset.user = '1';
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Категорії (спільно для О1/О2)
+───────────────────────────────────────────────────────────── */
+
+function rebuildCategories(scope) {
+  const lang = currLangBase();
+  const lib  = (getUniversLibrary('diameter') || []).filter(hasValidDiameter);
+
   const sel1 = scope.querySelector('#diamCategoryObject1') || scope.querySelector('.object1-group .category-select');
   const sel2 = scope.querySelector('#diamCategoryObject2') || scope.querySelector('.object2-group .category-select');
-
   const selects = [sel1, sel2].filter(Boolean);
   if (!selects.length) return;
 
-  const keys = new Set();
-  lib.forEach(rec => {
-    const k = getCatKey(rec);
-    if (k) keys.add(k);
-  });
+  // Group by key
+  const map = new Map();
+  for (const rec of lib) {
+    const key = getCatKey(rec);
+    if (!key) continue;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(rec);
+  }
 
-  selects.forEach(sel => {
-    const keep = norm(sel.value);
+  const categories = [];
+  for (const [key, rows] of map.entries()) {
+    // localized category label from any row in that key
+    let labelBase = '';
+    for (const r of rows) {
+      const i18n = pickCategoryI18n(r);
+      const cand = pickCategoryLabel(i18n, lang);
+      if (cand) { labelBase = cand; break; }
+    }
+    if (!labelBase) continue;
+    const hasUser = rows.some(isUser);
+    const userMark = hasUser ? ` ${t('ui.user_mark') || '(корист.)'}` : '';
+    categories.push({ key, label: `${labelBase}${userMark}` });
+  }
+  categories.sort((a,b) => a.label.localeCompare(b.label, undefined, { sensitivity:'base' }));
+
+  for (const sel of selects) {
+    const keep = s(sel.value);
     clearSelect(sel);
 
-    // placeholder (disabled + selected + hidden)
     const ph = document.createElement('option');
     ph.value = '';
-    ph.disabled = true;
-    ph.selected = true;
-    ph.hidden = true;
+    ph.disabled = true; ph.selected = true; ph.hidden = true;
     ph.textContent = t('panel_placeholder_category');
     sel.appendChild(ph);
 
-    // опції категорій
-    [...keys].sort().forEach(k => {
-      const label = getCategoryLabelByKey(lib, k, lang);
-      addOption(sel, k, label);
-    });
+    const frag = document.createDocumentFragment();
+    for (const c of categories) {
+      const opt = document.createElement('option');
+      opt.value = c.key;
+      opt.textContent = c.label;
+      frag.appendChild(opt);
+    }
+    sel.appendChild(frag);
 
-    // відновити вибір
-    if (keep && [...keys].includes(keep)) sel.value = keep;
-  });
+    if (keep && categories.some(c => c.key === keep)) sel.value = keep;
+  }
 }
 
-function rebuildObjectsSelect(scope, groupSelector, catSelector, objSelector) {
-  const lib  = getUniversLibrary() || [];
-  const lang = getCurrentLang?.() || 'ua';
+/* ─────────────────────────────────────────────────────────────
+   Об'єкти у вибраній категорії (О1/О2 однакова логіка)
+───────────────────────────────────────────────────────────── */
 
-  const group  = scope.querySelector(groupSelector);
-  const catSel = scope.querySelector(catSelector);
-  const objSel = scope.querySelector(objSelector);
-  if (!group || !objSel) return;
+function rebuildObjects(scope, { groupSel, catSel, objSel, isO1 }) {
+  const lang = currLangBase();
+  const lib  = (getUniversLibrary('diameter') || []).filter(hasValidDiameter);
 
-  const catKey = low(catSel?.value || '');
+  const cat = scope.querySelector(catSel);
+  const obj = scope.querySelector(objSel);
+  if (!obj) return;
 
-  // офіційні об’єкти цієї категорії
-  const official = catKey ? lib.filter(rec => getCatKey(rec) === catKey) : [];
+  const key = low(cat?.value || '');
 
-  // юзерські (за текстовою категорією відповідною до поточної мови)
-  const store = getStore();
-  let userItems = [];
-  if (catKey && typeof store?.list === 'function') {
-    const catLabel = getCategoryLabelByKey(lib, catKey, lang);
-    const all = store.list('diameter') || [];
-    userItems = all.filter(o => low(o?.category || o?.category_i18n?.[o?.originalLang]) === low(catLabel));
-  }
+  // попередній обраний за snapshot.id
+  const prevId = getSelectedSnapshotId(obj);
 
-  const keep = norm(objSel.value);
-  clearSelect(objSel);
-
-  // placeholder об’єкта (для О1/О2 різні підписи)
+  clearSelect(obj);
   const ph = document.createElement('option');
   ph.value = '';
-  ph.disabled = true;
-  ph.selected = true;
-  ph.hidden = true;
-  const isO1 = groupSelector.includes('object1') || objSelector.toLowerCase().includes('object1');
-  ph.textContent = isO1
-    ? t('panel_placeholder_object1')
-    : t('panel_placeholder_object2');
-  objSel.appendChild(ph);
+  ph.disabled = true; ph.selected = true; ph.hidden = true;
+  ph.textContent = isO1 ? t('panel_placeholder_object1') : t('panel_placeholder_object2');
+  obj.appendChild(ph);
 
-  // офіційні
-  official.forEach(rec => {
-    const name = pickLang(rec, 'name', lang);
-    if (name) addOption(objSel, name, name);
-  });
+  if (!key) return;
 
-  // юзерські
-  userItems.forEach(u => {
-    const name = norm(u?.name || u?.name_i18n?.[u?.originalLang]);
-    if (!name) return;
-    addOption(objSel, name, name + ' ' + (t?.('ui.user_mark') || '(user)'));
-  });
+  const rows = lib.filter(r => getCatKey(r) === key);
+  const items = [];
+  for (const rec of rows) {
+    const name = pickName(rec, lang);
+    if (!name) continue;
+    const value = String(rec?.id || name); // value = id (фолбек name)
+    const label = isUser(rec) ? `${name} ${t('ui.user_mark') || '(корист.)'}` : name;
+    items.push({ value, label, rec });
+  }
 
-  if (keep) objSel.value = keep;
+  // без дублів за value
+  const seen = new Set();
+  const frag = document.createDocumentFragment();
+  for (const it of items) {
+    if (seen.has(it.value)) continue;
+    seen.add(it.value);
+    const opt = document.createElement('option');
+    opt.value = it.value;
+    opt.textContent = it.label;
+    attachDiameterSnapshot(opt, it.rec);
+    frag.appendChild(opt);
+  }
+  obj.appendChild(frag);
+
+  // Відновити вибір по snapshot.id
+  if (prevId) {
+    const match = [...obj.options].find(o => {
+      try { return JSON.parse(o.dataset.snapshot || '{}').id === prevId; }
+      catch { return false; }
+    });
+    if (match) obj.value = match.value;
+  }
 }
 
-// локальне очищення форми при reset
+/* ─────────────────────────────────────────────────────────────
+   Reset форми режиму
+───────────────────────────────────────────────────────────── */
+
 function resetDiameterForm(scope) {
-  // розблокувати О1 (на випадок якщо десь блокувався)
+  // розблокувати О1
   scope.querySelector('.object1-group')?.classList.remove('is-locked');
   scope.querySelectorAll('.object1-group select, .object1-group input').forEach(el => {
     el.disabled = false;
     el.classList.remove('is-invalid');
   });
 
-  // інпут базового діаметра О1 + плейсхолдер
+  // інпут базового діаметра
   const base = scope.querySelector('#diamCircleObject1') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
     base.placeholder = t('panel_placeholder_input_diameter');
     base.value = '';
   }
 
-  // перебудувати селекти
-  rebuildCategorySelects(scope);
-  rebuildObjectsSelect(scope, '.object1-group', '#diamCategoryObject1', '#diamObject1');
-  rebuildObjectsSelect(scope, '.object2-group', '#diamCategoryObject2', '#diamObject2');
+  rebuildCategories(scope);
+  rebuildObjects(scope, { groupSel: '.object1-group', catSel: '#diamCategoryObject1', objSel: '#diamObject1', isO1: true });
+  rebuildObjects(scope, { groupSel: '.object2-group', catSel: '#diamCategoryObject2', objSel: '#diamObject2', isO1: false });
 }
 
-// ─────────────────────────────────────────────────────────────
-// Публічний ініціалізатор
+/* ─────────────────────────────────────────────────────────────
+   Ініціалізація
+───────────────────────────────────────────────────────────── */
 
 export async function initUniversDiameterBlock() {
-  await loadUniversLibrary();
+  try {
+    await loadUniversLibrary('diameter');
+  } catch (e) {
+    console.error('[diameter] univers library load failed:', e);
+  }
 
   const scope = document.getElementById('univers_diameter');
-  if (!scope) return;
+  if (!scope) { console.warn('[diameter] #univers_diameter not found'); return; }
 
   // стартове заповнення
-  rebuildCategorySelects(scope);
-  rebuildObjectsSelect(scope, '.object1-group', '#diamCategoryObject1', '#diamObject1');
-  rebuildObjectsSelect(scope, '.object2-group', '#diamCategoryObject2', '#diamObject2');
+  rebuildCategories(scope);
+  rebuildObjects(scope, { groupSel: '.object1-group', catSel: '#diamCategoryObject1', objSel: '#diamObject1', isO1: true });
+  rebuildObjects(scope, { groupSel: '.object2-group', catSel: '#diamCategoryObject2', objSel: '#diamObject2', isO1: false });
 
-  // плейсхолдер для інпута базового діаметра О1
+  // плейсхолдер і підказки для baseline О1
   const base = scope.querySelector('#diamCircleObject1') || scope.querySelector('[data-field="baseline-diameter"]');
-  if (base) base.placeholder = t('panel_placeholder_input_diameter');
-  if (base) attachO1QuickSuggest({ inputEl: base });
+  if (base) {
+    base.placeholder = t('panel_placeholder_input_diameter');
+    try { attachO1QuickSuggest({ inputEl: base }); } catch {}
+  }
 
-  // зміна категорій → оновити відповідний список об’єктів
+  // зміна категорій → оновити список об'єктів у відповідній групі
   scope.querySelector('#diamCategoryObject1')?.addEventListener('change', () => {
-    rebuildObjectsSelect(scope, '.object1-group', '#diamCategoryObject1', '#diamObject1');
+    rebuildObjects(scope, { groupSel: '.object1-group', catSel: '#diamCategoryObject1', objSel: '#diamObject1', isO1: true });
   });
   scope.querySelector('#diamCategoryObject2')?.addEventListener('change', () => {
-    rebuildObjectsSelect(scope, '.object2-group', '#diamCategoryObject2', '#diamObject2');
+    rebuildObjects(scope, { groupSel: '.object2-group', catSel: '#diamCategoryObject2', objSel: '#diamObject2', isO1: false });
   });
 
-  // події юзерських об'єктів → повна перебудова
+  // перезбірка при оновленні бібліотек/юзер-об'єктів
   const rebuildAll = () => {
-    rebuildCategorySelects(scope);
-    rebuildObjectsSelect(scope, '.object1-group', '#diamCategoryObject1', '#diamObject1');
-    rebuildObjectsSelect(scope, '.object2-group', '#diamCategoryObject2', '#diamObject2');
+    rebuildCategories(scope);
+    rebuildObjects(scope, { groupSel: '.object1-group', catSel: '#diamCategoryObject1', objSel: '#diamObject1', isO1: true });
+    rebuildObjects(scope, { groupSel: '.object2-group', catSel: '#diamCategoryObject2', objSel: '#diamObject2', isO1: false });
   };
-  document.addEventListener('user-objects-added', rebuildAll);
+
+  document.addEventListener('univers-lib-reloaded', (e) => {
+    const m = e?.detail?.mode;
+    if (m && m !== 'diameter') return;
+    rebuildAll();
+  });
+  document.addEventListener('user-objects-added',   rebuildAll);
   document.addEventListener('user-objects-changed', rebuildAll);
   document.addEventListener('user-objects-removed', rebuildAll);
 
-  // ЗМІНА МОВИ ПІД ЧАС СЕСІЇ (повна сумісність)
-  const onLangChange = () => rebuildAll();
-  document.addEventListener('languageChanged', onLangChange);
-  window.addEventListener('languageChanged', onLangChange);
-  document.addEventListener('lang-changed', onLangChange);
-  window.addEventListener('lang-changed', onLangChange);
+  // зміна мови
+  const onLang = () => rebuildAll();
+  document.addEventListener('languageChanged', onLang);
+  document.addEventListener('lang-changed', onLang);
+  document.addEventListener('i18nextLanguageChanged', onLang);
+  document.addEventListener('i18n:ready', onLang);
 
-  // системний Reset → локально очистити форму/стан режиму
-  document.addEventListener('reset', () => resetDiameterForm(scope));
+  // системний UI reset
+  const onUiReset = () => resetDiameterForm(scope);
+  window.addEventListener('orbit:ui-reset', onUiReset);
 
-  console.log('[mode:univers_diameter] init OK');
+  console.log('[mode:diameter] UI initialized');
 }
 
-// (опційно для тестів)
-export { rebuildCategorySelects, rebuildObjectsSelect, resetDiameterForm };
+/* (опційно для тестів) */
+export {
+  rebuildCategories as rebuildCategorySelection,
+  rebuildObjects   as rebuildObjectsSelection,
+  resetDiameterForm
+};

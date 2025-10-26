@@ -1,13 +1,12 @@
-// full/js/data/data_diameter.js
+// /js/data/data_diameter.js
 'use strict';
 
 /**
- * Адаптер даних для режиму «Діаметр» (еталон «Гроші»).
- * Завдання:
- *  - прочитати вибір користувача з DOM (контейнер режиму);
- *  - знайти об’єкти у univers-бібліотеці або серед юзерських;
- *  - привести діаметри до метрів через централізований конвертер;
- *  - повернути StandardData (без мережі і без рендера).
+ * Адаптер даних для режиму «Діаметр».
+ * Тепер SNAPSHOT-FIRST для О1 і О2:
+ *  - шукаємо snapshot в dataset вибраного <option>;
+ *  - якщо є — використовуємо його (без пошуків у бібліотеках);
+ *  - якщо немає — фолбек у univers-бібліотеку/юзерський стор.
  *
  * Експорт:
  *  - getDiameterData(scope?): StandardData
@@ -34,7 +33,7 @@ function pickLang(rec, base, lang) {
   return norm(a || b || c || d || e || '');
 }
 
-// ключ категорії (узгоджено з блоками)
+// ключ категорії (узгоджено з blocks)
 function getCatKey(rec) {
   return low(rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
 }
@@ -45,14 +44,12 @@ function toMetersViaConverter(value, unit) {
   if (!Number.isFinite(v)) return NaN;
   const u = (unit && String(unit)) || getBaseUnit('diameter') || 'km';
   try {
-    // convertToBase для 'diameter' уже повертає значення в МЕТРАХ у вашій реалізації
+    // convertToBase для 'diameter' повертає значення в МЕТРАХ
     return convertToBase(v, u, 'diameter');
   } catch {
     return NaN;
   }
 }
-
-
 
 // Прочитати діаметр у метрах з офіційного чи юзерського запису
 function readDiameterMeters(source) {
@@ -84,7 +81,6 @@ function readDiameterMeters(source) {
 
   return { valueReal: NaN, unit: 'km' };
 }
-
 
 // Діаметр базового кола О1 (м)
 function readBaselineDiameterMeters(scope) {
@@ -169,6 +165,104 @@ function findUser(store, { category, name }) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// NEW: Snapshot-first читання для О1 і О2 (з option.dataset.snapshot)
+
+function getSelectedOption(scope, selectId) {
+  const root = scope || document;
+  const sel = root?.querySelector(`#${selectId}`);
+  if (!sel || sel.tagName !== 'SELECT') return null;
+  const idx = sel.selectedIndex;
+  if (idx < 0) return null;
+  return sel.options[idx] || null;
+}
+
+function parseOptionSnapshot(opt) {
+  try {
+    const raw = opt?.dataset?.snapshot;
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || typeof s !== 'object') return null;
+
+    // Мінімум валідації: значення > 0 і є unit
+    const v = Number(s.value);
+    if (!Number.isFinite(v) || v <= 0) return null;
+    const u = s.unit ? String(s.unit) : null;
+    if (!u) return null;
+
+    return s;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Нормалізувати snapshot у структуру «як у бібліотеці», щоб решта коду не відрізняла.
+ * Для діаметрів пишемо в поле `diameter { value, unit }`.
+ * category_id беремо з snapshot.category_key або із селекта категорії.
+ */
+function normalizeSnapshotToLibRecord(snapshot, catKeyFromSelect) {
+  if (!snapshot) return null;
+  const rec = {
+    id: snapshot.id || null,
+    source: 'user',
+    is_user_object: true,
+
+    // імена/категорії для pickLang/getCatKey
+    name_ua: snapshot.name_ua ?? null,
+    name_en: snapshot.name_en ?? null,
+    name_es: snapshot.name_es ?? null,
+    name:    snapshot.name_en || snapshot.name_ua || snapshot.name_es || '',
+
+    category_id: snapshot.category_key || catKeyFromSelect || null,
+    category_en: snapshot.category_en ?? null,
+    category_ua: snapshot.category_ua ?? null,
+    category_es: snapshot.category_es ?? null,
+    category:    snapshot.category_en || snapshot.category_ua || snapshot.category_es || null,
+
+    // ОСНОВНЕ для режиму «Діаметр»
+    diameter: {
+      value: Number(snapshot.value),
+      unit:  String(snapshot.unit)
+    },
+
+    // описи — не обов'язкові
+    description_ua: snapshot.description_ua ?? null,
+    description_en: snapshot.description_en ?? null,
+    description_es: snapshot.description_es ?? null
+  };
+
+  // валідація: значення має бути > 0
+  if (!Number.isFinite(rec.diameter.value) || rec.diameter.value <= 0) return null;
+  return rec;
+}
+
+/**
+ * Прочитати О1 зі snapshot, прикріпленого до обраного option у #diamObject1.
+ */
+function readO1FromSnapshot(scope) {
+  const opt = getSelectedOption(scope, 'diamObject1');
+  if (!opt) return null;
+  const s = parseOptionSnapshot(opt);
+  if (!s) return null;
+
+  const catKeySelect = getVal(scope, '#diamCategoryObject1, .object1-group .category-select');
+  return normalizeSnapshotToLibRecord(s, catKeySelect || null);
+}
+
+/**
+ * Прочитати О2 зі snapshot, прикріпленого до обраного option у #diamObject2.
+ */
+function readO2FromSnapshot(scope) {
+  const opt = getSelectedOption(scope, 'diamObject2');
+  if (!opt) return null;
+  const s = parseOptionSnapshot(opt);
+  if (!s) return null;
+
+  const catKeySelect = getVal(scope, '#diamCategoryObject2, .object2-group .category-select');
+  return normalizeSnapshotToLibRecord(s, catKeySelect || null);
+}
+
+// ─────────────────────────────────────────────────────────────
 // Експорт
 
 /**
@@ -177,10 +271,10 @@ function findUser(store, { category, name }) {
  */
 export function getDiameterData(scope) {
   const lang  = getCurrentLang?.() || 'ua';
-  const lib   = getUniversLibrary();
+  const lib   = getUniversLibrary(); // загальна univers-бібліотека для діаметрів
   const store = getStore();
 
-  // вибір користувача (підтримуємо і #id, і класи-групи як в еталоні)
+  // вибір користувача
   const catO1  = getVal(scope, '#diamCategoryObject1, .object1-group .category-select');
   const catO2  = getVal(scope, '#diamCategoryObject2, .object2-group .category-select');
   const nameO1 = getVal(scope, '#diamObject1,         .object1-group .object-select');
@@ -188,14 +282,21 @@ export function getDiameterData(scope) {
 
   const baselineDiameterMeters = readBaselineDiameterMeters(scope);
 
-  // офіційні/юзерські об’єкти
-  let off1 = findOfficial(lib, { category: catO1, name: nameO1 });
-  if (!off1 && nameO1) off1 = findOfficial(lib, { category: '', name: nameO1 });
-  const obj1 = off1?.obj || findUser(store, { category: catO1, name: nameO1 });
+  // SNAPSHOT-FIRST
+  let obj1 = readO1FromSnapshot(scope);
+  let obj2 = readO2FromSnapshot(scope);
 
-  let off2 = findOfficial(lib, { category: catO2, name: nameO2 });
-  if (!off2 && nameO2) off2 = findOfficial(lib, { category: '', name: nameO2 });
-  const obj2 = off2?.obj || findUser(store, { category: catO2, name: nameO2 });
+  // Якщо снапшота немає — фолбеки як раніше (бібліотека → стор)
+  let off1 = null, off2 = null;
+
+  if (!obj1) {
+    off1 = findOfficial(lib, { category: catO1, name: nameO1 }) || (nameO1 && findOfficial(lib, { category: '', name: nameO1 }));
+    obj1 = off1?.obj || findUser(store, { category: catO1, name: nameO1 }) || null;
+  }
+  if (!obj2) {
+    off2 = findOfficial(lib, { category: catO2, name: nameO2 }) || (nameO2 && findOfficial(lib, { category: '', name: nameO2 }));
+    obj2 = off2?.obj || findUser(store, { category: catO2, name: nameO2 }) || null;
+  }
 
   // локалізація
   const name1 = obj1 ? pickLang(obj1, 'name', lang)        : nameO1;
