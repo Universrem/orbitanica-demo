@@ -90,19 +90,30 @@ export function setLanguage(lang) {
 /** Оновлює всі елементи з атрибутом [data-i18n-key] */
 function refreshStaticTexts() {
   try {
-    document.querySelectorAll('[data-i18n-key]').forEach(el => {
-      const key = el.getAttribute('data-i18n-key');
-      const translated = t(key);
-      if (el.tagName === 'INPUT' && 'placeholder' in el) {
-        el.placeholder = translated;
-      } else {
-        el.textContent = translated;
+    document.querySelectorAll('[data-i18n-key]').forEach(node => {
+      const key = node.getAttribute('data-i18n-key');
+      const val = t(key);
+
+      if (node.tagName === 'INPUT' && 'placeholder' in node) {
+        node.placeholder = val;
+        return;
       }
+
+      if (node.getAttribute('data-i18n-mode') === 'paragraphs') {
+        const parts = val.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+        node.replaceChildren(...parts.map(text => {
+          const p = document.createElement('p');
+          p.textContent = text;
+          return p;
+        }));
+        return;
+      }
+
+      node.textContent = val;
     });
-  } catch (e) {
-    // тиха деградація, якщо DOM ще не готовий
-  }
+  } catch {}
 }
+
 
 /** Розсилка подій зміни мови (нові/старі слухачі) */
 function dispatchLangEvents(lang) {

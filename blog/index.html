@@ -100,13 +100,41 @@
   <aside id="blog-sidebar">
     <h3 class="blog-nav-title" data-i18n-key="blog_nav_title"></h3>
     <ul class="blog-nav">
+      <li><a href="#post-2" data-i18n-key="blog_entry_2_title"></a></li>
       <li><a href="#post-1" data-i18n-key="blog_entry_1_title"></a></li>
+      
       <!-- додайте нові <li> … для post-2, post-3 тощо -->
     </ul>
   </aside>
 
   <!-- Права колонка: самі записи -->
   <section id="blog-entries">
+
+    <article class="blog-entry" id="post-2">
+      <h2 data-i18n-key="blog_entry_2_title"></h2>
+
+      <figure class="blog-hero">
+        <picture>
+          <source type="image/webp"
+                  srcset="/blog/img/landau-hero-800.webp 800w,
+                          /blog/img/landau-hero-1200.webp 1200w,
+                          /blog/img/landau-hero-1600.webp 1600w"
+                  sizes="(max-width: 800px) 100vw, (max-width: 1200px) 100vw, 1200px">
+          <source type="image/jpeg"
+                  srcset="/blog/img/landau-hero-800.jpg 800w,
+                          /blog/img/landau-hero-1200.jpg 1200w,
+                          /blog/img/landau-hero-1600.jpg 1600w"
+                  sizes="(max-width: 800px) 100vw, (max-width: 1200px) 100vw, 1200px">
+          <img src="/blog/img/landau-hero-1200.jpg"
+              alt="Нічне зоряне небо та силует людини"
+              loading="lazy" width="1200" height="800">
+        </picture>
+      </figure>
+
+      <div data-i18n-key="blog_entry_2_text" data-i18n-mode="paragraphs"></div>
+      <div class="blog-date" data-i18n-key="blog_date_2"></div>
+    </article>
+
     <article class="blog-entry" id="post-1">
       <h2 data-i18n-key="blog_entry_1_title"></h2>
       <div class="video-wrapper">
@@ -116,9 +144,10 @@
           loading="lazy"
           allowfullscreen></iframe>
       </div>
-      <p data-i18n-key="blog_entry_1_text"></p>
+      <div data-i18n-key="blog_entry_1_text" data-i18n-mode="paragraphs"></div>
       <div class="blog-date" data-i18n-key="blog_date_1"></div>
     </article>
+
   </section>
 </div>
 
@@ -135,6 +164,32 @@
 </section>
   <script type="module" src="/js/i18n.js"></script>
   <script type="module" src="/js/ui/langMenu.js"></script>
+  <button id="back-to-top" aria-label="Back to top" title="До верху">
+  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 5l-7 7h4v7h6v-7h4z"></path>
+  </svg>
+</button>
+<script type="module">
+  const btn = document.getElementById('back-to-top');
+  const header = document.getElementById('top-bar');
+
+  // показуємо кнопку, коли шапка зникла з екрану
+  const io = new IntersectionObserver(
+    ([entry]) => {
+      entry.isIntersecting ? btn.classList.remove('is-visible')
+                           : btn.classList.add('is-visible');
+    },
+    { root: null, threshold: 0, rootMargin: '0px' }
+  );
+  io.observe(header);
+
+  // клік без зміни URL
+  btn.addEventListener('click', () => {
+    const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+  });
+</script>
+
 </body>
 </html>
 
