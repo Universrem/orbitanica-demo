@@ -1,4 +1,3 @@
-// js/data/univers_lib.js
 'use strict';
 
 /**
@@ -6,7 +5,7 @@
  * Віддає: офіційні + користувацькі (з Supabase) ТІЛЬКИ для запитаного mode.
  * Кеш окремо на кожен mode.
  *
- * Публічне API:
+ * Публічне API (збережено):
  *   await loadUniversLibrary(mode)          // 'distance' | 'diameter' | 'mass' | 'luminosity'
  *   await ready(mode)                       // детермінований бар'єр готовності кешу
  *   getUniversLibrary(mode)                 // отримати змерджений масив (може бути порожнім)
@@ -15,6 +14,12 @@
  *   removeFromUniversLibrary(mode, id)      // миттєво видалити юзер-об’єкт із кешу (і кинути подію)
  *   getById(mode, id)                       // знайти запис у кеші за id (user/official)
  *   resolveObject(mode, hint)               // розв’язати об’єкт за {id, category_key, name, lang}
+ *
+ * ВАЖЛИВО (fixed):
+ *   1) Офіційні записи тепер НОРМАЛІЗУЮТЬСЯ так само, як користувацькі:
+ *      гарантовано мають: { id, category_key, name_*, description_*, [modeField]: { value, unit } }.
+ *   2) Якщо офіційний запис не містив id/category_key — генеруємо стабільний id і ключ категорії.
+ *   3) Після цього селектори завжди отримують стабільні id → «Розрахувати» кладе будь-який О2 у буфер.
  */
 
 import { listPublic, listMine } from '../../cabinet/js/cloud/userObjects.cloud.js';
@@ -26,7 +31,7 @@ const MODE_FIELD = {
   luminosity: 'luminosity',
 };
 
-const __cache     = new Map();   // mode -> array (мердж офіційні + юзерські)
+const __cache     = new Map();   // mode -> array (мердж офіційні + юзерські, вже нормалізовані)
 const __promises  = new Map();   // mode -> Promise завантаження
 const __readyOnce = new Map();   // mode -> Promise, що резолвиться при першому готовому кеші
 
@@ -80,21 +85,35 @@ function pickLocalized(src, base, lang) {
   return norm(src?.[base]);
 }
 
-// Мовно-інваріантні “ключові” значення (для дедупу): беремо лексикографічний мінімум по наявних
-function invariantMinOfTriplet(src, base) {
-  const all = [norm(src?.[`${base}_ua`]), norm(src?.[`${base}_en`]), norm(src?.[`${base}_es`])]
-    .filter(Boolean)
-    .map(s => low(s));
-  if (!all.length) return '';
-  all.sort(); // лексикографічно (en/es/ua не важливо — важливий зміст)
-  return all[0];
+/* ───────────────────────────── Ідентифікатори ───────────────────────────── */
+
+// Детермінований простий хеш → стабільний псевдо-id для офіційних, якщо немає id
+function djb2(str) {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = ((h << 5) + h) + str.charCodeAt(i);
+  // до позитивного 32-bit і в hex
+  return (h >>> 0).toString(16).padStart(8, '0');
+}
+function makeStableIdForOfficial(mode, rec) {
+  const lang = currentLang();
+  const name = pickLocalized(rec, 'name', lang) || pickLocalized(rec, 'name', 'en') || '';
+  const cat  = pickLocalized(rec, 'category', lang) || pickLocalized(rec, 'category', 'en') || '';
+  const key  = String(rec?.category_key || rec?.category_id || '').trim();
+  const basis = `${mode}|${key}|${low(name)}|${low(cat)}`;
+  return `off-${mode}-${djb2(basis)}`;
 }
 
-function hasModeField(rec, mode) {
-  const key = MODE_FIELD[mode];
-  if (!key) return false;
-  const v = Number(rec?.[key]?.value ?? rec?.[key]); // офіційні можуть мати інакше
-  return Number.isFinite(v) && v > 0;
+// Приведення категорії до стабільного ключа (якщо не вказаний)
+// Перевага: rec.category_key/rec.category_id → інакше із локалізованих назв будуємо slug
+function ensureCategoryKey(rec) {
+  const existed = norm(rec?.category_key || rec?.category_id);
+  if (existed) return existed;
+  const lang = currentLang();
+  const label = pickLocalized(rec, 'category', lang) ||
+                pickLocalized(rec, 'category', 'en') ||
+                pickLocalized(rec, 'name', 'en') || 'misc';
+  // грубий slug
+  return low(label).replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'misc';
 }
 
 /* ───────────────────────── Нормалізація UGC → формат бібліотеки ───────────────────────── */
@@ -115,50 +134,73 @@ function normalizeUserObject(row, mode) {
   const v = Number(rawVal);
   if (!Number.isFinite(v) || v <= 0) return null;
 
-  const lang = currentLang();
-
   const rec = {
-    // ідентифікація
-    id: row.id,
+    // джерело
     source: 'user',
     is_user_object: true,
     user_id: row.owner_id,
 
-    // оригінальні i18n-поля залишаємо як є
-    name_ua: row.name_ua,
-    name_en: row.name_en,
-    name_es: row.name_es,
-
-    category_ua: row.category_ua,
-    category_en: row.category_en,
-    category_es: row.category_es,
-
-    description_ua: row.description_ua,
-    description_en: row.description_en,
-    description_es: row.description_es,
-
-    // агреговані для зручності споживачів — за мовою системи з коректним фолбеком
-    name:     pickLocalized(row, 'name',     lang),
-    category: pickLocalized(row, 'category', lang),
-
-    // ключ категорії
+    // ідентифікація
+    id: row.id,
     category_key: row.category_key,
     category_id:  row.category_key, // зворотна сумісність
 
-    // режимне поле
-    [key]: {
-      value: v,
-      unit:  rawUnit ? String(rawUnit) : null,
-    },
+    // i18n як у сирому рядку
+    name_ua: row.name_ua, name_en: row.name_en, name_es: row.name_es,
+    category_ua: row.category_ua, category_en: row.category_en, category_es: row.category_es,
+    description_ua: row.description_ua, description_en: row.description_en, description_es: row.description_es,
 
-    // мета
-    created_at: row.created_at,
-    updated_at: row.updated_at,
+    // режимне поле
+    [key]: { value: v, unit: rawUnit ? String(rawUnit) : null },
+
+    // мета (лише корисне)
     curated: !!row.curated,
     is_official: false,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
   };
 
   return rec;
+}
+
+/* ─────────────────────── Нормалізація OFFICIAL → формат бібліотеки ───────────────────────
+   Робимо те саме, що для UGC: гарантуємо {id, category_key, name_*, description_*, [key]:{value,unit}}.
+*/
+
+function normalizeOfficial(rec, mode) {
+  if (!rec || !mode) return null;
+  const key = MODE_FIELD[mode];
+  if (!key) return null;
+
+  // 1) Значення
+  const rawV = rec?.[key]?.value ?? rec?.[key]; // офіційні можуть мати число напряму
+  const rawU = rec?.[key]?.unit  ?? rec?.unit;
+  const v = Number(rawV);
+  if (!Number.isFinite(v) || v <= 0) return null;
+
+  // 2) Категорія + id
+  const category_key = ensureCategoryKey(rec);
+  const id = norm(rec?.id) || makeStableIdForOfficial(mode, { ...rec, category_key });
+
+  const out = {
+    source: 'official',
+    is_user_object: false,
+
+    id,
+    category_key,
+    category_id: category_key, // зворотна сумісність
+
+    // переносимо i18n як є (якщо якихось мов немає — залишаться undefined/null)
+    name_ua: rec?.name_ua, name_en: rec?.name_en, name_es: rec?.name_es,
+    category_ua: rec?.category_ua, category_en: rec?.category_en, category_es: rec?.category_es,
+    description_ua: rec?.description_ua, description_en: rec?.description_en, description_es: rec?.description_es,
+
+    [key]: { value: v, unit: rawU ? String(rawU) : null },
+
+    is_official: true
+  };
+
+  return out;
 }
 
 /* ───────────────────────────── Завантаження ───────────────────────────── */
@@ -200,44 +242,38 @@ async function fetchUserByMode(mode) {
   return all;
 }
 
-// Мовно-незалежний ключ унікальності (id → інакше інваріант назви/категорії + джерело)
-function keyOfInvariant(r) {
-  if (r?.id) return `id:${r.id}`;
-  const n = invariantMinOfTriplet(r, 'name')     || low(r?.name)     || '';
-  const c = invariantMinOfTriplet(r, 'category') || low(r?.category) || '';
-  const s = r?.is_user_object ? 'u' : 'o';
-  return `${s}|n:${n}|c:${c}`;
-}
-
-function dedupeMerge(official, user, mode) {
-  // офіційні: тільки релевантні цьому режиму
-  const offFiltered = official.filter(rec => hasModeField(rec, mode));
-
-  // Стартовий набір + seen ключі
-  const out  = [...offFiltered];
-  const seen = new Set(out.map(keyOfInvariant));
-
-  for (const u of user) {
-    const k = keyOfInvariant(u);
-    if (!seen.has(k)) {
-      seen.add(k);
-      out.push(u);
-    } else {
-      // якщо id збігся — замінюємо на свіжий юзерський
-      const idx = out.findIndex(r => (r.id && u.id) ? r.id === u.id : keyOfInvariant(r) === k);
-      if (idx >= 0) out[idx] = u;
-    }
+function dedupeMerge(officialNorm, userNorm) {
+  // Стратегія проста й стабільна:
+  //  - індексуємо офіційні за id
+  //  - поверх кладемо юзерські за id (оновлюють при збігу id)
+  const byId = new Map();
+  for (const r of officialNorm) {
+    if (!r?.id) continue;
+    byId.set(String(r.id), r);
   }
-
-  return out;
+  for (const u of userNorm) {
+    if (!u?.id) continue;
+    byId.set(String(u.id), u); // юзерський має пріоритет за тим самим id
+  }
+  return Array.from(byId.values());
 }
 
 async function buildForMode(mode) {
-  const [official, userObjs] = await Promise.all([
+  const [officialRaw, userObjs] = await Promise.all([
     fetchOfficial(),
     fetchUserByMode(mode),
   ]);
-  return dedupeMerge(official, userObjs, mode);
+
+  // 1) Нормалізація офіційних
+  const officialNorm = officialRaw
+    .map(r => normalizeOfficial(r, mode))
+    .filter(Boolean);
+
+  // 2) Юзерські вже нормалізовані
+  const userNorm = userObjs;
+
+  // 3) Мердж
+  return dedupeMerge(officialNorm, userNorm);
 }
 
 /* ───────────────────────────── Події ───────────────────────────── */
@@ -329,14 +365,11 @@ export function addToUniversLibrary(mode, userRow) {
 
   const cur = Array.isArray(__cache.get(mode)) ? [...__cache.get(mode)] : [];
 
-  // Видаляємо стару версію якщо існує (за id або інваріантним ключем)
-  const nk = keyOfInvariant(normalized);
-  const next = cur.filter(item => keyOfInvariant(item) !== nk);
+  // за id
+  const next = cur.filter(item => String(item?.id) !== String(normalized.id));
+  next.unshift(normalized); // свіжий нагору
 
-  // Додаємо новий об'єкт на початок (щоб був помітний у списках)
-  next.unshift(normalized);
   __cache.set(mode, next);
-
   emitReloaded(mode, 'user-add', { id: normalized.id });
   return normalized;
 }
@@ -347,7 +380,7 @@ export function addToUniversLibrary(mode, userRow) {
 export function removeFromUniversLibrary(mode, id) {
   if (!mode || !id) return false;
   const cur = Array.isArray(__cache.get(mode)) ? __cache.get(mode) : [];
-  const next = cur.filter(it => it?.id !== id);
+  const next = cur.filter(it => String(it?.id) !== String(id));
   if (next.length === cur.length) return false;
 
   __cache.set(mode, next);
@@ -369,13 +402,13 @@ export function getById(mode, id) {
  * Резолвер об’єкта за підказкою.
  * Підтримує: id, category_key/category_id, name (+lang).
  * Пріоритет: id → (category_key + name) → name.
+ * Працює коректніше після нормалізації офіційних записів.
  */
 export function resolveObject(mode, hint = {}) {
   const list = __cache.get(mode);
   if (!Array.isArray(list) || !list.length) return null;
 
   const lang = normalizeLang(hint.lang) || currentLang();
-
   const pickName = (rec) => pickLocalized(rec, 'name', lang);
 
   // 1) по id

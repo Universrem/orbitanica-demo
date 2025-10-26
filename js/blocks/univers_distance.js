@@ -3,142 +3,81 @@
 
 /**
  * Блок режиму «Відстань» (UI).
- * - O1: Земля / Сонце / Сонячна система (до Оорта) / Чумацький Шлях з бібліотеки діаметрів (мають diameter).
- * - O2: категорії та об'єкти з бібліотеки дистанцій (мають distance_to_earth) + користувацькі.
- * - У селектах показуємо ТІЛЬКИ назви поточною мовою. Якщо назви категорії мовою немає — показуємо назву на іншій доступній мові (ua→en→es), але НЕ ключ.
- *
- * ДОДАНО:
- *  • snapshot у dataset для кожного option О2 (id, category_key, value, unit, name_*).
- *  • публічний recalculate() — викликає стандартний обробник режиму.
+ * - O1: фіксований список із бібліотеки діаметрів + поле діаметра (#distCircleObject1) + селектор пресетів (#distBaselinePreset).
+ * - O2: категорії та об'єкти з мердженої бібліотеки «distance» (офіційні + користувацькі).
+ * - Лейбли локалізовані; для UGC додаємо « (корист.)».
+ * - Для кожного option О2 прикріплюємо snapshot у dataset.snapshot.
  */
 
 import { t, getCurrentLang } from '../i18n.js';
 import { loadUniversLibrary, getUniversLibrary } from '../data/univers_lib.js';
-import { getStore } from '../userObjects/api.js';
-import { attachO1QuickSuggest } from '../utils/o1QuickSuggest.js';
 import { onDistanceCalculate } from '../events/distance_buttons.js';
+import { attachO1QuickSuggest } from '../utils/o1QuickSuggest.js';
 
-// ─────────────────────────────────────────────────────────────
-// Константи та утіліти
+/* ─────────────────────────────────────────────────────────────
+   Утіліти
+───────────────────────────────────────────────────────────── */
 
-const SUPPORTED_LANGUAGES = ['ua', 'en', 'es'];
-const O1_ALLOWED_NAMES = [
-  { ua: 'Земля', en: 'Earth', es: 'Tierra' },
-  { ua: 'Сонце', en: 'Sun', es: 'Sol' },
-  { ua: 'Сонячна система (до Оорта)', en: 'Solar System (to Oort Cloud)', es: 'Sistema Solar (hasta la Nube de Oort)' },
-  { ua: 'Чумацький Шлях', en: 'Milky Way', es: 'Vía Láctea' }
-];
-
+const SUP_LANGS = ['ua', 'en', 'es'];
 const s = v => String(v ?? '').trim();
 const low = v => s(v).toLowerCase();
 
-function stripUserMark(label) {
-  const mark = t('ui.user_mark') || '(корист.)';
-  return s(label).replace(new RegExp(String(mark).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), '').trim();
-}
-
-// нормалізуємо es-ES → es, і т.п. Якщо мова не з SUPPORTED_LANGUAGES — нічого не будуємо.
-function getLangSafe() {
+function currentLangBase() {
   const raw = (getCurrentLang && getCurrentLang()) || '';
   const base = String(raw).toLowerCase().split(/[-_]/)[0];
-  return SUPPORTED_LANGUAGES.includes(base) ? base : '';
+  return SUP_LANGS.includes(base) ? base : 'ua';
 }
 
-function isUserObject(o) {
-  return !!(o?.is_user_object || o?.source === 'user');
-}
-
-function hasValidDiameter(o) {
-  const v = Number(o?.diameter?.value);
+function hasValidDiameter(rec) {
+  const v = Number(rec?.diameter?.value);
   return Number.isFinite(v) && v > 0;
 }
 
-function hasValidDistanceToEarth(o) {
-  const v = Number(o?.distance_to_earth?.value);
+function hasValidDistance(rec) {
+  const v = Number(rec?.distance_to_earth?.value);
   return Number.isFinite(v) && v > 0;
 }
 
-// ключ категорії — slug/ідентифікатор, НЕ текст
-function getCategoryKey(rec) {
+function isUser(rec) {
+  return !!(rec?.is_user_object || rec?.source === 'user');
+}
+
+function getCatKey(rec) {
   return low(rec?.category_key ?? rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
+}
+
+function pickName(rec, lang) {
+  return s(rec?.[`name_${lang}`] ?? rec?.name ?? '');
+}
+
+function pickCategoryI18n(rec) {
+  return {
+    ua: s(rec?.category_ua ?? rec?.category_i18n?.ua),
+    en: s(rec?.category_en ?? rec?.category_i18n?.en),
+    es: s(rec?.category_es ?? rec?.category_i18n?.es),
+  };
+}
+
+function pickCategoryLabel(i18n, lang) {
+  if (lang === 'ua' && i18n.ua) return i18n.ua;
+  if (lang === 'en' && i18n.en) return i18n.en;
+  if (lang === 'es' && i18n.es) return i18n.es;
+  return i18n.ua || i18n.en || i18n.es || '';
 }
 
 function clearSelect(el) {
   if (!el) return;
-  while (el.firstChild) el.removeChild(el.firstChild);
+  el.innerHTML = '';
 }
 
-function addOpt(sel, value, label, isPlaceholder = false) {
-  const opt = document.createElement('option');
-  opt.value = value;
-  opt.textContent = label;
-  if (isPlaceholder) {
-    opt.disabled = true;
-    opt.selected = true;
-    opt.hidden = true;
-  }
-  sel.appendChild(opt);
-  return opt; // повертаємо option для подальшого dataset.snapshot
-}
-
-// Назва об'єкта поточною мовою (для юзерів також name_i18n)
-function getLangName(obj, lang) {
-  const i18n = obj?.name_i18n?.[lang];
-  const direct = obj?.[`name_${lang}`];
-  const legacy = (obj?.originalLang === lang) ? obj?.name : '';
-  return s(i18n || direct || legacy || '');
-}
-
-// Вибір підпису з i18n для категорії: поточна мова або fallback ua→en→es (без ключа!)
-function pickCategoryLabel(i18n, lang) {
-  const ua = s(i18n?.ua);
-  const en = s(i18n?.en);
-  const es = s(i18n?.es);
-  if (lang === 'ua' && ua) return ua;
-  if (lang === 'en' && en) return en;
-  if (lang === 'es' && es) return es;
-  return ua || en || es || ''; // НІКОЛИ не повертаємо slug
-}
-
-// Назва категорії поточною мовою (для юзерів також category_i18n); без fallback
-function getLangCategory(obj, lang) {
-  const i18n = obj?.category_i18n?.[lang];
-  const direct = obj?.[`category_${lang}`];
-  return s(i18n || direct || '');
-}
-
-// Побудувати i18n пак для офіційної категорії з масиву її записів
-function collectOfficialCategoryI18N(recordsInKey) {
-  let ua = '', en = '', es = '';
-  for (const r of recordsInKey) {
-    if (!ua) ua = s(r?.category_ua);
-    if (!en) en = s(r?.category_en);
-    if (!es) es = s(r?.category_es);
-    if (ua && en && es) break;
-  }
-  return { ua: ua || null, en: en || null, es: es || null };
-}
-
-function isAllowedO1Object(rec) {
-  const names = new Set([rec?.name_ua, rec?.name_en, rec?.name_es, rec?.name].map(low).filter(Boolean));
-  return O1_ALLOWED_NAMES.some(allowed => {
-    const targets = new Set([allowed.ua, allowed.en, allowed.es].map(low));
-    for (const n of names) if (targets.has(n)) return true;
-    return false;
-  });
-}
-
-// ─────────────────────────────────────────────────────────────
-// Snapshot helpers (для option О2)
-
-function makeSnapshotFromLibRecord(rec) {
-  if (!rec || !hasValidDistanceToEarth(rec)) return null;
+function attachSnapshot(opt, rec) {
+  if (!opt || !rec || !hasValidDistance(rec)) return;
   const d = rec.distance_to_earth;
-  return {
+  const snap = {
     id: rec?.id ?? null,
     category_key: rec?.category_key ?? rec?.category_id ?? null,
     value: Number(d?.value),
-    unit: d?.unit ?? null,
+    unit: s(d?.unit),
     name_ua: rec?.name_ua ?? null,
     name_en: rec?.name_en ?? null,
     name_es: rec?.name_es ?? null,
@@ -146,385 +85,346 @@ function makeSnapshotFromLibRecord(rec) {
     description_en: rec?.description_en ?? null,
     description_es: rec?.description_es ?? null,
   };
+  if (!Number.isFinite(snap.value) || !snap.value || !snap.unit) return;
+  try { opt.dataset.snapshot = JSON.stringify(snap); } catch {}
+  if (isUser(rec)) opt.dataset.user = '1';
 }
 
-function attachSnapshotToOption(opt, rec) {
-  if (!opt || !rec) return;
+function getSelectedSnapshotId(sel) {
+  if (!sel) return '';
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt) return '';
   try {
-    const snap = makeSnapshotFromLibRecord(rec);
-    if (!snap || !Number.isFinite(Number(snap.value)) || !snap.unit) return;
-    opt.dataset.snapshot = JSON.stringify(snap);
-  } catch (e) {
-    console.warn('[distance] snapshot attach failed:', e);
-  }
+    const snap = JSON.parse(opt.dataset.snapshot || '{}');
+    return snap.id ? String(snap.id) : '';
+  } catch { return ''; }
 }
 
-// ─────────────────────────────────────────────────────────────
-// O1: 4 об'єкти
+/* ─────────────────────────────────────────────────────────────
+   O1 (базовий об’єкт + діаметр + пресети)
+───────────────────────────────────────────────────────────── */
 
-function rebuildObject1Selection(scope) {
-  const lib = getUniversLibrary('diameter') || [];
-  const lang = getLangSafe(); if (!lang) return;
+const O1_CANDIDATES = [
+  { ua: 'Земля', en: 'Earth', es: 'Tierra' },
+  { ua: 'Сонце', en: 'Sun', es: 'Sol' },
+  { ua: 'Сонячна система (до Оорта)', en: 'Solar System (to Oort Cloud)', es: 'Sistema Solar (hasta la Nube de Oort)' },
+  { ua: 'Чумацький Шлях', en: 'Milky Way', es: 'Vía Láctea' },
+];
+
+// якщо у вас є стабільні id офіційних об’єктів — краще звіряти по id
+function matchByNames(rec, cand) {
+  const names = new Set([rec?.name_ua, rec?.name_en, rec?.name_es, rec?.name].map(low).filter(Boolean));
+  const targets = new Set([cand.ua, cand.en, cand.es].map(low));
+  for (const n of names) if (targets.has(n)) return true;
+  return false;
+}
+
+function rebuildO1(scope) {
   const sel = scope.querySelector('#distObject1');
   if (!sel) return;
+  const lang = currentLangBase();
 
-  const valid = lib.filter(hasValidDiameter).filter(isAllowedO1Object);
-  const current = s(sel.value);
+  const lib = (getUniversLibrary('diameter') || []).filter(hasValidDiameter);
+  const prev = s(sel.value);
 
   clearSelect(sel);
-  addOpt(sel, '', t('panel_placeholder_object1'), true);
 
-  // рівно 4 у фіксованому порядку, тільки якщо є назва поточною мовою
-  O1_ALLOWED_NAMES.forEach(allowed => {
-    const rec = valid.find(r => {
-      const recordNames = [r?.name_ua, r?.name_en, r?.name_es, r?.name].map(low);
-      const targetNames = [allowed.ua, allowed.en, allowed.es].map(low);
-      return recordNames.some(n => targetNames.includes(n));
-    });
-    if (!rec) return;
-    const label = s(rec?.[`name_${lang}`] || '');
-    if (label) addOpt(sel, label, label);
-  });
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = t('panel_placeholder_object1');
+  placeholder.disabled = true; placeholder.selected = true; placeholder.hidden = true;
+  sel.appendChild(placeholder);
 
-  if (current) sel.value = current;
-}
-
-// ─────────────────────────────────────────────────────────────
-// O2: категорії + об'єкти
-
-function rebuildCategorySelectionO2(scope) {
-  const lib = getUniversLibrary('distance') || [];
-  const valid = Array.isArray(lib) ? lib.filter(hasValidDistanceToEarth) : [];
-  const lang = getLangSafe(); if (!lang) return;
-  const sel = scope.querySelector('#distCategoryObject2');
-  if (!sel) return;
-
-  const current = s(sel.value);
-  clearSelect(sel);
-  addOpt(sel, '', t('panel_placeholder_category'), true);
-
-  // офіційні категорії
-  const officialCategories = new Set();
-  valid.forEach(r => {
-    if (!isUserObject(r)) {
-      const key = getCategoryKey(r);
-      if (key) officialCategories.add(key);
-    }
-  });
-
-  // юзерські об’єкти (масив нормалізованих з api.js)
-  let userObjects = [];
-  try {
-    const store = getStore();
-    userObjects = (typeof store.list === 'function') ? (store.list('distance') || []) : [];
-  } catch (e) {
-    console.warn('[distance] failed to load user objects for categories:', e);
+  const opts = [];
+  for (const cand of O1_CANDIDATES) {
+    const rec = lib.find(r => matchByNames(r, cand));
+    if (!rec) continue;
+    const label = pickName(rec, lang);
+    if (!label) continue;
+    const opt = document.createElement('option');
+    opt.value = label;      // для О1 у вас value = назва (історично)
+    opt.textContent = label;
+    opts.push(opt);
   }
+  for (const o of opts) sel.appendChild(o);
+  if (prev) sel.value = prev;
 
-  // зібрати ключі категорій, що мають бодай один об’єкт з назвою поточною мовою
-  const categoryKeys = new Set();
-
-  // офіційні: key -> масив офіційних записів
-  const byKey = new Map();
-  valid.forEach(r => {
-    if (isUserObject(r)) return;
-    const key = getCategoryKey(r);
-    if (!key) return;
-    if (!byKey.has(key)) byKey.set(key, []);
-    byKey.get(key).push(r);
-  });
-  for (const [key, arr] of byKey.entries()) {
-    const hasNameInLang = arr.some(r => s(r?.[`name_${lang}`] || '') !== '');
-    if (hasNameInLang) categoryKeys.add(key);
-  }
-
-  // юзерські: key -> масив юзерських
-  const userByKey = new Map();
-  userObjects.forEach(u => {
-    const key = low(u?.category_key);
-    if (!key) return;
-    if (!userByKey.has(key)) userByKey.set(key, []);
-    userByKey.get(key).push(u);
-  });
-  for (const [key, arr] of userByKey.entries()) {
-    const hasNameInLang = arr.some(u => getLangName(u, lang));
-    if (hasNameInLang) categoryKeys.add(key);
-  }
-
-  // побудувати label: офіційна → pickCategoryLabel(зібраний i18n), юзерська → pickCategoryLabel(u.category_i18n, lang) + (корист.)
-  const keysSorted = Array.from(categoryKeys).sort();
-  keysSorted.forEach(key => {
-    let label = '';
-
-    if (officialCategories.has(key)) {
-      const arr = byKey.get(key) || [];
-      const i18n = collectOfficialCategoryI18N(arr);
-      label = pickCategoryLabel(i18n, lang);
-    } else {
-      const arr = userByKey.get(key) || [];
-      // беремо перший, де хоч щось є у category_i18n/category_*
-      let i18n = null;
-      for (const u of arr) {
-        const cand = {
-          ua: s(u?.category_i18n?.ua ?? u?.category_ua),
-          en: s(u?.category_i18n?.en ?? u?.category_en),
-          es: s(u?.category_i18n?.es ?? u?.category_es),
-        };
-        if (cand.ua || cand.en || cand.es) { i18n = cand; break; }
-      }
-      label = pickCategoryLabel(i18n || {}, lang);
-      const userMark = t('ui.user_mark') || '(корист.)';
-      label = `${label} ${userMark}`.trim();
-    }
-
-    // Якщо раптом нема жодної назви — пропускаємо категорію (НЕ показуємо ключ)
-    if (!label) return;
-
-    addOpt(sel, key, label);
-  });
-
-  if (current && categoryKeys.has(current)) sel.value = current;
-}
-
-function rebuildObjectsSelectionO2(scope, newObject = null) {
-  const lib = getUniversLibrary('distance') || [];
-  const valid = Array.isArray(lib) ? lib.filter(hasValidDistanceToEarth) : [];
-  const lang = getLangSafe(); if (!lang) return;
-
-  const group  = scope.querySelector('.object2-group');
-  const catSel = scope.querySelector('#distCategoryObject2');
-  const objSel = scope.querySelector('#distObject2');
-  if (!group || !objSel || !catSel) return;
-
-  const key = low(catSel.value || '');
-  const prev = s(objSel.value);
-
-  clearSelect(objSel);
-  addOpt(objSel, '', t('panel_placeholder_object2'), true);
-  if (!key) return;
-
-  // офіційні об'єкти в категорії — тільки з назвою поточною мовою
-  const officialInCat = valid
-    .filter(r => !isUserObject(r) && getCategoryKey(r) === key)
-    .map(r => {
-      const name = s(r?.[`name_${lang}`] || '');
-      return name ? { label: name, value: name, rec: r } : null; // value = назва
-    })
-    .filter(Boolean);
-
-  // юзерські об'єкти в категорії — тільки з назвою поточною мовою; додаємо «(корист.)»
-  let userInCat = [];
-  try {
-    const store = getStore();
-    const all = (typeof store.list === 'function') ? (store.list('distance') || []) : [];
-    userInCat = all
-      .filter(u => low(u?.category_key) === key)
-      .map(u => {
-        const name = getLangName(u, lang);
-        if (!name) return null;
-        const mark = t('ui.user_mark') || '(корист.)';
-        return { label: `${name} ${mark}`, value: name, rec: u }; // value = назва
-      })
-      .filter(Boolean);
-  } catch (e) {
-    console.warn('[distance] failed to load user objects for objects-select:', e);
-  }
-
-  // миттєво додаємо щойно створений об'єкт (до появи у store)
-  if (newObject && low(newObject.category_key) === key) {
-    const freshName = getLangName(newObject, lang);
-    if (freshName) {
-      const mark = t('ui.user_mark') || '(корист.)';
-      userInCat.unshift({ label: `${freshName} ${mark}`, value: freshName, rec: newObject });
-    }
-  }
-
-  // уникаємо дублів за value (назва) і одночасно прикріплюємо snapshot
-  const seen = new Set();
-  [...officialInCat, ...userInCat].forEach(item => {
-    if (seen.has(item.value)) return;
-    seen.add(item.value);
-    const opt = addOpt(objSel, item.value, item.label);
-    // Для юзерського запису може не бути lib-подібної структури — спробуємо знайти її у merged lib
-    let rec = item.rec;
-    if (!rec || !hasValidDistanceToEarth(rec)) {
-      rec = valid.find(r => getCategoryKey(r) === key && low(s(r?.[`name_${lang}`] || '')) === low(stripUserMark(item.label)));
-    }
-    attachSnapshotToOption(opt, rec);
-  });
-
-  // автоселекція
-  if (newObject && low(newObject.category_key) === key) {
-    const newName = getLangName(newObject, lang);
-    if (newName) objSel.value = newName;
-  } else if (prev) {
-    objSel.value = prev;
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Скидання
-
-function resetDistanceForm(scope) {
-  // Скидаємо стан О1
-  const object1Group = scope.querySelector('.object1-group');
-  if (object1Group) {
-    object1Group.classList.remove('is-locked');
-    object1Group.querySelectorAll('select, input').forEach(el => {
-      el.disabled = false;
-      el.classList.remove('is-invalid');
-    });
-  }
-
-  // Плейсхолдер базового діаметра
+  // Поле діаметра — placeholder + quick-suggest
   const diameterInput = scope.querySelector('#distCircleObject1') ||
                         scope.querySelector('[data-field="baseline-diameter"]');
   if (diameterInput) {
     diameterInput.placeholder = t('panel_placeholder_input_diameter');
-    diameterInput.value = '';
+    try { attachO1QuickSuggest({ inputEl: diameterInput }); } catch {}
   }
 
-  // Перебудова
-  rebuildObject1Selection(scope);
-  rebuildCategorySelectionO2(scope);
-  rebuildObjectsSelectionO2(scope);
+  // Пресети базового діаметра (опційний селектор)
+  setupBaselinePresets(scope);
 }
 
-// ─────────────────────────────────────────────────────────────
-// Події
+// Значення пресетів (у метрах). Не примусові: якщо у селекті вже задані — не перезаписуємо.
+function setupBaselinePresets(scope) {
+  const presetSel = scope.querySelector('#distBaselinePreset, [data-role="baseline-preset"]');
+  const input = scope.querySelector('#distCircleObject1, [data-field="baseline-diameter"]');
+  if (!presetSel || !input) return;
 
-function handleUserObjectsAdded(event) {
-  const { mode, object, slot } = event.detail || {};
-  if (mode !== 'distance' || slot !== 'object2' || !object) return;
+  // якщо у селектора немає жодної опції, не чіпаємо — ніяких автододавань
+  if (presetSel.options.length === 0) return;
 
-  event.stopImmediatePropagation();
+  const onPresetChange = () => {
+    const val = String(presetSel.value || '').trim();
+    if (!val || val === '__custom__') return;
+    input.value = val;
+  };
 
-  const scope = document.getElementById('univers_distance');
-  if (!scope) return;
+  const onInputChange = () => {
+    const v = String(input.value || '').trim();
+    if (!v) return;
+    const match = [...presetSel.options].find(o => o.value === v);
+    presetSel.value = match ? match.value : '__custom__';
+  };
 
+  presetSel.removeEventListener('change', onPresetChange);
+  presetSel.addEventListener('change', onPresetChange);
+
+  input.removeEventListener('input', onInputChange);
+  input.addEventListener('input', onInputChange);
+
+  // початкова синхронізація тільки якщо є збіг
+  const v0 = String(input.value || '').trim();
+  const match0 = [...presetSel.options].find(o => o.value === v0);
+  presetSel.value = match0 ? match0.value : presetSel.value;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   O2: категорії
+───────────────────────────────────────────────────────────── */
+
+function rebuildO2Categories(scope) {
+  const sel = scope.querySelector('#distCategoryObject2');
+  if (!sel) return;
+  const lang = currentLangBase();
+
+  const lib = (getUniversLibrary('distance') || []).filter(hasValidDistance);
+
+  // Групуємо за ключем
+  const byKey = new Map();
+  for (const rec of lib) {
+    const key = getCatKey(rec);
+    if (!key) continue;
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key).push(rec);
+  }
+
+  // Категорії показуємо тільки якщо є хоч один об’єкт із назвою на поточній мові
+  const categories = [];
+  for (const [key, arr] of byKey.entries()) {
+    const hasAnyNameInLang = arr.some(r => !!pickName(r, lang));
+    if (!hasAnyNameInLang) continue;
+
+    // Витягаємо локалізовану назву категорії
+    let catI18n = null;
+    for (const r of arr) {
+      const cand = pickCategoryI18n(r);
+      if (cand.ua || cand.en || cand.es) { catI18n = cand; break; }
+    }
+    const labelBase = pickCategoryLabel(catI18n || {}, lang);
+    if (!labelBase) continue;
+
+    // позначаємо категорію як «корист.» якщо в ній є хоча б 1 UGC
+    const hasUser = arr.some(isUser);
+    const userMark = hasUser ? ` ${t('ui.user_mark') || '(корист.)'}` : '';
+    categories.push({ key, label: `${labelBase}${userMark}` });
+  }
+
+  categories.sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
+
+  const prev = s(sel.value);
+  clearSelect(sel);
+
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = t('panel_placeholder_category');
+  placeholder.disabled = true; placeholder.selected = true; placeholder.hidden = true;
+  sel.appendChild(placeholder);
+
+  const frag = document.createDocumentFragment();
+  for (const c of categories) {
+    const opt = document.createElement('option');
+    opt.value = c.key;
+    opt.textContent = c.label;
+    frag.appendChild(opt);
+  }
+  sel.appendChild(frag);
+
+  if (prev && categories.some(c => c.key === prev)) sel.value = prev;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   O2: об’єкти в категорії
+───────────────────────────────────────────────────────────── */
+
+function rebuildO2Objects(scope) {
   const catSel = scope.querySelector('#distCategoryObject2');
   const objSel = scope.querySelector('#distObject2');
   if (!catSel || !objSel) return;
+  const lang = currentLangBase();
 
-  // Спершу перебудуємо категорії, щоб нова категорія точно була в селекті
-  rebuildCategorySelectionO2(scope);
+  const catKey = low(catSel.value || '');
+  const prevId = getSelectedSnapshotId(objSel);
 
-  const key = low(object.category_key || '');
-  // Якщо після ребілду такої категорії ще немає — додамо тимчасову опцію з назвою (без slug)
-  if (![...catSel.options].some(o => low(o.value) === key)) {
-    const lang = getLangSafe();
-    const i18n = {
-      ua: s(object?.category_i18n?.ua ?? object?.category_ua),
-      en: s(object?.category_i18n?.en ?? object?.category_en),
-      es: s(object?.category_i18n?.es ?? object?.category_es),
-    };
-    let label = pickCategoryLabel(i18n, lang);
-    const userMark = t('ui.user_mark') || '(корист.)';
-    label = label ? `${label} ${userMark}`.trim() : ''; // якщо навіть тут нема назви — не показуємо ключ
-    if (label) addOpt(catSel, key, label);
+  clearSelect(objSel);
+  const ph = document.createElement('option');
+  ph.value = '';
+  ph.textContent = t('panel_placeholder_object2');
+  ph.disabled = true; ph.selected = true; ph.hidden = true;
+  objSel.appendChild(ph);
+  if (!catKey) return;
+
+  const lib = (getUniversLibrary('distance') || []).filter(hasValidDistance);
+  const inCat = lib.filter(r => getCatKey(r) === catKey);
+
+  // Формуємо список: value = id (фолбек name), label локалізований (+ (корист.))
+  const items = [];
+  for (const rec of inCat) {
+    const name = pickName(rec, lang);
+    if (!name) continue;
+    const value = String(rec?.id || name);
+    const label = isUser(rec) ? `${name} ${t('ui.user_mark') || '(корист.)'}` : name;
+    items.push({ value, label, rec });
   }
-  catSel.value = key;
 
-  // Тепер перебудуємо об'єкти з урахуванням свіжого об'єкта
-  rebuildObjectsSelectionO2(scope, object);
+  // Уникнути дублів за value
+  const seen = new Set();
+  const frag = document.createDocumentFragment();
+  for (const it of items) {
+    if (seen.has(it.value)) continue;
+    seen.add(it.value);
+    const opt = document.createElement('option');
+    opt.value = it.value;
+    opt.textContent = it.label;
+    attachSnapshot(opt, it.rec);
+    frag.appendChild(opt);
+  }
+  objSel.appendChild(frag);
+
+  // Відновлення вибору за snapshot.id
+  if (prevId) {
+    const match = [...objSel.options].find(o => {
+      try { return JSON.parse(o.dataset.snapshot || '{}').id === prevId; }
+      catch { return false; }
+    });
+    if (match) objSel.value = match.value;
+  }
 }
 
-function handleLanguageChange() {
-  const scope = document.getElementById('univers_distance');
-  if (!scope) return;
-  rebuildObject1Selection(scope);
-  rebuildCategorySelectionO2(scope);
-  rebuildObjectsSelectionO2(scope);
+/* ─────────────────────────────────────────────────────────────
+   Скидання форми
+───────────────────────────────────────────────────────────── */
+
+function resetDistanceForm(scope) {
+  const o1Group = scope.querySelector('.object1-group');
+  if (o1Group) {
+    o1Group.classList.remove('is-locked');
+    o1Group.querySelectorAll('select, input').forEach(el => { el.disabled = false; el.classList.remove('is-invalid'); });
+  }
+  const input = scope.querySelector('#distCircleObject1') || scope.querySelector('[data-field="baseline-diameter"]');
+  if (input) {
+    input.placeholder = t('panel_placeholder_input_diameter');
+    input.value = '';
+  }
+  rebuildO1(scope);
+  rebuildO2Categories(scope);
+  rebuildO2Objects(scope);
 }
 
-function handleUniversLibraryReloaded(event) {
-  const mode = event?.detail?.mode;
-  if (mode && mode !== 'distance' && mode !== 'diameter') return;
-
-  const scope = document.getElementById('univers_distance');
-  if (!scope) return;
-
-  rebuildObject1Selection(scope);
-  rebuildCategorySelectionO2(scope);
-  rebuildObjectsSelectionO2(scope);
-}
-
-function handleReset() {
-  const scope = document.getElementById('univers_distance');
-  if (scope) resetDistanceForm(scope);
-}
-
-// ─────────────────────────────────────────────────────────────
-// Публічна калькуляція для аплайєра
+/* ─────────────────────────────────────────────────────────────
+   Публічна калькуляція (для аплайєра)
+───────────────────────────────────────────────────────────── */
 
 export function recalculate() {
-  try {
-    const scope = document.getElementById('univers_distance') || document;
-    onDistanceCalculate({ scope });
-  } catch (e) {
-    console.error('[distance] recalculate() failed:', e);
-  }
+  const scope = document.getElementById('univers_distance') || document;
+  try { onDistanceCalculate({ scope }); } catch (e) { console.error('[distance] recalculate failed:', e); }
 }
 
-// ─────────────────────────────────────────────────────────────
-// Ініціалізація
+/* ─────────────────────────────────────────────────────────────
+   Ініціалізація / Teardown
+───────────────────────────────────────────────────────────── */
+
+let __inited = false;
+let __teardown = null;
 
 export async function initUniversDistanceBlock() {
+  if (__inited) return;
+  __inited = true;
+
   try {
-    await Promise.all([
-      loadUniversLibrary('distance'),
-      loadUniversLibrary('diameter'),
-    ]);
-  } catch (error) {
-    console.error('[distance] Failed to load univers libraries:', error);
-    return;
+    await Promise.all([ loadUniversLibrary('distance'), loadUniversLibrary('diameter') ]);
+  } catch (e) {
+    console.error('[distance] univers libraries load failed:', e);
   }
 
   const scope = document.getElementById('univers_distance');
-  if (!scope) {
-    console.warn('[distance] Scope element not found');
-    return;
-  }
+  if (!scope) { console.warn('[distance] #univers_distance not found'); return; }
 
-  const initForm = () => {
-    rebuildObject1Selection(scope);
-    rebuildCategorySelectionO2(scope);
-    rebuildObjectsSelectionO2(scope);
+  rebuildO1(scope);
+  rebuildO2Categories(scope);
+  rebuildO2Objects(scope);
 
-    const diameterInput = scope.querySelector('#distCircleObject1') ||
-                          scope.querySelector('[data-field="baseline-diameter"]');
-    if (diameterInput) {
-      diameterInput.placeholder = t('panel_placeholder_input_diameter');
-      attachO1QuickSuggest({ inputEl: diameterInput });
-    }
+  const onCatChange = () => rebuildO2Objects(scope);
+  const catSel = scope.querySelector('#distCategoryObject2');
+  if (catSel) catSel.addEventListener('change', onCatChange);
+
+  const onLibReload = (e) => {
+    const m = e?.detail?.mode;
+    if (m && m !== 'distance' && m !== 'diameter') return;
+    rebuildO1(scope);
+    rebuildO2Categories(scope);
+    rebuildO2Objects(scope);
   };
 
-  initForm();
+  const onLang = () => {
+    rebuildO1(scope);
+    rebuildO2Categories(scope);
+    rebuildO2Objects(scope);
+  };
 
-  const categorySelect = scope.querySelector('#distCategoryObject2');
-  if (categorySelect) {
-    categorySelect.addEventListener('change', () => {
-      rebuildObjectsSelectionO2(scope);
-    });
-  }
+  const onUiReset = () => resetDistanceForm(scope);
 
-  // тільки document — без дублю на window
-  document.addEventListener('user-objects-added', handleUserObjectsAdded);
-  document.addEventListener('user-objects-changed', initForm);
-  document.addEventListener('user-objects-removed', initForm);
-  document.addEventListener('univers-lib-reloaded', handleUniversLibraryReloaded);
-  document.addEventListener('languageChanged', handleLanguageChange);
-  document.addEventListener('lang-changed', handleLanguageChange);
-  document.addEventListener('reset', handleReset);
-  document.addEventListener('user-objects-updated', handleUniversLibraryReloaded);
+  document.addEventListener('univers-lib-reloaded', onLibReload);
+  document.addEventListener('user-objects-updated', onLibReload);
+  document.addEventListener('user-objects-removed', onLibReload);
 
-  console.log('[mode:distance] Initialization completed successfully');
+  document.addEventListener('languageChanged', onLang);
+  document.addEventListener('lang-changed', onLang);
+  document.addEventListener('i18nextLanguageChanged', onLang);
+  document.addEventListener('i18n:ready', onLang);
+
+  window.addEventListener('orbit:ui-reset', onUiReset);
+
+  __teardown = () => {
+    if (catSel) catSel.removeEventListener('change', onCatChange);
+    document.removeEventListener('univers-lib-reloaded', onLibReload);
+    document.removeEventListener('user-objects-updated', onLibReload);
+    document.removeEventListener('user-objects-removed', onLibReload);
+    document.removeEventListener('languageChanged', onLang);
+    document.removeEventListener('lang-changed', onLang);
+    document.removeEventListener('i18nextLanguageChanged', onLang);
+    document.removeEventListener('i18n:ready', onLang);
+    window.removeEventListener('orbit:ui-reset', onUiReset);
+    __inited = false;
+  };
+
+  console.log('[mode:distance] UI initialized');
 }
 
-// Експорт для тестів
+export function disposeUniversDistanceBlock() {
+  if (typeof __teardown === 'function') __teardown();
+}
+
+/* Експорти для тестів */
 export {
-  rebuildObject1Selection,
-  rebuildCategorySelectionO2,
-  rebuildObjectsSelectionO2,
+  rebuildO1 as rebuildObject1Selection,
+  rebuildO2Categories as rebuildCategorySelectionO2,
+  rebuildO2Objects as rebuildObjectsSelectionO2,
   resetDistanceForm
 };
