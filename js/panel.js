@@ -1,4 +1,4 @@
-//js/panel.js
+// js/panel.js
 
 'use strict';
 
@@ -6,10 +6,9 @@ import { resetAllUI } from './events/reset.js';
 import { getMode } from './modes/registry.js';
 import './modes/builtin.js'; // реєструє стандартні режими (side-effect)
 
+// Іконка потрібна лише для create
 function getIconForAction(action) {
-  if (action === 'create')     return '/res/icons/add.png';
-  if (action === 'calculate')  return '/res/icons/play.png';
-  if (action === 'reset')      return '/res/icons/stop.png';
+  if (action === 'create') return '/res/icons/add.png';
   return '';
 }
 
@@ -19,7 +18,7 @@ function createField(f) {
 
   if (f.type === 'select') {
     el = document.createElement('select');
-    el.id = f.id; // select/input мають унікальні id — залишаємо
+    el.id = f.id;
     const opt = document.createElement('option');
     opt.value = '';
     opt.textContent = f.placeholder;
@@ -33,46 +32,69 @@ function createField(f) {
     el.type = 'number';
     el.inputMode = 'decimal';
     el.step = 'any';
-    el.id = f.id; // унікальний id потрібен для збирання даних
+    el.id = f.id;
     el.placeholder = f.placeholder;
 
-} else if (f.type === 'button') {
-  el = document.createElement('button');
-  el.className = 'icon-button';
-  // старий контракт: і id, і data-action лишаються
-  el.id = f.id;                 // ⚠️ дубльовані id залишаємо для стилів
-  el.dataset.action = f.id;     // логіка дивиться на data-action
+  } else if (f.type === 'button') {
+    const isCalc = f.id === 'calculate';
+    const isReset = f.id === 'reset';
+    const isCreate = f.id === 'create';
 
-  // текст мітки беремо з f.text (він уже локалізований на момент рендера)
-  const label = String(f.text || '').trim();
-  if (label) {
-  el.setAttribute('aria-label', label);
-  // НЕ ставимо title для іконкових кнопок (щоб не було нативного тултіпа)
-  if (!el.classList.contains('icon-button')) {
-    el.title = label;
-  }
-}
+    if (isCalc || isReset) {
+      // ТЕКСТОВІ кнопки для Start/Reset (без іконок і тултіпів)
+      el = document.createElement('button');
+      el.id = f.id;
+      el.dataset.action = f.id;
 
+      el.classList.add('panel-btn');
+      if (isCalc) el.classList.add('panel-btn--primary');
+      if (isReset) el.classList.add('panel-btn--outline');
 
-  // всередині — лише іконка
-  const img = document.createElement('img');
-  img.className = 'btn-icon';
-  img.src = getIconForAction(el.dataset.action);
-  img.alt = ''; // декоративна
-  img.setAttribute('aria-hidden', 'true');
-  el.append(img);
-  el.removeAttribute('title');
-el.querySelectorAll('[title]').forEach(n => n.removeAttribute('title'));
-}
- 
-    else if (f.type === 'text') {
+      const label = String(f.text || '').trim();
+      if (label) {
+        el.textContent = label;
+        el.setAttribute('aria-label', label);
+      }
+      el.removeAttribute('title');
+
+    } else if (isCreate) {
+      // МАЛЕНЬКА ІКОНКА create — як було
+      el = document.createElement('button');
+      el.id = f.id;
+      el.dataset.action = f.id;
+
+      el.className = 'icon-button';
+      const label = String(f.text || '').trim();
+      if (label) el.setAttribute('aria-label', label);
+
+      const img = document.createElement('img');
+      img.className = 'btn-icon';
+      img.src = getIconForAction('create');
+      img.alt = '';
+      img.setAttribute('aria-hidden', 'true');
+      el.append(img);
+      el.removeAttribute('title');
+
+    } else {
+      // Дефолт: текстова
+      el = document.createElement('button');
+      el.id = f.id;
+      el.dataset.action = f.id;
+      el.classList.add('panel-btn', 'panel-btn--secondary');
+      const label = String(f.text || '').trim();
+      if (label) {
+        el.textContent = label;
+        el.setAttribute('aria-label', label);
+      }
+      el.removeAttribute('title');
+    }
+
+  } else if (f.type === 'text') {
     el = document.createElement('div');
-    el.id = f.id; // тут ідентичні id зустрічаються у різних підсекціях — ок для нашого апдейту текстів
+    el.id = f.id;
     el.textContent = f.text;
     (f.className ? el.className = f.className : el.classList.add('panel-note'));
     if (f.i18nKey) el.setAttribute('data-i18n-key', f.i18nKey);
-
-
 
   } else if (f.type === 'group') {
     el = document.createElement('div');
@@ -95,7 +117,7 @@ el.querySelectorAll('[title]').forEach(n => n.removeAttribute('title'));
  */
 export function initLeftPanel(t) {
   console.log('🔧 initLeftPanel запущено');
-  const ALWAYS_OPEN_SECTIONS = new Set(); // нічого не лишаємо відкритим за замовчуванням
+  const ALWAYS_OPEN_SECTIONS = new Set();
 
   const panelConfig = [
 
@@ -133,8 +155,8 @@ export function initLeftPanel(t) {
             },
             {
               type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
+                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
               ]
             }
           ]
@@ -159,8 +181,8 @@ export function initLeftPanel(t) {
             },
             {
               type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
+                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
               ]
             }
           ]
@@ -187,8 +209,8 @@ export function initLeftPanel(t) {
             },
             {
               type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
+                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
               ]
             }
           ]
@@ -215,8 +237,8 @@ export function initLeftPanel(t) {
             },
             {
               type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
+                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
               ]
             }
           ]
@@ -224,126 +246,124 @@ export function initLeftPanel(t) {
       ]
     },
 
-
     {
-  id: 'history', title: t('panel_title_history'),
-  fields: [
-    {
-      type: 'group', className: 'sector-block object1-group', children: [
-        { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-        { type: 'select', id: 'histCategoryObject1', placeholder: t('panel_placeholder_category') },
-        { type: 'select', id: 'histObject1',         placeholder: t('panel_placeholder_event1') },
-        { type: 'input',  id: 'historyBaselineDiameter', placeholder: t('panel_placeholder_input_diameter') },
-        { type: 'button', id: 'create',              text: t('panel_button_create') },
-      ]
-    },
-    {
-      type: 'group', className: 'sector-block object2-group', children: [
-        { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-        { type: 'select', id: 'histCategoryObject2', placeholder: t('panel_placeholder_category') },
-        { type: 'select', id: 'histObject2',         placeholder: t('panel_placeholder_event2') },
-        { type: 'button', id: 'create',              text: t('panel_button_create') },
-      ]
-    },
-    {
-      type: 'group', className: 'sector-block', children: [
-        { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
-        { type: 'button', id: 'reset',     text: t('panel_button_reset') }
-      ]
-    }
-  ]
-},
-
-    {
-  id: 'geo', title: t('panel_title_geo'),
-  children: [
-    {
-      id: 'geo_population', title: t('panel_title_geo_population'),
+      id: 'history', title: t('panel_title_history'),
       fields: [
         {
           type: 'group', className: 'sector-block object1-group', children: [
-            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
-            { type: 'select', id: 'geoPopCategoryObject1',    placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'geoPopObject1',            placeholder: t('panel_placeholder_object1') },
-            { type: 'input',  id: 'geoPopBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'button', id: 'create',                   text: t('panel_button_create') },
+            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
+            { type: 'select', id: 'histCategoryObject1', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'histObject1',         placeholder: t('panel_placeholder_event1') },
+            { type: 'input',  id: 'historyBaselineDiameter', placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block object2-group', children: [
-            { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
-            { type: 'select', id: 'geoPopCategoryObject2', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'geoPopObject2',         placeholder: t('panel_placeholder_object2') },
-            { type: 'button', id: 'create',                text: t('panel_button_create') },
+            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
+            { type: 'select', id: 'histCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'histObject2',         placeholder: t('panel_placeholder_event2') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-            { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
           ]
         }
       ]
     },
-    {
-      id: 'geo_area', title: t('panel_title_geo_area'),
-      fields: [
-        {
-          type: 'group', className: 'sector-block object1-group', children: [
-            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
-            { type: 'select', id: 'geoAreaCategoryObject1',   placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'geoAreaObject1',           placeholder: t('panel_placeholder_object1') },
-            { type: 'input',  id: 'geoAreaBaselineDiameter',  placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'button', id: 'create',                   text: t('panel_button_create') },
-          ]
-        },
-        {
-          type: 'group', className: 'sector-block object2-group', children: [
-            { type: 'text',   id: 'selectSecondObject',     text: t('note_select_second_object') },
-            { type: 'select', id: 'geoAreaCategoryObject2',  placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'geoAreaObject2',          placeholder: t('panel_placeholder_object2') },
-            { type: 'button', id: 'create',                  text: t('panel_button_create') },
-          ]
-        },
-        {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-            { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'geo_objects', title: t('panel_title_geo_objects'),
-      fields: [
-        {
-          type: 'group', className: 'sector-block object1-group', children: [
-            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
-            { type: 'select', id: 'geoObjCategoryObject1',    placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'geoObjObject1',            placeholder: t('panel_placeholder_object1') },
-            { type: 'input',  id: 'geoObjBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'button', id: 'create',                   text: t('panel_button_create') },
-          ]
-        },
-        {
-          type: 'group', className: 'sector-block object2-group', children: [
-            { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
-            { type: 'select', id: 'geoObjCategoryObject2',  placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'geoObjObject2',          placeholder: t('panel_placeholder_object2') },
-            { type: 'button', id: 'create',                 text: t('panel_button_create') },
-          ]
-        },
-        {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-            { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
-          ]
-        }
-      ]
-    }
-  ]
-},
 
+    {
+      id: 'geo', title: t('panel_title_geo'),
+      children: [
+        {
+          id: 'geo_population', title: t('panel_title_geo_population'),
+          fields: [
+            {
+              type: 'group', className: 'sector-block object1-group', children: [
+                { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
+                { type: 'select', id: 'geoPopCategoryObject1',    placeholder: t('panel_placeholder_category') },
+                { type: 'select', id: 'geoPopObject1',            placeholder: t('panel_placeholder_object1') },
+                { type: 'input',  id: 'geoPopBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
+                { type: 'button', id: 'create',                   text: t('panel_button_create') },
+              ]
+            },
+            {
+              type: 'group', className: 'sector-block object2-group', children: [
+                { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
+                { type: 'select', id: 'geoPopCategoryObject2', placeholder: t('panel_placeholder_category') },
+                { type: 'select', id: 'geoPopObject2',         placeholder: t('panel_placeholder_object2') },
+                { type: 'button', id: 'create',                text: t('panel_button_create') },
+              ]
+            },
+            {
+              type: 'group', className: 'sector-block', children: [
+                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'geo_area', title: t('panel_title_geo_area'),
+          fields: [
+            {
+              type: 'group', className: 'sector-block object1-group', children: [
+                { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
+                { type: 'select', id: 'geoAreaCategoryObject1',   placeholder: t('panel_placeholder_category') },
+                { type: 'select', id: 'geoAreaObject1',           placeholder: t('panel_placeholder_object1') },
+                { type: 'input',  id: 'geoAreaBaselineDiameter',  placeholder: t('panel_placeholder_input_diameter') },
+                { type: 'button', id: 'create',                   text: t('panel_button_create') },
+              ]
+            },
+            {
+              type: 'group', className: 'sector-block object2-group', children: [
+                { type: 'text',   id: 'selectSecondObject',     text: t('note_select_second_object') },
+                { type: 'select', id: 'geoAreaCategoryObject2',  placeholder: t('panel_placeholder_category') },
+                { type: 'select', id: 'geoAreaObject2',          placeholder: t('panel_placeholder_object2') },
+                { type: 'button', id: 'create',                  text: t('panel_button_create') },
+              ]
+            },
+            {
+              type: 'group', className: 'sector-block', children: [
+                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+              ]
+            }
+          ]
+        },
+        {
+          id: 'geo_objects', title: t('panel_title_geo_objects'),
+          fields: [
+            {
+              type: 'group', className: 'sector-block object1-group', children: [
+                { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
+                { type: 'select', id: 'geoObjCategoryObject1',    placeholder: t('panel_placeholder_category') },
+                { type: 'select', id: 'geoObjObject1',            placeholder: t('panel_placeholder_object1') },
+                { type: 'input',  id: 'geoObjBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
+                { type: 'button', id: 'create',                   text: t('panel_button_create') },
+              ]
+            },
+            {
+              type: 'group', className: 'sector-block object2-group', children: [
+                { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
+                { type: 'select', id: 'geoObjCategoryObject2',  placeholder: t('panel_placeholder_category') },
+                { type: 'select', id: 'geoObjObject2',          placeholder: t('panel_placeholder_object2') },
+                { type: 'button', id: 'create',                 text: t('panel_button_create') },
+              ]
+            },
+            {
+              type: 'group', className: 'sector-block', children: [
+                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+              ]
+            }
+          ]
+        }
+      ]
+    },
 
     {
       id: 'money', title: t('panel_title_money'),
@@ -353,12 +373,12 @@ export function initLeftPanel(t) {
             { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
             { type: 'select', id: 'moneyCategoryObject1', placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'moneyObject1',         placeholder: t('panel_placeholder_object1') },
-            { type: 'input', id: 'moneyBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'input',  id: 'moneyBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
             { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
-          type: 'group', className: 'sector-block object2-group', children: [      
+          type: 'group', className: 'sector-block object2-group', children: [
             { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
             { type: 'select', id: 'moneyCategoryObject2', placeholder: t('panel_placeholder_category') },
             { type: 'select', id: 'moneyObject2',         placeholder: t('panel_placeholder_object2') },
@@ -367,9 +387,8 @@ export function initLeftPanel(t) {
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-            { type: 'button', id: 'reset',                 text: t('panel_button_reset') },
-
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') },
           ]
         }
       ]
@@ -397,55 +416,22 @@ export function initLeftPanel(t) {
         },
         {
           type: 'group', className: 'sector-block', children: [
-            { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-            { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
           ]
         }
       ]
     },
 
-  /**   {
-      id: 'other', title: t('panel_title_other'),
-      fields: [
-        {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-            { type: 'select', id: 'otherCategoryObject1', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'otherObject1',        placeholder: t('panel_placeholder_object1') },
-            { type: 'text',   id: 'setScaleFirstObject', text: t('note_set_scale_first_object') },
-            { type: 'input',  id: 'otherCircleObject1',  placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'text',   id: 'createFirstObject',   text: t('note_create_first_object') },
-            { type: 'button', id: 'create',              text: t('panel_button_create') },
-          ]
-        },
-        {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-            { type: 'select', id: 'otherCategoryObject2', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'otherObject2',        placeholder: t('panel_placeholder_object2') },
-            { type: 'text',   id: 'createSecondObject',  text: t('note_create_second_object') },
-            { type: 'button', id: 'create',              text: t('panel_button_create') },
-          ]
-        },
-        {
-          type: 'group', className: 'sector-block', children: [
-            { type: 'text',   id: 'visualizationControls', text: t('note_visualization_controls') },
-            { type: 'button', id: 'calculate',             text: t('panel_button_calculate') },
-            { type: 'button', id: 'reset',                 text: t('panel_button_reset') }
-          ]
-        }
-      ]
-    } */
-{ type: 'note', i18nKey: 'panel_title_options', text: t('panel_title_options'), className: 'panel-section-title' },
+    { type: 'note', i18nKey: 'panel_title_options', text: t('panel_title_options'), className: 'panel-section-title' },
 
-{ id: 'settings', title: t('panel_title_settings') },
+    { id: 'settings', title: t('panel_title_settings') },
 
-{ id: 'faq', title: t('panel_title_faq') },
-
+    { id: 'faq', title: t('panel_title_faq') },
 
   ];
 
-  // ==== Reactivity на зміну мови (всередині initLeftPanel, щоб мати t у замиканні)
+  // ==== Reactivity на зміну мови
   const onLangChanged = () => {
     // Заголовки секцій
     document.querySelectorAll('#left-panel > details > summary').forEach(summary => {
@@ -464,7 +450,6 @@ export function initLeftPanel(t) {
     // Поля
     document.querySelectorAll('#left-panel select, #left-panel input, #left-panel button, #left-panel .panel-note, #left-panel .panel-section-title').forEach(el => {
       const id = el.id;
-      const action = el.dataset?.action || '';
 
       if (el.tagName === 'SELECT') {
         const opt = el.querySelector('option');
@@ -485,37 +470,37 @@ export function initLeftPanel(t) {
       } else if (el.tagName === 'INPUT') {
         el.placeholder = t('panel_placeholder_input_diameter');
 
-} else if (el.tagName === 'BUTTON') {
-  const action = el.dataset?.action || '';
-  let label = '';
-  if (action === 'calculate') label = t('panel_button_calculate');
-  else if (action === 'reset') label = t('panel_button_reset');
-  else if (action === 'create') label = t('panel_button_create');
+      } else if (el.tagName === 'BUTTON') {
+        const action = el.dataset?.action || '';
+        if (action === 'calculate') {
+          const label = t('panel_button_calculate');
+          el.textContent = label;
+          el.setAttribute('aria-label', label);
+          el.removeAttribute('title');
+        } else if (action === 'reset') {
+          const label = t('panel_button_reset');
+          el.textContent = label;
+          el.setAttribute('aria-label', label);
+          el.removeAttribute('title');
+        } else if (action === 'create') {
+          const label = t('panel_button_create');
+          el.setAttribute('aria-label', label);
+          el.removeAttribute('title');
+          // textContent не чіпаємо → лишається іконка
+        }
 
-if (label) {
-  el.setAttribute('aria-label', label);
-  if (!el.classList.contains('icon-button')) {
-    el.title = label;
-  }
-}
+      } else if (el.classList.contains('panel-note')) {
+        if (id === 'selectFirstObject')            el.textContent = t('note_select_first_object');
+        else if (id === 'setScaleFirstObject')     el.textContent = t('note_set_scale_first_object');
+        else if (id === 'createFirstObject')       el.textContent = t('note_create_first_object');
+        else if (id === 'selectSecondObject')      el.textContent = t('note_select_second_object');
+        else if (id === 'createSecondObject')      el.textContent = t('note_create_second_object');
+        else if (id === 'visualizationControls')   el.textContent = t('note_visualization_controls');
 
-
-}
-
-
-else if (el.classList.contains('panel-note')) {
-  if (id === 'selectFirstObject')            el.textContent = t('note_select_first_object');
-  else if (id === 'setScaleFirstObject')     el.textContent = t('note_set_scale_first_object');
-  else if (id === 'createFirstObject')       el.textContent = t('note_create_first_object');
-  else if (id === 'selectSecondObject')      el.textContent = t('note_select_second_object');
-  else if (id === 'createSecondObject')      el.textContent = t('note_create_second_object');
-  else if (id === 'visualizationControls')   el.textContent = t('note_visualization_controls');
-} else if (el.classList.contains('panel-section-title')) {
-  const key = el.getAttribute('data-i18n-key');
-  if (key) el.textContent = t(key);
-}
-
-
+      } else if (el.classList.contains('panel-section-title')) {
+        const key = el.getAttribute('data-i18n-key');
+        if (key) el.textContent = t(key);
+      }
     });
   };
 
@@ -526,15 +511,14 @@ else if (el.classList.contains('panel-note')) {
   if (!container) return;
 
   panelConfig.forEach(sec => {
-        // Службовий рядок простого тексту між секціями
+    // Службовий рядок простого тексту між секціями
     if (sec.type === 'note') {
       const note = document.createElement('div');
       note.className = sec.className || 'panel-note';
-      // зберігаємо ключ для реакції на зміну мови
       if (sec.i18nKey) note.setAttribute('data-i18n-key', sec.i18nKey);
       note.textContent = sec.text || '';
       container.append(note);
-      return; // переходимо до наступного елемента panelConfig
+      return;
     }
 
     // головна секція
@@ -571,39 +555,26 @@ else if (el.classList.contains('panel-note')) {
           });
         }
 
-        // Закриваємо інші підсекції, якщо відкрили цю
-// Єдина поведінка для всіх підрежимів (усіх секцій):
-// - якщо клік по відкритому підрежиму → закрити його і виконати ПОВНИЙ reset
-// - якщо клік по іншому підрежиму → закрити ВСІ інші підрежими (у всій панелі),
-//   виконати ПОВНИЙ reset і відкрити цей
-// Єдина поведінка для підрежимів:
-// - клік по відкритому підрежиму → закрити його + повний reset
-// - клік по іншому підрежиму → закрити ВСІ інші підрежими і топ-рівневі режими,
-//   виконати повний reset і відкрити цей
-subSum.addEventListener('click', (e) => {
-  e.preventDefault();
+        // Навігація між підрежимами
+        subSum.addEventListener('click', (e) => {
+          e.preventDefault();
 
-  const leftPanel = document.getElementById('left-panel');
-  const opening = !subDet.open;
+          const leftPanel = document.getElementById('left-panel');
+          const opening = !subDet.open;
 
-  if (leftPanel) {
-    // Закрити всі підрежими у всіх секціях
-    leftPanel.querySelectorAll('#left-panel details details').forEach(other => {
-      if (other !== subDet) other.open = false;
-    });
-    // Закрити всі топ-рівневі режими, крім контейнера цього підрежиму
-    const containerDet = subDet.closest('#left-panel > details');
-    leftPanel.querySelectorAll('#left-panel > details').forEach(top => {
-      if (top !== containerDet) top.open = false;
-    });
-  }
+          if (leftPanel) {
+            leftPanel.querySelectorAll('#left-panel details details').forEach(other => {
+              if (other !== subDet) other.open = false;
+            });
+            const containerDet = subDet.closest('#left-panel > details');
+            leftPanel.querySelectorAll('#left-panel > details').forEach(top => {
+              if (top !== containerDet) top.open = false;
+            });
+          }
 
-  // Навігація → завжди повний ресет
-  resetAllUI();
-
-  // Відкрити/закрити поточний підрежим
-  subDet.open = opening;
-});
+          resetAllUI();
+          subDet.open = opening;
+        });
 
         content.append(subDet);
       });
@@ -617,49 +588,42 @@ subSum.addEventListener('click', (e) => {
     }
 
     // Закриття інших головних секцій при відкритті цієї
-sum.addEventListener('click', (e) => {
-  e.preventDefault();
+    sum.addEventListener('click', (e) => {
+      e.preventDefault();
 
-  const leftPanel = document.getElementById('left-panel');
-  const isContainer = Array.isArray(sec.children); // univers/geo мають підрежими
-  const opening = !det.open;
+      const leftPanel = document.getElementById('left-panel');
+      const isContainer = Array.isArray(sec.children);
+      const opening = !det.open;
 
-  if (leftPanel) {
-    // Закрити всі підрежими у всіх контейнерах
-    leftPanel.querySelectorAll('#left-panel details details').forEach(d => d.open = false);
-    // Закрити всі інші топ-рівневі режими (окрім дозволених і поточного)
-    leftPanel.querySelectorAll('#left-panel > details').forEach(other => {
-      if (other !== det && !ALWAYS_OPEN_SECTIONS.has(other.id)) other.open = false;
+      if (leftPanel) {
+        leftPanel.querySelectorAll('#left-panel details details').forEach(d => d.open = false);
+        leftPanel.querySelectorAll('#left-panel > details').forEach(other => {
+          if (other !== det && !ALWAYS_OPEN_SECTIONS.has(other.id)) other.open = false;
+        });
+      }
+
+      resetAllUI();
+      det.open = opening;
+
+      if (!opening && isContainer) {
+        det.querySelectorAll('details').forEach(d => d.open = false);
+      }
     });
-  }
 
-  // Навігація → завжди повний ресет
-  resetAllUI();
-
-  // Відкрити/закрити поточну секцію
-  det.open = opening;
-
-  // Якщо закриваємо контейнер — також закрити його підрежими
-  if (!opening && isContainer) {
-    det.querySelectorAll('details').forEach(d => d.open = false);
-  }
-});
-
-
-if (ALWAYS_OPEN_SECTIONS.has(sec.id)) det.open = true;
+    if (ALWAYS_OPEN_SECTIONS.has(sec.id)) det.open = true;
 
     container.append(det);
   });
 
   // Після рендера інітимо дані
-getMode('univers_diameter')?.initBlock?.();
-getMode('univers_distance')?.initBlock?.();
-getMode('univers_luminosity')?.initBlock?.();
-getMode('univers_mass')?.initBlock?.();
-getMode('history')?.initBlock?.();
-getMode('money')?.initBlock?.();
-getMode('math')?.initBlock?.();
-getMode('geo_area')?.initBlock?.();
-getMode('geo_population')?.initBlock?.();
-getMode('geo_objects')?.initBlock?.();
+  getMode('univers_diameter')?.initBlock?.();
+  getMode('univers_distance')?.initBlock?.();
+  getMode('univers_luminosity')?.initBlock?.();
+  getMode('univers_mass')?.initBlock?.();
+  getMode('history')?.initBlock?.();
+  getMode('money')?.initBlock?.();
+  getMode('math')?.initBlock?.();
+  getMode('geo_area')?.initBlock?.();
+  getMode('geo_population')?.initBlock?.();
+  getMode('geo_objects')?.initBlock?.();
 }
