@@ -89,6 +89,23 @@ function standardizeUserObject(item) {
       }
       break;
     }
+    case 'money': {
+      if (isPosNum(v) && u) {
+        item.money = { value: Number(v), unit: String(u) };
+      } else {
+        delete item.money;
+      }
+      break;
+    }
+    case 'math': {
+      if (isPosNum(v) && u) {
+        item.quantity = { value: Number(v), unit: String(u) };
+      } else {
+        delete item.quantity;
+      }
+      break;
+    }
+
     default:
       // інші/невідомі режими не чіпаємо
       break;
@@ -96,6 +113,7 @@ function standardizeUserObject(item) {
 
   return item;
 }
+
 
 /** Keyset-курсори для пагінації */
 function mkCursorArg(cursor) {
