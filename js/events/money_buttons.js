@@ -199,6 +199,20 @@ export function onMoneyCalculate({ scope }) {
       setGroupDescription({ id: 'money_o1', description: data.object1.description });
     }
   }
+  // ——— START SESSION (як у «Історії») ———
+  const baselineValid = (Number.isFinite(Number(data?.object1?.valueReal)) && Number(data?.object1?.valueReal) > 0) && (baselineDiameter > 0);
+  if (baselineValid && scope) {
+    // LOCK O1 UI (аналог «Відстань»)
+    const o1Group = scope.querySelector('.object1-group');
+    if (o1Group) {
+      o1Group.classList.add('is-locked');
+      o1Group.querySelectorAll('select, input, button, textarea').forEach(el => {
+        el.disabled = true;
+      });
+    }
+
+    try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
+  }
 
   // 3) О2 через калькулятор
   const v2 = Number(data?.object2?.valueReal);

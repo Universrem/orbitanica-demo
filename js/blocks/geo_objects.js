@@ -2,228 +2,350 @@
 'use strict';
 
 /**
- * Режим «Географія → Об’єкти (довжина/висота)» (UI).
- * - чекає завантаження geo-бібліотеки;
- * - будує селекти категорій і об’єктів (О1/О2) ЛИШЕ з записів, що мають length або height;
- * - слухає reset / user-objects-* / languageChanged|lang-changed;
- * - не рахує нічого і не лізе в інші режими.
+ * Режим «Географія → Об’єкти (довжина/висота)» (UI) — SNAPSHOT-FIRST (еталон «Математика»).
+ * - О1 і О2: категорії/об'єкти з geo-бібліотеки (офіційні + UGC);
+ * - кожному <option> кріпимо snapshot у dataset.snapshot (length|height {value,unit});
+ * - відновлення вибору за snapshot.id; локалізовані лейбли, UGC позначається (корист.);
+ * - слухаємо reload/ready бібліотеки, user-objects-* та зміну мови; локальний reset на orbit:ui-reset.
  */
 
 import { t, getCurrentLang } from '../i18n.js';
 import { loadGeoLibrary, getGeoLibrary } from '../data/geo_lib.js';
-import { getStore } from '../userObjects/api.js';
 import { attachO1QuickSuggest } from '../utils/o1QuickSuggest.js';
 
-// ─────────────────────────────────────────────────────────────
-// Утіліти
+/* ─────────────────────────────────────────────────────────────
+   Утіліти
+───────────────────────────────────────────────────────────── */
 
-const norm = s => String(s ?? '').trim();
-const low  = s => norm(s).toLowerCase();
+const s   = v => String(v ?? '').trim();
+const low = v => s(v).toLowerCase();
 
-function pickLang(rec, base, lang) {
-  if (!rec) return '';
-  const a = rec[`${base}_${lang}`];
-  const b = rec[`${base}_en`];
-  const c = rec[`${base}_ua`];
-  const d = rec[`${base}_es`];
-  const e = rec[base];
-  return norm(a || b || c || d || e || '');
+function currLangBase() {
+  const raw = (getCurrentLang && getCurrentLang()) || '';
+  const base = String(raw).toLowerCase().split(/[-_]/)[0];
+  return ['ua','en','es'].includes(base) ? base : 'ua';
 }
 
-// ключ категорії (узгоджений з адаптерами)
-function getCatKey(rec) {
-  return low(rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
+function isUser(rec) {
+  return !!(rec?.is_user_object || rec?.source === 'user');
 }
 
-// валідне поле length/height?
-function hasLinear(rec) {
-  const lv = Number(rec?.length?.value);
-  const hv = Number(rec?.height?.value);
-  return (Number.isFinite(lv) && lv > 0) || (Number.isFinite(hv) && hv > 0);
+// Валідне лінійне значення (length або height)
+function hasValidLinear(rec) {
+  const L = Number(rec?.length?.value);
+  const H = Number(rec?.height?.value);
+  return (Number.isFinite(L) && L > 0) || (Number.isFinite(H) && H > 0);
 }
 
-// підпис категорії за key у вибраній мові
-function getCategoryLabelByKey(lib, key, lang) {
-  const k = String(key || '').trim().toLowerCase();
-  const rows = Array.isArray(lib) ? lib.filter(r => getCatKey(r) === k) : [];
-  if (rows.length === 0) return norm(key);
-
-  const prefs = [`category_${lang}`, 'category_en', 'category_ua', 'category_es', 'category'];
-  for (const field of prefs) {
-    for (const r of rows) {
-      const v = r && r[field] ? String(r[field]).trim() : '';
-      if (v) return v;
-    }
+// Витягти нормалізоване {value, unit} для snapshot (перевага length, далі height)
+function pickLinearVU(rec) {
+  const L = rec?.length, H = rec?.height;
+  if (L && Number.isFinite(Number(L.value)) && Number(L.value) > 0 && s(L.unit)) {
+    return { value: Number(L.value), unit: s(L.unit) };
   }
-  return norm(key);
+  if (H && Number.isFinite(Number(H.value)) && Number(H.value) > 0 && s(H.unit)) {
+    return { value: Number(H.value), unit: s(H.unit) };
+  }
+  return { value: NaN, unit: '' };
 }
 
-function clearSelect(sel) {
-  if (!sel) return;
-  while (sel.firstChild) sel.removeChild(sel.firstChild);
+function getCatKey(rec) {
+  return low(rec?.category_key ?? rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
 }
 
-function addOption(sel, value, label) {
-  const opt = document.createElement('option');
-  opt.value = value;
-  opt.textContent = label;
-  sel.appendChild(opt);
+function pickName(rec, lang) {
+  return s(rec?.[`name_${lang}`] || '');
 }
 
-// ─────────────────────────────────────────────────────────────
-// Побудова списків
+function pickCategoryI18n(rec) {
+  return {
+    ua: s(rec?.category_ua ?? rec?.category_i18n?.ua),
+    en: s(rec?.category_en ?? rec?.category_i18n?.en),
+    es: s(rec?.category_es ?? rec?.category_i18n?.es),
+  };
+}
 
-function rebuildCategorySelectsGeoObjects(scope) {
-  const lib  = getGeoLibrary() || [];
-  const src  = lib.filter(hasLinear); // лише записи з length/height
-  const lang = getCurrentLang?.() || 'ua';
+function pickCategoryLabel(i18n, lang) {
+  if (lang === 'ua' && i18n.ua) return i18n.ua;
+  if (lang === 'en' && i18n.en) return i18n.en;
+  if (lang === 'es' && i18n.es) return i18n.es;
+  return i18n.ua || i18n.en || i18n.es || '';
+}
+
+function clearSelect(el) {
+  if (!el) return;
+  el.innerHTML = '';
+}
+
+function getSelectedSnapshotId(sel) {
+  if (!sel) return '';
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt) return '';
+  try {
+    const snap = JSON.parse(opt.dataset.snapshot || '{}');
+    return snap.id ? String(snap.id) : '';
+  } catch { return ''; }
+}
+
+/**
+ * Прикріпити snapshot «лінійної» величини до option (О1/О2 однаково).
+ * Snapshot формат:
+ * {
+ *   id, category_key,
+ *   value, unit,         // з length|height.{value,unit}
+ *   name_ua, name_en, name_es,
+ *   description_ua, description_en, description_es,
+ *   category_ua, category_en, category_es (якщо є)
+ * }
+ */
+function attachGeoSnapshot(opt, rec) {
+  if (!opt || !rec || !hasValidLinear(rec)) return;
+  const { value, unit } = pickLinearVU(rec);
+  const snap = {
+    id: rec?.id ?? null,
+    category_key: rec?.category_key ?? rec?.category_id ?? null,
+    value: Number(value),
+    unit:  s(unit),
+    name_ua: rec?.name_ua ?? null,
+    name_en: rec?.name_en ?? null,
+    name_es: rec?.name_es ?? null,
+    description_ua: rec?.description_ua ?? null,
+    description_en: rec?.description_en ?? null,
+    description_es: rec?.description_es ?? null,
+    category_ua: rec?.category_ua ?? rec?.category_i18n?.ua ?? null,
+    category_en: rec?.category_en ?? rec?.category_i18n?.en ?? null,
+    category_es: rec?.category_es ?? rec?.category_i18n?.es ?? null
+  };
+  if (!Number.isFinite(snap.value) || snap.value <= 0 || !snap.unit) return;
+  try { opt.dataset.snapshot = JSON.stringify(snap); } catch {}
+  if (isUser(rec)) opt.dataset.user = '1';
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Категорії (спільно для О1/О2)
+───────────────────────────────────────────────────────────── */
+
+function rebuildCategories(scope) {
+  const lang = currLangBase();
+  const lib  = (getGeoLibrary() || []).filter(hasValidLinear);
+
   const sel1 = scope.querySelector('#geoObjCategoryObject1') || scope.querySelector('.object1-group .category-select');
   const sel2 = scope.querySelector('#geoObjCategoryObject2') || scope.querySelector('.object2-group .category-select');
-
   const selects = [sel1, sel2].filter(Boolean);
   if (!selects.length) return;
 
-  const keys = new Set();
-  src.forEach(rec => {
-    const k = getCatKey(rec);
-    if (k) keys.add(k);
-  });
+  // group by key
+  const map = new Map();
+  for (const rec of lib) {
+    const key = getCatKey(rec);
+    if (!key) continue;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(rec);
+  }
 
-  selects.forEach(sel => {
-    const keep = (sel && String(sel.value || '') || '').trim();
+  const categories = [];
+  for (const [key, rows] of map.entries()) {
+    // 1) Показуємо категорію лише якщо є хоч один об'єкт із локалізованою назвою
+    const hasLocalizedObj = rows.some(r => hasValidLinear(r) && s(r?.[`name_${lang}`]));
+    if (!hasLocalizedObj) continue;
+
+    // 2) Підпис категорії
+    let labelBase = '';
+    for (const r of rows) {
+      const i18n = pickCategoryI18n(r);
+      const cand = pickCategoryLabel(i18n, lang);
+      if (cand) { labelBase = cand; break; }
+    }
+    if (!labelBase) {
+      for (const r of rows) {
+        const i18n = pickCategoryI18n(r);
+        const cand = i18n.ua || i18n.en || i18n.es || '';
+        if (cand) { labelBase = cand; break; }
+      }
+    }
+    if (!labelBase) continue;
+
+    const hasUser = rows.some(isUser);
+    const userMark = hasUser ? ` ${t('ui.user_mark') || '(корист.)'}` : '';
+    categories.push({ key, label: `${labelBase}${userMark}` });
+  }
+
+  categories.sort((a,b) => a.label.localeCompare(b.label, undefined, { sensitivity:'base' }));
+
+  for (const sel of selects) {
+    const keep = s(sel.value);
     clearSelect(sel);
 
     const ph = document.createElement('option');
     ph.value = '';
-    ph.disabled = true;
-    ph.selected = true;
-    ph.hidden = true;
+    ph.disabled = true; ph.selected = true; ph.hidden = true;
     ph.textContent = t('panel_placeholder_category');
     sel.appendChild(ph);
 
-    [...keys].sort().forEach(k => {
-      const label = getCategoryLabelByKey(src, k, lang);
-      addOption(sel, k, label);
-    });
+    const frag = document.createDocumentFragment();
+    for (const c of categories) {
+      const opt = document.createElement('option');
+      opt.value = c.key;
+      opt.textContent = c.label;
+      frag.appendChild(opt);
+    }
+    sel.appendChild(frag);
 
-    if (keep && [...keys].includes(keep)) sel.value = keep;
-  });
+    if (keep && categories.some(c => c.key === keep)) sel.value = keep;
+  }
 }
 
-function rebuildObjectsSelectGeoObjects(scope, groupSelector, catSelector, objSelector) {
-  const lib  = getGeoLibrary() || [];
-  const src  = lib.filter(hasLinear);
-  const lang = getCurrentLang?.() || 'ua';
+/* ─────────────────────────────────────────────────────────────
+   Об'єкти у вибраній категорії (О1/О2 однакова логіка)
+───────────────────────────────────────────────────────────── */
 
-  const group  = scope.querySelector(groupSelector);
-  const catSel = scope.querySelector(catSelector);
-  const objSel = scope.querySelector(objSelector);
-  if (!group || !objSel) return;
+function rebuildObjects(scope, { catSel, objSel, isO1 }) {
+  const lang = currLangBase();
+  const lib  = (getGeoLibrary() || []).filter(hasValidLinear);
 
-  const catKey = low(catSel?.value || '');
+  const cat = scope.querySelector(catSel);
+  const obj = scope.querySelector(objSel);
+  if (!obj) return;
 
-  // офіційні об’єкти цієї категорії
-  const official = catKey ? src.filter(rec => getCatKey(rec) === catKey) : [];
+  const key = low(cat?.value || '');
 
-  // юзерські — зіставляємо за локалізованою назвою категорії
-  const store = getStore();
-  let userItems = [];
-  if (catKey && typeof store?.list === 'function') {
-    const catLabel = getCategoryLabelByKey(src, catKey, lang);
-    const all = store.list('geo') || [];
-    userItems = all.filter(o => low(o?.category || o?.category_i18n?.[o?.originalLang]) === low(catLabel));
-  }
+  // попередній обраний за snapshot.id
+  const prevId = getSelectedSnapshotId(obj);
 
-  const keep = (objSel && String(objSel.value || '') || '').trim();
-  clearSelect(objSel);
-
-  // placeholder об’єкта
+  clearSelect(obj);
   const ph = document.createElement('option');
   ph.value = '';
-  ph.disabled = true;
-  ph.selected = true;
-  ph.hidden = true;
-  const isO1 = groupSelector.includes('object1') || objSelector.toLowerCase().includes('object1');
+  ph.disabled = true; ph.selected = true; ph.hidden = true;
   ph.textContent = isO1 ? t('panel_placeholder_object1') : t('panel_placeholder_object2');
-  objSel.appendChild(ph);
+  obj.appendChild(ph);
 
-  // офіційні
-  official.forEach(rec => {
-    const name = pickLang(rec, 'name', lang);
-    if (name) addOption(objSel, name, name);
-  });
+  if (!key) return;
 
-  // юзерські
-  userItems.forEach(u => {
-    const name = String(u?.name || u?.name_i18n?.[u?.originalLang] || '').trim();
-    if (!name) return;
-    addOption(objSel, name, name + ' ' + (t?.('ui.user_mark') || '(user)'));
-  });
+  const rows = lib.filter(r => getCatKey(r) === key);
+  const items = [];
+  for (const rec of rows) {
+    const name = pickName(rec, lang);
+    if (!name) continue;
+    const value = String(rec?.id || name); // value = id (фолбек name)
+    const label = isUser(rec) ? `${name} ${t('ui.user_mark') || '(корист.)'}` : name;
+    items.push({ value, label, rec });
+  }
 
-  if (keep) objSel.value = keep;
+  // без дублів за value
+  const seen = new Set();
+  const frag = document.createDocumentFragment();
+  for (const it of items) {
+    if (seen.has(it.value)) continue;
+    seen.add(it.value);
+    const opt = document.createElement('option');
+    opt.value = it.value;
+    opt.textContent = it.label;
+    attachGeoSnapshot(opt, it.rec);
+    frag.appendChild(opt);
+  }
+  obj.appendChild(frag);
+
+  // Відновити вибір по snapshot.id
+  if (prevId) {
+    const match = [...obj.options].find(o => {
+      try { return JSON.parse(o.dataset.snapshot || '{}').id === prevId; }
+      catch { return false; }
+    });
+    if (match) obj.value = match.value;
+  }
 }
 
-// локальне очищення форми при reset
+/* ─────────────────────────────────────────────────────────────
+   Reset форми режиму
+───────────────────────────────────────────────────────────── */
+
 function resetGeoObjectsForm(scope) {
+  // розблокувати О1
   scope.querySelector('.object1-group')?.classList.remove('is-locked');
   scope.querySelectorAll('.object1-group select, .object1-group input').forEach(el => {
     el.disabled = false;
     el.classList.remove('is-invalid');
   });
 
+  // інпут базового діаметра (масштаб)
   const base = scope.querySelector('#geoObjBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
     base.placeholder = t('panel_placeholder_input_diameter');
     base.value = '';
   }
 
-  rebuildCategorySelectsGeoObjects(scope);
-  rebuildObjectsSelectGeoObjects(scope, '.object1-group', '#geoObjCategoryObject1', '#geoObjObject1');
-  rebuildObjectsSelectGeoObjects(scope, '.object2-group', '#geoObjCategoryObject2', '#geoObjObject2');
+  rebuildCategories(scope);
+  rebuildObjects(scope, { catSel: '#geoObjCategoryObject1', objSel: '#geoObjObject1', isO1: true });
+  rebuildObjects(scope, { catSel: '#geoObjCategoryObject2', objSel: '#geoObjObject2', isO1: false });
 }
 
-// ─────────────────────────────────────────────────────────────
-// Публічний ініціалізатор
+/* ─────────────────────────────────────────────────────────────
+   Ініціалізація
+───────────────────────────────────────────────────────────── */
 
 export async function initGeoObjectsBlock() {
-  await loadGeoLibrary();
+  try {
+    await loadGeoLibrary();
+  } catch (e) {
+    console.error('[geo_objects] library load failed:', e);
+  }
 
   const scope = document.getElementById('geo_objects');
-  if (!scope) return;
+  if (!scope) { console.warn('[geo_objects] #geo_objects not found'); return; }
 
-  rebuildCategorySelectsGeoObjects(scope);
-  rebuildObjectsSelectGeoObjects(scope, '.object1-group', '#geoObjCategoryObject1', '#geoObjObject1');
-  rebuildObjectsSelectGeoObjects(scope, '.object2-group', '#geoObjCategoryObject2', '#geoObjObject2');
+  // стартове заповнення
+  rebuildCategories(scope);
+  rebuildObjects(scope, { catSel: '#geoObjCategoryObject1', objSel: '#geoObjObject1', isO1: true });
+  rebuildObjects(scope, { catSel: '#geoObjCategoryObject2', objSel: '#geoObjObject2', isO2: true });
 
+  // плейсхолдер і підказки для baseline О1
   const base = scope.querySelector('#geoObjBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
-  if (base) base.placeholder = t('panel_placeholder_input_diameter');
-  if (base) attachO1QuickSuggest({ inputEl: base });
+  if (base) {
+    base.placeholder = t('panel_placeholder_input_diameter');
+    try { attachO1QuickSuggest({ inputEl: base }); } catch {}
+  }
 
+  // зміна категорій → оновити список об'єктів у відповідній групі
   scope.querySelector('#geoObjCategoryObject1')?.addEventListener('change', () => {
-    rebuildObjectsSelectGeoObjects(scope, '.object1-group', '#geoObjCategoryObject1', '#geoObjObject1');
+    rebuildObjects(scope, { catSel: '#geoObjCategoryObject1', objSel: '#geoObjObject1', isO1: true });
   });
   scope.querySelector('#geoObjCategoryObject2')?.addEventListener('change', () => {
-    rebuildObjectsSelectGeoObjects(scope, '.object2-group', '#geoObjCategoryObject2', '#geoObjObject2');
+    rebuildObjects(scope, { catSel: '#geoObjCategoryObject2', objSel: '#geoObjObject2', isO1: false });
   });
 
+  // перезбірка при оновленні бібліотеки/UGC та зміні мови
   const rebuildAll = () => {
-    rebuildCategorySelectsGeoObjects(scope);
-    rebuildObjectsSelectGeoObjects(scope, '.object1-group', '#geoObjCategoryObject1', '#geoObjObject1');
-    rebuildObjectsSelectGeoObjects(scope, '.object2-group', '#geoObjCategoryObject2', '#geoObjObject2');
+    rebuildCategories(scope);
+    rebuildObjects(scope, { catSel: '#geoObjCategoryObject1', objSel: '#geoObjObject1', isO1: true });
+    rebuildObjects(scope, { catSel: '#geoObjCategoryObject2', objSel: '#geoObjObject2', isO1: false });
   };
-  document.addEventListener('user-objects-added', rebuildAll);
-  document.addEventListener('user-objects-changed', rebuildAll);
+
+  // очікувані події лоадера гео-бібліотеки + UGC
+  document.addEventListener('geo-lib-reloaded', rebuildAll);
+  document.addEventListener('geo-lib:ready', rebuildAll);
+  document.addEventListener('user-objects-updated', rebuildAll);
   document.addEventListener('user-objects-removed', rebuildAll);
+  // сумісність зі старими подіями
+  document.addEventListener('user-objects-added',   rebuildAll);
+  document.addEventListener('user-objects-changed', rebuildAll);
 
-  const onLangChange = () => rebuildAll();
-  document.addEventListener('languageChanged', onLangChange);
-  window.addEventListener('languageChanged', onLangChange);
-  document.addEventListener('lang-changed', onLangChange);
-  window.addEventListener('lang-changed', onLangChange);
+  // зміна мови
+  const onLang = () => rebuildAll();
+  document.addEventListener('languageChanged', onLang);
+  document.addEventListener('lang-changed', onLang);
+  document.addEventListener('i18nextLanguageChanged', onLang);
+  document.addEventListener('i18n:ready', onLang);
 
-  document.addEventListener('reset', () => resetGeoObjectsForm(scope));
+  // системний UI reset
+  const onUiReset = () => resetGeoObjectsForm(scope);
+  window.addEventListener('orbit:ui-reset', onUiReset);
 
-  console.log('[mode:geo:objects] init OK');
+  console.log('[mode:geo:objects] UI initialized (snapshot-first)');
 }
 
-export { rebuildCategorySelectsGeoObjects, rebuildObjectsSelectGeoObjects, resetGeoObjectsForm };
+/* (опційно для тестів) */
+export {
+  rebuildCategories as rebuildCategorySelectsGeoObjects,
+  rebuildObjects   as rebuildObjectsSelectGeoObjects,
+  resetGeoObjectsForm
+};

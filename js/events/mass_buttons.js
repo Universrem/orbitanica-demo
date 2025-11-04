@@ -189,17 +189,21 @@ export function onMassCalculate({ scope }) {
     }
   }
 
-  // ——— LOCK O1 UI ДО RESET + START SESSION ———
-  const baselineValid = o1RealOk && baselineDiameter > 0;
+  // ——— START SESSION ———
+  const baselineValid = (Number.isFinite(m1) && m1 > 0) && (baselineDiameter > 0);
   if (baselineValid && scope) {
-    const o1group = scope.querySelector('.object1-group');
-    if (o1group) {
-      o1group.classList.add('is-locked');
-      o1group.querySelectorAll('select, input, button, textarea')
-        .forEach(el => { el.disabled = true; });
+    // LOCK O1 UI 
+    const o1Group = scope.querySelector('.object1-group');
+    if (o1Group) {
+      o1Group.classList.add('is-locked');
+      o1Group.querySelectorAll('select, input, button, textarea').forEach(el => {
+        el.disabled = true;
+      });
     }
+
     try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
   }
+
 
   // 3) О2 через калькулятор
   const m2 = Number(data?.object2?.valueReal);

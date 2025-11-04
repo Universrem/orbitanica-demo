@@ -29,6 +29,19 @@
       if (!applier) {
         throw new Error(`No applier for mode "${mode}"`);
       }
+           // Якщо мітки ще нема — ставимо дефолтну (Львів); якщо вже є — нічого не чіпаємо
+      try {
+        const { markerLayer, defaultCenterLon, defaultCenterLat } = await import('/js/globe/globe.js');
+        const { placeMarker } = await import('/js/globe/markers.js');
+
+        const ents = markerLayer.getEntities?.() || [];
+        if (!ents.length) {
+          placeMarker(defaultCenterLon, defaultCenterLat, { silent: true, suppressEvent: true });
+        }
+      } catch (e) {
+        console.warn('[applyScene] center marker skipped:', e);
+      }
+
       await applier(query); // може бути sync/async
       return true;
     } catch (e) {

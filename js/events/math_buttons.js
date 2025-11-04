@@ -189,13 +189,16 @@ export function onMathCalculate({ scope }) {
     }
   }
 
-  // 2c) (залишаємо існуючу поведінку) LOCK O1 UI до RESET + старт сесії
-  const baselineValid = o1RealOk && baselineDiameter > 0;
+    // ——— START SESSION  ———
+  const baselineValid = (Number.isFinite(Number(data?.object1?.valueReal)) && Number(data?.object1?.valueReal) > 0) && (baselineDiameter > 0);
   if (baselineValid && scope) {
-    const o1group = scope.querySelector('.object1-group');
-    if (o1group) {
-      o1group.classList.add('is-locked');
-      o1group.querySelectorAll('select, input, button, textarea').forEach(el => { el.disabled = true; });
+    // LOCK O1 UI 
+    const o1Group = scope.querySelector('.object1-group');
+    if (o1Group) {
+      o1Group.classList.add('is-locked');
+      o1Group.querySelectorAll('select, input, button, textarea').forEach(el => {
+        el.disabled = true;
+      });
     }
     try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
   }

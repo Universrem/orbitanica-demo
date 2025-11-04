@@ -2,9 +2,14 @@
 'use strict';
 
 /**
- * Адаптер даних для «Географія → Об’єкти (довжина/висота)».
+ * Адаптер даних для «Географія → Об’єкти» (SNAPSHOT-FIRST для О2 і О1).
+ * Правило як у «Математика»:
+ *  - спершу шукаємо snapshot у dataset вибраного <option>;
+ *  - якщо є — використовуємо його (без пошуків у бібліотеках);
+ *  - якщо немає — фолбек у geo-бібліотеку / юзерський стор.
+ *
  * Експорт:
- *  - getGeoObjectsData(scope): StandardData
+ *  - getGeoObjectsData(scope?): StandardData
  */
 
 import { getCurrentLang } from '../i18n.js';
@@ -12,8 +17,9 @@ import { getGeoLibrary } from './geo_lib.js';
 import { getStore } from '../userObjects/api.js';
 import { convertToBase, getBaseUnit } from '../utils/unit_converter.js';
 
-// ─────────────────────────────────────────────────────────────
-// Утіліти
+/* ─────────────────────────────────────────────────────────────
+ * Утіліти
+ * ────────────────────────────────────────────────────────────*/
 
 const norm = s => String(s ?? '').trim();
 const low  = s => norm(s).toLowerCase();
@@ -33,31 +39,42 @@ function getCatKey(rec) {
   return low(rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
 }
 
-// валідне поле length/height?
-function hasLinear(rec) {
-  const lv = Number(rec?.length?.value);
-  const hv = Number(rec?.height?.value);
-  return (Number.isFinite(lv) && lv > 0) || (Number.isFinite(hv) && hv > 0);
+function getVal(scope, sel) {
+  const el = (scope || document)?.querySelector(sel);
+  return el ? norm(el.value) : '';
 }
 
-// Конвертація → метри через централізований конвертер
-// Конвертація → метри через централізований конвертер
+// Діаметр базового кола (м)
+function readBaselineDiameterMeters(scope) {
+  const a = (scope || document)?.querySelector('#geoObjBaselineDiameter, [data-field="baseline-diameter"]');
+  if (a) {
+    const v = Number(a.value);
+    if (Number.isFinite(v) && v >= 0) return v;
+  }
+  return 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Конвертори/читачі значень (лінійна величина → метри)
+ * ────────────────────────────────────────────────────────────*/
+
 function toMetersViaConverter(value, unit) {
   const v = Number(value);
   if (!Number.isFinite(v)) return NaN;
 
-  const u = unit || getBaseUnit('distance') || 'm';
+  const u = unit || getBaseUnit('geo_objects') || 'm';
   try {
-    return convertToBase(v, u, 'distance'); // база distance = метри
+    // база для geo_objects — метри
+    return convertToBase(v, u, 'geo_objects');
   } catch {
     return NaN;
   }
 }
 
 
-// Прочитати довжину/висоту (в метрах) із офіційного чи юзерського запису
+// Прочитати довжину/висоту (в метрах) із запису
 function readGeoLinearMeters(source) {
-  // 1) офіційні: length або height
+  // офіційні/нормалізовані: length/height як {value, unit}
   if (source?.length && typeof source.length === 'object') {
     const vm = toMetersViaConverter(source.length.value, source.length.unit || 'm');
     if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
@@ -67,7 +84,7 @@ function readGeoLinearMeters(source) {
     if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
   }
 
-  // 2) юзерські через attrs
+  // можливі юзерські attrs
   if (source?.attrs?.length && typeof source.attrs.length === 'object') {
     const vm = toMetersViaConverter(source.attrs.length.value, source.attrs.length.unit || 'm');
     if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
@@ -77,7 +94,7 @@ function readGeoLinearMeters(source) {
     if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
   }
 
-  // 3) можливі плоскі поля
+  // плоскі поля
   if (source && typeof source === 'object') {
     const vm = toMetersViaConverter(
       source.lengthValue ?? source.heightValue ?? source.value,
@@ -89,97 +106,217 @@ function readGeoLinearMeters(source) {
   return { valueReal: NaN, unit: 'm' };
 }
 
-// Діаметр базового кола (м)
-function readBaselineDiameterMeters(scope) {
-  const a = scope?.querySelector('#geoObjBaselineDiameter, [data-field="baseline-diameter"]');
-  if (a) {
-    const v = Number(a.value);
-    if (Number.isFinite(v) && v >= 0) return v;
+/* ─────────────────────────────────────────────────────────────
+ * SNAPSHOT-FIRST (dataset.snapshot на вибраному <option>)
+ * ────────────────────────────────────────────────────────────*/
+
+function getSelectedOption(scope, selectId) {
+  const root = scope || document;
+  const sel = root?.querySelector(`#${selectId}`);
+  if (!sel || sel.tagName !== 'SELECT') return null;
+  const idx = sel.selectedIndex;
+  if (idx < 0) return null;
+  return sel.options[idx] || null;
+}
+
+function parseOptionSnapshot(opt) {
+  try {
+    const raw = opt?.dataset?.snapshot;
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || typeof s !== 'object') return null;
+
+    const v = Number(s.value);
+    if (!Number.isFinite(v) || v <= 0) return null;
+    const u = s.unit ? String(s.unit) : null;
+    if (!u) return null;
+
+    return s;
+  } catch { return null; }
+}
+
+/**
+ * Нормалізувати snapshot у «бібліотечний» запис для гео-об’єктів.
+ * Для лінійних величин кладемо у поле `length { value, unit }`.
+ * category_id беремо з snapshot.category_key або з селекта категорії.
+ */
+function normalizeSnapshotToLibRecord(snapshot, catKeyFromSelect) {
+  if (!snapshot) return null;
+  const rec = {
+    id: snapshot.id || null,
+    source: 'user',
+    is_user_object: true,
+
+    // імена/категорії для pickLang/getCatKey
+    name_ua: snapshot.name_ua ?? null,
+    name_en: snapshot.name_en ?? null,
+    name_es: snapshot.name_es ?? null,
+    name:    snapshot.name_en || snapshot.name_ua || snapshot.name_es || '',
+
+    category_id: snapshot.category_key || catKeyFromSelect || null,
+    category_en: snapshot.category_en ?? null,
+    category_ua: snapshot.category_ua ?? null,
+    category_es: snapshot.category_es ?? null,
+    category:    snapshot.category_en || snapshot.category_ua || snapshot.category_es || null,
+
+    // ОСНОВНЕ для «Об’єкти»: лінійна величина (довжина/висота)
+    length: {
+      value: Number(snapshot.value),
+      unit:  String(snapshot.unit)
+    },
+
+    // описи — не обов'язкові
+    description_ua: snapshot.description_ua ?? null,
+    description_en: snapshot.description_en ?? null,
+    description_es: snapshot.description_es ?? null
+  };
+
+  if (!Number.isFinite(rec.length.value) || rec.length.value <= 0) return null;
+  return rec;
+}
+
+function readO1FromSnapshot(scope) {
+  const opt = getSelectedOption(scope, 'geoObjObject1');
+  if (!opt) return null;
+  const s = parseOptionSnapshot(opt);
+  if (!s) return null;
+  const catKeySelect = getVal(scope, '#geoObjCategoryObject1, .object1-group .category-select');
+  return normalizeSnapshotToLibRecord(s, catKeySelect || null);
+}
+
+function readO2FromSnapshot(scope) {
+  const opt = getSelectedOption(scope, 'geoObjObject2');
+  if (!opt) return null;
+  const s = parseOptionSnapshot(opt);
+  if (!s) return null;
+  const catKeySelect = getVal(scope, '#geoObjCategoryObject2, .object2-group .category-select');
+  return normalizeSnapshotToLibRecord(s, catKeySelect || null);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * Пошук у бібліотеці / сторі (фолбек, якщо snapshot відсутній)
+ * ────────────────────────────────────────────────────────────*/
+
+function findOfficialLinear(lib, { category, name }) {
+  if (!Array.isArray(lib)) return null;
+
+  // допускаємо, що в бібліотеці можуть бути як length, так і height
+  const src = lib.filter(o => {
+    const lv = Number(o?.length?.value);
+    const hv = Number(o?.height?.value);
+    return (Number.isFinite(lv) && lv > 0) || (Number.isFinite(hv) && hv > 0);
+  });
+
+  const catKey = low(category);
+  let rows = src;
+  if (catKey) rows = rows.filter(rec => getCatKey(rec) === catKey);
+
+  const needle = low(name);
+  if (needle) {
+    for (let i = 0; i < rows.length; i++) {
+      const o = rows[i];
+      const n_en = low(o?.name_en);
+      const n_ua = low(o?.name_ua);
+      const n_es = low(o?.name_es);
+      const n    = low(o?.name);
+      if ([n_en, n_ua, n_es, n].some(v => v && v === needle)) {
+        const li = lib.indexOf(o);
+        return { obj: o, libIndex: li >= 0 ? li : i };
+      }
+    }
+    for (let i = 0; i < src.length; i++) {
+      const o = src[i];
+      const n_en = low(o?.name_en);
+      const n_ua = low(o?.name_ua);
+      const n_es = low(o?.name_es);
+      const n    = low(o?.name);
+      if ([n_en, n_ua, n_es, n].some(v => v && v === needle)) {
+        return { obj: o, libIndex: lib.indexOf(o) };
+      }
+    }
+    return null;
   }
-  return 0;
+
+  if (rows.length > 0) {
+    const o = rows[0];
+    const li = lib.indexOf(o);
+    return { obj: o, libIndex: li >= 0 ? li : 0 };
+  }
+  return null;
 }
 
-function getVal(scope, sel) {
-  const el = scope?.querySelector(sel);
-  return el ? norm(el.value) : '';
+function findUserLinear(store, { category, name }) {
+  if (!store) return null;
+  if (typeof store.getByName === 'function') {
+    const hit = store.getByName('geo', name, category);
+    if (hit) return hit;
+  }
+  if (typeof store.list === 'function') {
+    const all = store.list('geo') || [];
+    const nName = low(name);
+    const nCat  = low(category);
+    const hit = all.find(o =>
+      low(o?.name || o?.name_i18n?.[o?.originalLang]) === nName &&
+      low(o?.category || o?.category_i18n?.[o?.originalLang]) === nCat
+    );
+    if (hit) return hit;
+  }
+  return null;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Експорт
+/* ─────────────────────────────────────────────────────────────
+ * Експорт
+ * ────────────────────────────────────────────────────────────*/
 
+/**
+ * Зібрати StandardData для calc та інфопанелі (режим «Географія → Об’єкти»).
+ * @param {HTMLElement} [scope] - контейнер секції режиму
+ */
 export function getGeoObjectsData(scope) {
-  const lang = getCurrentLang?.() || 'ua';
-  const lib = getGeoLibrary();
+  const lang  = getCurrentLang?.() || 'ua';
+  const lib   = getGeoLibrary();
   const store = getStore();
 
   // Вибір користувача
   const catO1  = getVal(scope, '#geoObjCategoryObject1, .object1-group .category-select');
   const catO2  = getVal(scope, '#geoObjCategoryObject2, .object2-group .category-select');
-  const nameO1 = getVal(scope, '#geoObjObject1, .object1-group .object-select');
-  const nameO2 = getVal(scope, '#geoObjObject2, .object2-group .object-select');
-
-  // Офіційні/юзерські об’єкти
-  const src = Array.isArray(lib) ? lib.filter(hasLinear) : [];
-  const findOfficial = ({ category, name }) => {
-    const catKey = low(category);
-    let rows = src;
-    if (catKey) rows = rows.filter(r => getCatKey(r) === catKey);
-
-    const needle = low(name);
-    if (needle) {
-      for (let i = 0; i < rows.length; i++) {
-        const o = rows[i];
-        const n_en = low(o?.name_en);
-        const n_ua = low(o?.name_ua);
-        const n_es = low(o?.name_es);
-        const n    = low(o?.name);
-        if ([n_en, n_ua, n_es, n].some(v => v && v === needle)) {
-          const li = lib.indexOf(o);
-          return { obj: o, libIndex: li >= 0 ? li : i };
-        }
-      }
-      for (let i = 0; i < src.length; i++) {
-        const o = src[i];
-        const n_en = low(o?.name_en);
-        const n_ua = low(o?.name_ua);
-        const n_es = low(o?.name_es);
-        const n    = low(o?.name);
-        if ([n_en, n_ua, n_es, n].some(v => v && v === needle)) {
-          return { obj: o, libIndex: lib.indexOf(o) };
-        }
-      }
-      return null;
-    }
-    if (rows.length > 0) {
-      const o = rows[0];
-      const li = lib.indexOf(o);
-      return { obj: o, libIndex: li >= 0 ? li : 0 };
-    }
-    return null;
-  };
-
-  let off1 = findOfficial({ category: catO1, name: nameO1 });
-  if (!off1 && nameO1) off1 = findOfficial({ category: '', name: nameO1 });
-  const obj1 = off1?.obj || (getStore()?.getByName?.('geo', nameO1, catO1) ?? null);
-
-  let off2 = findOfficial({ category: catO2, name: nameO2 });
-  if (!off2 && nameO2) off2 = findOfficial({ category: '', name: nameO2 });
-  const obj2 = off2?.obj || (getStore()?.getByName?.('geo', nameO2, catO2) ?? null);
+  const nameO1 = getVal(scope, '#geoObjObject1,         .object1-group .object-select');
+  const nameO2 = getVal(scope, '#geoObjObject2,         .object2-group .object-select');
 
   const baselineDiameterMeters = readBaselineDiameterMeters(scope);
 
-  // Локалізація
-  const name1 = obj1 ? pickLang(obj1, 'name', lang) : nameO1;
-  const cat1  = obj1 ? pickLang(obj1, 'category', lang) : catO1;
+  // SNAPSHOT-FIRST
+  let obj1 = readO1FromSnapshot(scope);
+  let obj2 = readO2FromSnapshot(scope);
+
+  // Якщо снапшота немає — фолбеки (бібліотека → стор)
+  let off1 = null, off2 = null;
+
+  if (!obj1) {
+    off1 = findOfficialLinear(lib, { category: catO1, name: nameO1 }) ||
+           (nameO1 && findOfficialLinear(lib, { category: '', name: nameO1 }));
+    obj1 = off1?.obj || findUserLinear(store, { category: catO1, name: nameO1 }) || null;
+  }
+  if (!obj2) {
+    off2 = findOfficialLinear(lib, { category: catO2, name: nameO2 }) ||
+           (nameO2 && findOfficialLinear(lib, { category: '', name: nameO2 }));
+    obj2 = off2?.obj || findUserLinear(store, { category: catO2, name: nameO2 }) || null;
+  }
+
+  // локалізація
+  const name1 = obj1 ? pickLang(obj1, 'name', lang)        : nameO1;
+  const cat1  = obj1 ? pickLang(obj1, 'category', lang)    : catO1;
   const desc1 = obj1 ? pickLang(obj1, 'description', lang) : '';
 
-  const name2 = obj2 ? pickLang(obj2, 'name', lang) : nameO2;
-  const cat2  = obj2 ? pickLang(obj2, 'category', lang) : catO2;
+  const name2 = obj2 ? pickLang(obj2, 'name', lang)        : nameO2;
+  const cat2  = obj2 ? pickLang(obj2, 'category', lang)    : catO2;
   const desc2 = obj2 ? pickLang(obj2, 'description', lang) : '';
 
+  // значення (в метрах)
   const { valueReal: l1m, unit: u1 } = readGeoLinearMeters(obj1);
   const { valueReal: l2m, unit: u2 } = readGeoLinearMeters(obj2);
 
+  // стандартний пакет
   return {
     modeId: 'geo_objects',
     object1: {
@@ -187,7 +324,7 @@ export function getGeoObjectsData(scope) {
       category: cat1,
       description: desc1,
       kind: 'length',
-      valueReal: Number.isFinite(l1m) ? l1m : NaN, // в метрах
+      valueReal: Number.isFinite(l1m) ? l1m : NaN,
       unit: u1 || 'm',
       diameterScaled: baselineDiameterMeters,
       color: undefined,
@@ -199,7 +336,7 @@ export function getGeoObjectsData(scope) {
       category: cat2,
       description: desc2,
       kind: 'length',
-      valueReal: Number.isFinite(l2m) ? l2m : NaN, // в метрах
+      valueReal: Number.isFinite(l2m) ? l2m : NaN,
       unit: u2 || 'm',
       color: undefined,
       libIndex: off2?.libIndex ?? -1,

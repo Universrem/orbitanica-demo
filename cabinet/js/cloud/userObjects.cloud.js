@@ -55,54 +55,52 @@ function standardizeUserObject(item) {
   const v2 = item.value2;
   const u2 = item.unit2_key || item.unit2;
 
-  // Режимні поля (точно в такому форматі читають адаптери/бібліотека)
+  // Режимні поля (ОДИН єдиний ключ { value, unit } на режим)
   switch (item.mode) {
+    // ——— Univers ———
     case 'distance': {
-      if (isPosNum(v) && u) {
-        item.distance_to_earth = { value: Number(v), unit: String(u) };
-      } else {
-        delete item.distance_to_earth;
-      }
+      if (isPosNum(v) && u) item.distance_to_earth = { value: Number(v), unit: String(u) };
+      else delete item.distance_to_earth;
       break;
     }
     case 'diameter': {
-      if (isPosNum(v) && u) {
-        item.diameter = { value: Number(v), unit: String(u) };
-      } else {
-        delete item.diameter;
-      }
+      if (isPosNum(v) && u) item.diameter = { value: Number(v), unit: String(u) };
+      else delete item.diameter;
       break;
     }
     case 'mass': {
-      if (isPosNum(v) && u) {
-        item.mass = { value: Number(v), unit: String(u) };
-      } else {
-        delete item.mass;
-      }
+      if (isPosNum(v) && u) item.mass = { value: Number(v), unit: String(u) };
+      else delete item.mass;
       break;
     }
     case 'luminosity': {
-      if (isPosNum(v) && u) {
-        item.luminosity = { value: Number(v), unit: String(u) };
-      } else {
-        delete item.luminosity;
-      }
+      if (isPosNum(v) && u) item.luminosity = { value: Number(v), unit: String(u) };
+      else delete item.luminosity;
+      break;
+    }
+    case 'geo_objects': {
+      if (isPosNum(v) && u) item.length = { value: Number(v), unit: String(u) };
+      else delete item.length;
+      break;
+    }
+    case 'geo_area': {
+      if (isPosNum(v) && u) item.area = { value: Number(v), unit: String(u) };
+      else delete item.area;
+      break;
+    }
+    case 'geo_population': {
+      if (isPosNum(v) && u) item.population = { value: Number(v), unit: String(u) };
+      else delete item.population;
       break;
     }
     case 'money': {
-      if (isPosNum(v) && u) {
-        item.money = { value: Number(v), unit: String(u) };
-      } else {
-        delete item.money;
-      }
+      if (isPosNum(v) && u) item.amount = { value: Number(v), unit: String(u) };
+      else delete item.amount;
       break;
     }
     case 'math': {
-      if (isPosNum(v) && u) {
-        item.quantity = { value: Number(v), unit: String(u) };
-      } else {
-        delete item.quantity;
-      }
+      if (isPosNum(v) && u) item.quantity = { value: Number(v), unit: String(u) };
+      else delete item.quantity;
       break;
     }
 
@@ -113,6 +111,7 @@ function standardizeUserObject(item) {
 
   return item;
 }
+
 
 
 /** Keyset-курсори для пагінації */

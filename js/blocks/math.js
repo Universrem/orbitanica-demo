@@ -42,7 +42,8 @@ function getCatKey(rec) {
 }
 
 function pickName(rec, lang) {
-  return s(rec?.[`name_${lang}`] ?? rec?.name);
+  // лише назва мовою системи; без фолбеків
+  return s(rec?.[`name_${lang}`] || '');
 }
 
 function pickCategoryI18n(rec) {
@@ -132,18 +133,33 @@ function rebuildCategories(scope) {
   }
 
   const categories = [];
-  for (const [key, rows] of map.entries()) {
-    let labelBase = '';
+for (const [key, rows] of map.entries()) {
+  // 1) Категорія потрапляє у селектор ТІЛЬКИ якщо є хоч один об'єкт з name_<мова>
+  const hasLocalizedObj = rows.some(r => hasValidValue(r) && s(r?.[`name_${lang}`]));
+  if (!hasLocalizedObj) continue;
+
+  // 2) Підпис категорії: спершу беремо локалізований, якщо є; інакше — будь-який наявний
+  let labelBase = '';
+  for (const r of rows) {
+    const i18n = pickCategoryI18n(r);
+    const cand = pickCategoryLabel(i18n, lang);
+    if (cand) { labelBase = cand; break; }
+  }
+  if (!labelBase) {
+    // фолбек лише для ПІДПИСУ категорії (не впливає на відбір)
     for (const r of rows) {
       const i18n = pickCategoryI18n(r);
-      const cand = pickCategoryLabel(i18n, lang);
+      const cand = i18n.ua || i18n.en || i18n.es || '';
       if (cand) { labelBase = cand; break; }
     }
-    if (!labelBase) continue;
-    const hasUser = rows.some(isUser);
-    const userMark = hasUser ? ` ${t('ui.user_mark') || '(корист.)'}` : '';
-    categories.push({ key, label: `${labelBase}${userMark}` });
   }
+  if (!labelBase) continue;
+
+  const hasUser = rows.some(isUser);
+  const userMark = hasUser ? ` ${t('ui.user_mark') || '(корист.)'}` : '';
+  categories.push({ key, label: `${labelBase}${userMark}` });
+}
+
   categories.sort((a,b) => a.label.localeCompare(b.label, undefined, { sensitivity:'base' }));
 
   for (const sel of selects) {

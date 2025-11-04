@@ -189,6 +189,20 @@ export function onDiameterCalculate({ scope }) {
       setGroupDescription({ id: 'diameter_o1', description: data.object1.description });
     }
   }
+  // ——— START SESSION  ———
+  const baselineValid = (Number.isFinite(v1) && v1 > 0) && (baselineDiameter > 0);
+  if (baselineValid && scope) {
+    // LOCK O1 UI 
+const o1Group = scope.querySelector('.object1-group');
+if (o1Group) {
+  o1Group.classList.add('is-locked');
+  o1Group.querySelectorAll('select, input, button, textarea').forEach(el => {
+    el.disabled = true;
+  });
+}
+
+    try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
+  }
 
   // 3) О2 через калькулятор
   const v2 = Number(data?.object2?.diameterReal);
