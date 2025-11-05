@@ -1,12 +1,13 @@
-// full/js/data/data_geo_objects.js
+// /js/data/data_geo_objects.js
 'use strict';
 
 /**
- * Адаптер даних для «Географія → Об’єкти» (SNAPSHOT-FIRST для О2 і О1).
- * Правило як у «Математика»:
- *  - спершу шукаємо snapshot у dataset вибраного <option>;
- *  - якщо є — використовуємо його (без пошуків у бібліотеках);
- *  - якщо немає — фолбек у geo-бібліотеку / юзерський стор.
+ * Адаптер даних для «Географія → Об’єкти» (SNAPSHOT-FIRST для О1 і О2).
+ * Логіка як у «Діаметри», але для лінійних величин:
+ *  - спершу читаємо snapshot з <option data-snapshot>;
+ *  - якщо нема — фолбек у geo-бібліотеку / юзерський стор;
+ *  - значення в метрах (valueReal), unit ОБОВ’ЯЗКОВО (дефолт 'm');
+ *  - scaledMeters у панелі показує РАДІУС (налаштовано в подіях).
  *
  * Експорт:
  *  - getGeoObjectsData(scope?): StandardData
@@ -34,7 +35,7 @@ function pickLang(rec, base, lang) {
   return norm(a || b || c || d || e || '');
 }
 
-// ключ категорії (узгоджено з blocks/geo_objects.js)
+// ключ категорії (узгоджено з blocks)
 function getCatKey(rec) {
   return low(rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
 }
@@ -61,20 +62,21 @@ function readBaselineDiameterMeters(scope) {
 function toMetersViaConverter(value, unit) {
   const v = Number(value);
   if (!Number.isFinite(v)) return NaN;
-
-  const u = unit || getBaseUnit('geo_objects') || 'm';
-  try {
-    // база для geo_objects — метри
-    return convertToBase(v, u, 'geo_objects');
-  } catch {
-    return NaN;
-  }
+  const u = norm(unit) || getBaseUnit('geo_objects') || 'm';
+  try { return convertToBase(v, u, 'geo_objects'); }
+  catch { return NaN; }
 }
 
-
-// Прочитати довжину/висоту (в метрах) із запису
+// Прочитати довжину/висоту (в метрах) із запису (OFFICIAL/UGC)
+// ПРИМІТКА: geo_lib нормалізує в поле `object { value, unit }`.
 function readGeoLinearMeters(source) {
-  // офіційні/нормалізовані: length/height як {value, unit}
+  // 1) новий нормалізований формат: object { value, unit }
+  if (source?.object && typeof source.object === 'object') {
+    const vm = toMetersViaConverter(source.object.value, source.object.unit || 'm');
+    if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
+  }
+
+  // 2) сумісність: length/height (можуть бути в OFFICIAL до нормалізації)
   if (source?.length && typeof source.length === 'object') {
     const vm = toMetersViaConverter(source.length.value, source.length.unit || 'm');
     if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
@@ -84,7 +86,11 @@ function readGeoLinearMeters(source) {
     if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
   }
 
-  // можливі юзерські attrs
+  // 3) юзерські attrs (сумісність)
+  if (source?.attrs?.object && typeof source.attrs.object === 'object') {
+    const vm = toMetersViaConverter(source.attrs.object.value, source.attrs.object.unit || 'm');
+    if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
+  }
   if (source?.attrs?.length && typeof source.attrs.length === 'object') {
     const vm = toMetersViaConverter(source.attrs.length.value, source.attrs.length.unit || 'm');
     if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
@@ -94,11 +100,11 @@ function readGeoLinearMeters(source) {
     if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
   }
 
-  // плоскі поля
+  // 4) плоскі поля (сумісність)
   if (source && typeof source === 'object') {
     const vm = toMetersViaConverter(
-      source.lengthValue ?? source.heightValue ?? source.value,
-      source.lengthUnit ?? source.heightUnit ?? source.unit ?? 'm'
+      source.objectValue ?? source.lengthValue ?? source.heightValue ?? source.value,
+      source.objectUnit  ?? source.lengthUnit  ?? source.heightUnit  ?? source.unit ?? 'm'
     );
     if (Number.isFinite(vm)) return { valueReal: vm, unit: 'm' };
   }
@@ -129,15 +135,14 @@ function parseOptionSnapshot(opt) {
     const v = Number(s.value);
     if (!Number.isFinite(v) || v <= 0) return null;
     const u = s.unit ? String(s.unit) : null;
-    if (!u) return null;
-
+    if (!u) return null;            // unit ОБОВ’ЯЗКОВО
     return s;
   } catch { return null; }
 }
 
 /**
  * Нормалізувати snapshot у «бібліотечний» запис для гео-об’єктів.
- * Для лінійних величин кладемо у поле `length { value, unit }`.
+ * Основне поле — `object { value, unit }`.
  * category_id беремо з snapshot.category_key або з селекта категорії.
  */
 function normalizeSnapshotToLibRecord(snapshot, catKeyFromSelect) {
@@ -159,10 +164,10 @@ function normalizeSnapshotToLibRecord(snapshot, catKeyFromSelect) {
     category_es: snapshot.category_es ?? null,
     category:    snapshot.category_en || snapshot.category_ua || snapshot.category_es || null,
 
-    // ОСНОВНЕ для «Об’єкти»: лінійна величина (довжина/висота)
-    length: {
+    // ОСНОВНЕ для «Об’єкти»: лінійна величина
+    object: {
       value: Number(snapshot.value),
-      unit:  String(snapshot.unit)
+      unit:  String(snapshot.unit || 'm') // unit не може бути порожнім
     },
 
     // описи — не обов'язкові
@@ -171,7 +176,7 @@ function normalizeSnapshotToLibRecord(snapshot, catKeyFromSelect) {
     description_es: snapshot.description_es ?? null
   };
 
-  if (!Number.isFinite(rec.length.value) || rec.length.value <= 0) return null;
+  if (!Number.isFinite(rec.object.value) || rec.object.value <= 0) return null;
   return rec;
 }
 
@@ -200,11 +205,14 @@ function readO2FromSnapshot(scope) {
 function findOfficialLinear(lib, { category, name }) {
   if (!Array.isArray(lib)) return null;
 
-  // допускаємо, що в бібліотеці можуть бути як length, так і height
+  // валідні лінійні записи: мають object.value>0 (або старі length/height)
   const src = lib.filter(o => {
+    const ov = Number(o?.object?.value);
     const lv = Number(o?.length?.value);
     const hv = Number(o?.height?.value);
-    return (Number.isFinite(lv) && lv > 0) || (Number.isFinite(hv) && hv > 0);
+    return (Number.isFinite(ov) && ov > 0) ||
+           (Number.isFinite(lv) && lv > 0) ||
+           (Number.isFinite(hv) && hv > 0);
   });
 
   const catKey = low(category);
@@ -247,12 +255,15 @@ function findOfficialLinear(lib, { category, name }) {
 
 function findUserLinear(store, { category, name }) {
   if (!store) return null;
+
+  // пріоритетно — getByName('geo_objects', ...)
   if (typeof store.getByName === 'function') {
-    const hit = store.getByName('geo', name, category);
+    const hit = store.getByName('geo_objects', name, category);
     if (hit) return hit;
   }
+  // фолбек — list('geo_objects')
   if (typeof store.list === 'function') {
-    const all = store.list('geo') || [];
+    const all = store.list('geo_objects') || [];
     const nName = low(name);
     const nCat  = low(category);
     const hit = all.find(o =>
@@ -274,7 +285,7 @@ function findUserLinear(store, { category, name }) {
  */
 export function getGeoObjectsData(scope) {
   const lang  = getCurrentLang?.() || 'ua';
-  const lib   = getGeoLibrary();
+  const lib   = getGeoLibrary('geo_objects'); // ВАЖЛИВО: режим
   const store = getStore();
 
   // Вибір користувача
@@ -324,9 +335,9 @@ export function getGeoObjectsData(scope) {
       category: cat1,
       description: desc1,
       kind: 'length',
-      valueReal: Number.isFinite(l1m) ? l1m : NaN,
-      unit: u1 || 'm',
-      diameterScaled: baselineDiameterMeters,
+      valueReal: Number.isFinite(l1m) ? l1m : NaN, // у метрах
+      unit: u1 || 'm',                              // unit обов’язковий
+      diameterScaled: baselineDiameterMeters,       // діаметр базового кола О1 (м)
       color: undefined,
       libIndex: off1?.libIndex ?? -1,
       userId: obj1?.id || obj1?._id || undefined
@@ -336,7 +347,7 @@ export function getGeoObjectsData(scope) {
       category: cat2,
       description: desc2,
       kind: 'length',
-      valueReal: Number.isFinite(l2m) ? l2m : NaN,
+      valueReal: Number.isFinite(l2m) ? l2m : NaN, // у метрах
       unit: u2 || 'm',
       color: undefined,
       libIndex: off2?.libIndex ?? -1,

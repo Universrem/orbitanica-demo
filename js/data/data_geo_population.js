@@ -3,8 +3,13 @@
 
 /**
  * Адаптер даних для режиму «Географія → Населення».
+ * SNAPSHOT-FIRST для О1 і О2:
+ *  - читаємо snapshot із dataset вибраного <option>;
+ *  - якщо є — використовуємо його (БЕЗ пошуків);
+ *  - якщо немає — фолбек у geo-бібліотеку / юзерський стор.
+ *
  * Експорт:
- *  - getGeoPopulationData(scope): StandardData
+ *  - getGeoPopulationData(scope?): StandardData
  */
 
 import { getCurrentLang } from '../i18n.js';
@@ -27,24 +32,64 @@ function pickLang(rec, base, lang) {
   return norm(a || b || c || d || e || '');
 }
 
-// Ключ категорії (узгоджено з blocks/geo_population.js)
 function getCatKey(rec) {
   return low(rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
 }
 
-// є валідне поле population?
 function hasPopulation(rec) {
   const v = Number(rec?.population?.value);
-  return Number.isFinite(v) && v > 0;
+  return Number.isFinite(v) && v > 0 && !!norm(rec?.population?.unit);
 }
 
-// Офіційний запис: тільки серед тих, що мають population
+// читання (значення, юніт) населення з різних форматів запису
+function readPopulationValueUnit(source) {
+  // офіційний/нормалізований формат
+  if (source?.population && typeof source.population === 'object') {
+    const v = Number(source.population.value);
+    const u = norm(source.population.unit);
+    if (Number.isFinite(v) && v > 0 && u) return { valueReal: v, unit: u };
+  }
+  // юзерський через attrs
+  if (source?.attrs?.population && typeof source.attrs.population === 'object') {
+    const v = Number(source.attrs.population.value);
+    const u = norm(source.attrs.population.unit);
+    if (Number.isFinite(v) && v > 0 && u) return { valueReal: v, unit: u };
+  }
+  // плоскі поля (сумісність)
+  if (source && typeof source === 'object') {
+    const v = Number(source.populationValue ?? source.value);
+    const u = norm(source.populationUnit ?? source.unit);
+    if (Number.isFinite(v) && v > 0 && u) return { valueReal: v, unit: u };
+  }
+  return { valueReal: NaN, unit: undefined };
+}
+
+// базовий діаметр масштабу (м)
+function readBaselineDiameterMeters(scope) {
+  const root = scope || document;
+  const a = root?.querySelector('#geoPopBaselineDiameter, [data-field="baseline-diameter"]');
+  if (a) {
+    const v = Number(a.value);
+    if (Number.isFinite(v) && v >= 0) return v;
+  }
+  return 0;
+}
+
+function getVal(scope, sel) {
+  const el = (scope || document)?.querySelector(sel);
+  return el ? norm(el.value) : '';
+}
+
+// ─────────────────────────────────────────────────────────────
+// Пошук у бібліотеці / сторі (фолбек, якщо snapshot відсутній)
+
 function findOfficial(lib, { category, name }) {
   if (!Array.isArray(lib)) return null;
 
-  let rows = lib.filter(hasPopulation);
+  const src = lib.filter(hasPopulation);
 
   const catKey = low(category);
+  let rows = src;
   if (catKey) rows = rows.filter(rec => getCatKey(rec) === catKey);
 
   const needle = low(name);
@@ -60,9 +105,8 @@ function findOfficial(lib, { category, name }) {
         return { obj: o, libIndex: li >= 0 ? li : i };
       }
     }
-    const all = lib.filter(hasPopulation);
-    for (let i = 0; i < all.length; i++) {
-      const o = all[i];
+    for (let i = 0; i < src.length; i++) {
+      const o = src[i];
       const n_en = low(o?.name_en);
       const n_ua = low(o?.name_ua);
       const n_es = low(o?.name_es);
@@ -82,9 +126,9 @@ function findOfficial(lib, { category, name }) {
   return null;
 }
 
-// Юзерський об’єкт зі стора
 function findUser(store, { category, name }) {
   if (!store) return null;
+
   if (typeof store.getByName === 'function') {
     const hit = store.getByName('geo', name, category);
     if (hit) return hit;
@@ -102,81 +146,140 @@ function findUser(store, { category, name }) {
   return null;
 }
 
-// Прочитати (value, unit) для населення
-function readGeoPopulationValueUnit(source) {
-  // 1) офіційний формат: { population: { value, unit } }
-  if (source?.population && typeof source.population === 'object') {
-    const v = Number(source.population.value);
-    const u = norm(source.population.unit || 'people');
-    if (Number.isFinite(v)) return { valueReal: v, unit: u };
-  }
-  // 2) юзерський через модалку: attrs.population { value, unit }
-  if (source?.attrs?.population && typeof source.attrs.population === 'object') {
-    const v = Number(source.attrs.population.value);
-    const u = norm(source.attrs.population.unit || 'people');
-    if (Number.isFinite(v)) return { valueReal: v, unit: u };
-  }
-  // 3) інші можливі плоскі поля
-  if (source && typeof source === 'object') {
-    const v = Number(source.populationValue ?? source.value);
-    const u = norm(source.populationUnit ?? source.unit ?? 'people');
-    if (Number.isFinite(v)) return { valueReal: v, unit: u };
-  }
-  return { valueReal: NaN, unit: 'people' };
+// ─────────────────────────────────────────────────────────────
+// SNAPSHOT-FIRST (dataset.snapshot на вибраному <option>)
+
+function getSelectedOption(scope, selectId) {
+  const root = scope || document;
+  const sel = root?.querySelector(`#${selectId}`);
+  if (!sel || sel.tagName !== 'SELECT') return null;
+  const idx = sel.selectedIndex;
+  if (idx < 0) return null;
+  return sel.options[idx] || null;
 }
 
-// Діаметр базового кола (м)
-function readBaselineDiameterMeters(scope) {
-  const a = scope?.querySelector('#geoPopBaselineDiameter, [data-field="baseline-diameter"]');
-  if (a) {
-    const v = Number(a.value);
-    if (Number.isFinite(v) && v >= 0) return v;
-  }
-  return 0;
+function parseOptionSnapshot(opt) {
+  try {
+    const raw = opt?.dataset?.snapshot;
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || typeof s !== 'object') return null;
+
+    const v = Number(s.value);
+    const u = s.unit ? String(s.unit) : '';
+    if (!Number.isFinite(v) || v <= 0 || !u) return null;
+
+    return s;
+  } catch { return null; }
 }
 
-function getVal(scope, sel) {
-  const el = scope?.querySelector(sel);
-  return el ? norm(el.value) : '';
+/**
+ * Нормалізуємо snapshot у «бібліотечний» запис.
+ * Для населення пишемо у поле `population { value, unit }`.
+ * category_id беремо з snapshot.category_key або із селекта.
+ */
+function normalizeSnapshotToLibRecord(snapshot, catKeyFromSelect) {
+  if (!snapshot) return null;
+  const rec = {
+    id: snapshot.id || null,
+    source: 'user',
+    is_user_object: true,
+
+    name_ua: snapshot.name_ua ?? null,
+    name_en: snapshot.name_en ?? null,
+    name_es: snapshot.name_es ?? null,
+    name:    snapshot.name_en || snapshot.name_ua || snapshot.name_es || '',
+
+    category_id: snapshot.category_key || catKeyFromSelect || null,
+    category_en: snapshot.category_en ?? null,
+    category_ua: snapshot.category_ua ?? null,
+    category_es: snapshot.category_es ?? null,
+    category:    snapshot.category_en || snapshot.category_ua || snapshot.category_es || null,
+
+    population: {
+      value: Number(snapshot.value),
+      unit:  String(snapshot.unit)
+    },
+
+    description_ua: snapshot.description_ua ?? null,
+    description_en: snapshot.description_en ?? null,
+    description_es: snapshot.description_es ?? null
+  };
+
+  if (!Number.isFinite(rec.population.value) || rec.population.value <= 0 || !rec.population.unit) return null;
+  return rec;
+}
+
+function readO1FromSnapshot(scope) {
+  const opt = getSelectedOption(scope, 'geoPopObject1');
+  if (!opt) return null;
+  const s = parseOptionSnapshot(opt);
+  if (!s) return null;
+
+  const catKeySelect = getVal(scope, '#geoPopCategoryObject1, .object1-group .category-select');
+  return normalizeSnapshotToLibRecord(s, catKeySelect || null);
+}
+
+function readO2FromSnapshot(scope) {
+  const opt = getSelectedOption(scope, 'geoPopObject2');
+  if (!opt) return null;
+  const s = parseOptionSnapshot(opt);
+  if (!s) return null;
+
+  const catKeySelect = getVal(scope, '#geoPopCategoryObject2, .object2-group .category-select');
+  return normalizeSnapshotToLibRecord(s, catKeySelect || null);
 }
 
 // ─────────────────────────────────────────────────────────────
 // Експорт
 
+/**
+ * Зібрати StandardData для calc та інфопанелі (режим «Гео → Населення»).
+ * @param {HTMLElement} [scope]
+ */
 export function getGeoPopulationData(scope) {
-  const lang = getCurrentLang?.() || 'ua';
-  const lib = getGeoLibrary();
+  const lang  = getCurrentLang?.() || 'ua';
+  const lib   = getGeoLibrary();
   const store = getStore();
 
-  // Вибір користувача
+  // вибір користувача
   const catO1  = getVal(scope, '#geoPopCategoryObject1, .object1-group .category-select');
   const catO2  = getVal(scope, '#geoPopCategoryObject2, .object2-group .category-select');
-  const nameO1 = getVal(scope, '#geoPopObject1, .object1-group .object-select');
-  const nameO2 = getVal(scope, '#geoPopObject2, .object2-group .object-select');
-
-  // Офіційні/юзерські об’єкти
-  let off1 = findOfficial(lib, { category: catO1, name: nameO1 });
-  if (!off1 && nameO1) off1 = findOfficial(lib, { category: '', name: nameO1 });
-  const obj1 = off1?.obj || findUser(store, { category: catO1, name: nameO1 });
-
-  let off2 = findOfficial(lib, { category: catO2, name: nameO2 });
-  if (!off2 && nameO2) off2 = findOfficial(lib, { category: '', name: nameO2 });
-  const obj2 = off2?.obj || findUser(store, { category: catO2, name: nameO2 });
+  const nameO1 = getVal(scope, '#geoPopObject1,         .object1-group .object-select');
+  const nameO2 = getVal(scope, '#geoPopObject2,         .object2-group .object-select');
 
   const baselineDiameterMeters = readBaselineDiameterMeters(scope);
 
-  // Локалізація
-  const name1 = obj1 ? pickLang(obj1, 'name', lang) : nameO1;
-  const cat1  = obj1 ? pickLang(obj1, 'category', lang) : catO1;
+  // SNAPSHOT-FIRST
+  let obj1 = readO1FromSnapshot(scope);
+  let obj2 = readO2FromSnapshot(scope);
+
+  // Фолбеки (бібліотека → стор), якщо snapshot відсутній
+  let off1 = null, off2 = null;
+
+  if (!obj1) {
+    off1 = findOfficial(lib, { category: catO1, name: nameO1 }) || (nameO1 && findOfficial(lib, { category: '', name: nameO1 }));
+    obj1 = off1?.obj || findUser(store, { category: catO1, name: nameO1 }) || null;
+  }
+  if (!obj2) {
+    off2 = findOfficial(lib, { category: catO2, name: nameO2 }) || (nameO2 && findOfficial(lib, { category: '', name: nameO2 }));
+    obj2 = off2?.obj || findUser(store, { category: catO2, name: nameO2 }) || null;
+  }
+
+  // локалізація
+  const name1 = obj1 ? pickLang(obj1, 'name', lang)        : nameO1;
+  const cat1  = obj1 ? pickLang(obj1, 'category', lang)    : catO1;
   const desc1 = obj1 ? pickLang(obj1, 'description', lang) : '';
 
-  const name2 = obj2 ? pickLang(obj2, 'name', lang) : nameO2;
-  const cat2  = obj2 ? pickLang(obj2, 'category', lang) : catO2;
+  const name2 = obj2 ? pickLang(obj2, 'name', lang)        : nameO2;
+  const cat2  = obj2 ? pickLang(obj2, 'category', lang)    : catO2;
   const desc2 = obj2 ? pickLang(obj2, 'description', lang) : '';
 
-  const { valueReal: v1, unit: u1 } = readGeoPopulationValueUnit(obj1);
-  const { valueReal: v2, unit: u2 } = readGeoPopulationValueUnit(obj2);
+  // значення
+  const { valueReal: v1, unit: u1 } = readPopulationValueUnit(obj1);
+  const { valueReal: v2, unit: u2 } = readPopulationValueUnit(obj2);
 
+  // стандартний пакет
   return {
     modeId: 'geo_population',
     object1: {
@@ -185,7 +288,7 @@ export function getGeoPopulationData(scope) {
       description: desc1,
       kind: 'population',
       valueReal: Number.isFinite(v1) ? v1 : NaN,
-      unit: u1 || 'people',
+      unit: u1,                           // без дефолтів
       diameterScaled: baselineDiameterMeters,
       color: undefined,
       libIndex: off1?.libIndex ?? -1,
@@ -197,7 +300,7 @@ export function getGeoPopulationData(scope) {
       description: desc2,
       kind: 'population',
       valueReal: Number.isFinite(v2) ? v2 : NaN,
-      unit: u2 || 'people',
+      unit: u2,                           // без дефолтів
       color: undefined,
       libIndex: off2?.libIndex ?? -1,
       userId: obj2?.id || obj2?._id || undefined

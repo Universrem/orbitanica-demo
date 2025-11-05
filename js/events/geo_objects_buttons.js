@@ -2,10 +2,11 @@
 'use strict';
 
 /**
- * Обробник для «Географія → Об’єкти (довжина/висота)» за еталоном «Математика» (SNAPSHOT-FIRST):
- *  - О1 так само має snapshot і фіксує baseline;
- *  - під час «Старт/Розрахувати» записуємо в буфери тільки те, що на екрані (SNAPSHOT-FIRST);
- *  - серіалізатор читає буфери через window.orbit.* геттери.
+ * Події режиму «Географія → Об’єкти» — СТРОГО за еталоном «Діаметри»
+ * з особливостями режиму:
+ *  - SNAPSHOT-FIRST (фіксуємо О1 та О2 зі snapshot із селекторів);
+ *  - в інфопанелі завжди пишемо РАДІУС у полі scaledMeters (і для О1, і для О2);
+ *  - unit не може бути null — завжди задаємо валідне значення (дефолт: 'm').
  *
  * Публічні геттери:
  *  - window.orbit.getGeoObjectsSelectedO1()  -> { categoryKey, objectId, name, snapshot } | null
@@ -47,7 +48,7 @@ function parseOptionSnapshot(opt) {
     if (!s || typeof s !== 'object') return null;
     const v = Number(s.value);
     if (!Number.isFinite(v) || v <= 0) return null;
-    if (!s.unit) return null;
+    if (!s.unit) return null; // unit обов'язковий
     return s;
   } catch { return null; }
 }
@@ -123,9 +124,11 @@ try {
  * - ставить baseline (О1);
  * - додає результат О2;
  * - пише О1/О2 зі snapshot у буфери (лише якщо це не repaint).
+ *
+ * ОСОБЛИВІСТЬ: у scaledMeters віддаємо РАДІУС (і для О1, і для О2).
  */
 export function onGeoObjectsCalculate({ scope }) {
-  // Підпис інфопанелі: «Географія: Об’єкти»
+  // Етикетки режиму
   setModeLabelKeys({ modeKey: 'panel_title_geo', subKey: 'panel_title_geo_objects' });
 
   // 1) Дані
@@ -141,11 +144,11 @@ export function onGeoObjectsCalculate({ scope }) {
   const color2 = getColorForKey(`geo_objects:o2:${++geoObjectsResultSeq}`);
 
   // 2) Baseline у калькуляторі
-  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // D1 (м)
+  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // з адаптера (м)
   const baselineRadius   = baselineDiameter > 0 ? baselineDiameter / 2 : 0;
-  const v1 = Number(data?.object1?.valueReal);                         // реальна довжина/висота О1 (м)
-  const u1Raw = data?.object1?.unit || 'm';
-  const u1 = u1Raw && u1Raw.toLowerCase() !== 'm' ? u1Raw : 'm';
+
+  const v1 = Number(data?.object1?.valueReal);     // реальна довжина/висота О1
+  const u1 = norm(data?.object1?.unit) || 'm';     // unit обов’язковий
 
   resetGeoObjectsScale();
   setGeoObjectsBaseline({
@@ -165,7 +168,7 @@ export function onGeoObjectsCalculate({ scope }) {
     }
   }
 
-  // 2b) Інфопанель: baseline (не під час repaint)
+  // 2b) Інфопанель: baseline (РАДІУС)
   const o1RealOk = Number.isFinite(v1) && v1 > 0;
   if (!__isRepaint) {
     addGroup({
@@ -174,14 +177,14 @@ export function onGeoObjectsCalculate({ scope }) {
       color: color1,
       groupType: 'baseline',
       uiLeftLabelKey:  'ui.geo.objects.o1.left',
-      uiRightLabelKey: 'ui.geo.objects.o1.right',
+      uiRightLabelKey: 'ui.geo.objects.o1.right'
     });
     appendVariant({
       id: 'geo_objects_o1',
       variant: 'single',
       realValue: o1RealOk ? v1 : null,
       realUnit:  o1RealOk ? u1 : null,
-      // У цьому підрежимі scaledMeters в інфопанелі — РАДІУС
+      // ОСОБЛИВІСТЬ: scaledMeters = РАДІУС
       scaledMeters: baselineRadius
     });
     if (String(data?.object1?.description || '').trim()) {
@@ -198,12 +201,26 @@ export function onGeoObjectsCalculate({ scope }) {
       o1Group.querySelectorAll('select, input, button, textarea').forEach(el => { el.disabled = true; });
     }
     try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
+    
+    // — маркер центру кіл: один раз, тихо
+    (async () => {
+      try {
+        const { markerLayer, defaultCenterLon, defaultCenterLat } = await import('/js/globe/globe.js');
+        const { placeMarker } = await import('/js/globe/markers.js');
+
+        const ents = markerLayer.getEntities?.() || [];
+        if (!ents.length) {
+          placeMarker(defaultCenterLon, defaultCenterLat, { silent: true, suppressEvent: true });
+        }
+      } catch (e) {
+        console.warn('[calculate] center marker skipped:', e);
+      }
+    })();
   }
 
   // 3) О2 через калькулятор
   const v2 = Number(data?.object2?.valueReal);
-  const u2Raw = data?.object2?.unit || 'm';
-  const u2 = u2Raw && u2Raw.toLowerCase() !== 'm' ? u2Raw : 'm';
+  const u2 = norm(data?.object2?.unit) || 'm'; // unit обов’язковий
 
   const res = addGeoObjectsCircle({
     valueReal: v2,
@@ -224,7 +241,7 @@ export function onGeoObjectsCalculate({ scope }) {
     }
   }
 
-  // 3b) Інфопанель для О2 (не під час repaint)
+  // 3b) Інфопанель: О2 (РАДІУС)
   const o2RealOk = Number.isFinite(v2) && v2 > 0;
   const groupId = `geo_objects_o2_${geoObjectsResultSeq}`;
   if (!__isRepaint) {
@@ -232,15 +249,15 @@ export function onGeoObjectsCalculate({ scope }) {
       id: groupId,
       title: data?.object2?.name || '',
       color: color2,
-      groupType: 'item',
-      uiLeftLabelKey:  'ui.geo.objects.o1.left',
-      uiRightLabelKey: 'ui.geo.objects.o1.right',
+      groupType: 'item'
+      // без uiLeftLabelKey/uiRightLabelKey — як в еталоні для O2
     });
     appendVariant({
       id: groupId,
       variant: 'single',
       realValue: o2RealOk ? v2 : null,
       realUnit:  o2RealOk ? u2 : null,
+      // ОСОБЛИВІСТЬ: scaledMeters = РАДІУС
       scaledMeters: scaledRadiusMeters,
       invisibleReason: res?.tooLarge ? 'tooLarge' : null,
       requiredBaselineMeters: res?.requiredBaselineMeters ?? null
@@ -261,10 +278,10 @@ export function onGeoObjectsCalculate({ scope }) {
   // 5) Лог
   // eslint-disable-next-line no-console
   console.log(
-    '[mode:geo:objects] O1: L=%s%s → Rscaled=%s; O2: L=%s%s → Rscaled=%s',
-    o1RealOk ? v1 : '—', o1RealOk ? ` ${u1}` : '',
+    '[mode:geo:objects] O1: L=%s %s → Rscaled=%s m; O2: L=%s %s → Rscaled=%s m',
+    o1RealOk ? v1 : '—', o1RealOk ? u1 : '-',
     baselineRadius,
-    o2RealOk ? v2 : '—', o2RealOk ? ` ${u2}` : '',
+    o2RealOk ? v2 : '—', o2RealOk ? u2 : '-',
     scaledRadiusMeters
   );
 }

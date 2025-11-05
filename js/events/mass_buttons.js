@@ -202,6 +202,21 @@ export function onMassCalculate({ scope }) {
     }
 
     try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
+    
+    // — маркер центру кіл: один раз, тихо
+    (async () => {
+      try {
+        const { markerLayer, defaultCenterLon, defaultCenterLat } = await import('/js/globe/globe.js');
+        const { placeMarker } = await import('/js/globe/markers.js');
+
+        const ents = markerLayer.getEntities?.() || [];
+        if (!ents.length) {
+          placeMarker(defaultCenterLon, defaultCenterLat, { silent: true, suppressEvent: true });
+        }
+      } catch (e) {
+        console.warn('[calculate] center marker skipped:', e);
+      }
+    })();
   }
 
 

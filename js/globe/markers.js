@@ -1,4 +1,4 @@
-// full/js/globe/markers.js
+// /js/globe/markers.js
 'use strict';
 
 import { globus, markerLayer } from "./globe.js";

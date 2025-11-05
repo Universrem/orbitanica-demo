@@ -2,9 +2,8 @@
 'use strict';
 
 /**
- * Лоадер «Географії» для конкретного підрежиму.
- * Віддає: OFFICIAL (/data/geography.json) + UGC (Supabase) ТІЛЬКИ для запитаного mode.
- * Кеш окремо на кожен mode.
+ * Лоадер «Географії» для підрежимів — СТРОГО за еталоном «Діаметри»,
+ * з власними назвами та жорсткою вимогою: unit ОБОВ’ЯЗКОВО присутній (не null/порожній).
  *
  * Публічне API:
  *   await loadGeoLibrary(mode)            // 'geo_objects' | 'geo_area' | 'geo_population'
@@ -13,16 +12,16 @@
  *   await refreshGeoLibrary(mode)         // перезавантажити й надіслати подію
  *   addToGeoLibrary(mode, userRow)        // миттєво додати/замінити UGC у кеші (і кинути подію)
  *   removeFromGeoLibrary(mode, id)        // миттєво видалити UGC із кешу (і кинути подію)
- *   getById(mode, id)                     // знайти запис у кеші за id
+ *   getById(mode, id)                     // знайти запис у кеші за id (user/official)
  *   resolveObject(mode, hint)             // розв’язати об’єкт за {id, category_key, name, lang}
  */
 
 import { listPublic, listMine } from '../../cabinet/js/cloud/userObjects.cloud.js';
 
 const MODE_FIELD = {
-  geo_objects:   'linear',      // нормалізуємо з length|height
-  geo_area:      'area',
-  geo_population:'population',
+  geo_objects:    'object',
+  geo_area:       'area',
+  geo_population: 'population',
 };
 
 const __cache     = new Map();   // mode -> array (мердж OFFICIAL + UGC, вже нормалізовані)
@@ -31,7 +30,7 @@ const __readyOnce = new Map();   // mode -> Promise, що резолвиться
 
 /* ───────────────────────────── Мова та утиліти ───────────────────────────── */
 
-const LANGS = ['en','es','ua'];
+const LANGS = ['en','es','ua']; // алфавітно
 const norm = (s) => String(s ?? '').trim();
 const low  = (s) => norm(s).toLowerCase();
 
@@ -75,6 +74,7 @@ function pickLocalized(src, base, lang) {
     const v = norm(src?.[`${base}_${L}`]);
     if (v) return v;
   }
+  // крайній фолбек — нейтральне поле без суфікса
   return norm(src?.[base]);
 }
 
@@ -108,22 +108,24 @@ function ensureCategoryKey(rec) {
 
 /* ───────────────────────── Нормалізація UGC → формат бібліотеки ───────────────────────── */
 
-function toVU(rawV, rawU) {
-  const v = Number(rawV);
-  const u = norm(rawU);
-  if (!Number.isFinite(v) || v <= 0 || !u) return null;
-  return { value: v, unit: u };
-}
-
 function normalizeUserObject(row, mode) {
   if (!row || !mode || row?.mode !== mode) return null;
 
   const key = MODE_FIELD[mode];
   if (!key) return null;
 
-  // Головні поля UGC: value / unit_key — однаково для всіх режимів
-  const v = Number(row?.value);
-  const u = row?.unit_key ?? row?.unit ?? null;
+  // значення та одиниця з сирого запису (UGC) — unit ОБОВ’ЯЗКОВО
+  const rawVal =
+    row.value ?? row.value1 ??
+    row.length ?? row.height ??  // можливі сумісні поля
+    row.area ?? row.population;
+
+  const rawUnit = row.unit_key ?? row.unit ?? row.unit1_key ?? row.unit1;
+
+  const v = Number(rawVal);
+  const u = norm(rawUnit);
+  if (!Number.isFinite(v) || v <= 0) return null;
+  if (!u) return null; // unit обов'язковий
 
   const rec = {
     // джерело
@@ -141,8 +143,8 @@ function normalizeUserObject(row, mode) {
     category_ua: row.category_ua, category_en: row.category_en, category_es: row.category_es,
     description_ua: row.description_ua, description_en: row.description_en, description_es: row.description_es,
 
-    // режимне поле
-    [key]: (Number.isFinite(v) && v > 0 && u) ? { value: v, unit: String(u) } : null,
+    // режимне поле (unit вже перевірений)
+    [key]: { value: v, unit: u },
 
     // мета
     curated: !!row.curated,
@@ -155,7 +157,8 @@ function normalizeUserObject(row, mode) {
 }
 
 /* ─────────────────────── Нормалізація OFFICIAL → формат бібліотеки ───────────────────────
-   Гарантуємо {id, category_key, name_*, description_*, [key]:{value,unit}} для кожного підрежиму.
+   Еталон: гарантуємо {id, category_key, name_*, description_*, [key]:{value,unit}},
+   записи без валідного числа АБО без unit — відкидаємо (return null).
 */
 
 function normalizeOfficial(rec, mode) {
@@ -163,21 +166,34 @@ function normalizeOfficial(rec, mode) {
   const key = MODE_FIELD[mode];
   if (!key) return null;
 
-  let vu = null;
+  // 1) Значення + одиниці за підрежимом (unit ОБОВ’ЯЗКОВО)
+  let rawV, rawU;
 
   if (mode === 'geo_objects') {
     // пріоритет length → height
     const lv = rec?.length?.value, lu = rec?.length?.unit;
     const hv = rec?.height?.value, hu = rec?.height?.unit;
-    vu = toVU(lv, lu) || toVU(hv, hu);
+    if (Number.isFinite(Number(lv)) && Number(lv) > 0 && norm(lu)) {
+      rawV = lv; rawU = lu;
+    } else if (Number.isFinite(Number(hv)) && Number(hv) > 0 && norm(hu)) {
+      rawV = hv; rawU = hu;
+    } else {
+      return null;
+    }
   } else if (mode === 'geo_area') {
-    vu = toVU(rec?.area?.value, rec?.area?.unit);
+    rawV = rec?.area?.value; rawU = rec?.area?.unit;
+    if (!(Number.isFinite(Number(rawV)) && Number(rawV) > 0 && norm(rawU))) return null;
   } else if (mode === 'geo_population') {
-    vu = toVU(rec?.population?.value, rec?.population?.unit);
+    rawV = rec?.population?.value; rawU = rec?.population?.unit;
+    if (!(Number.isFinite(Number(rawV)) && Number(rawV) > 0 && norm(rawU))) return null;
   }
 
-  // Можливі записи без числового поля — допустимо (щоб показати категорію/назву),
-  // але тоді [key] буде null, і UI просто не запропонує такий запис як вимірюваний.
+  const v = Number(rawV);
+  const u = norm(rawU);
+  if (!Number.isFinite(v) || v <= 0) return null;
+  if (!u) return null;
+
+  // 2) Категорія + id
   const category_key = ensureCategoryKey(rec);
   const id = norm(rec?.id) || makeStableIdForOfficial(mode, { ...rec, category_key });
 
@@ -189,12 +205,12 @@ function normalizeOfficial(rec, mode) {
     category_key,
     category_id: category_key, // зворотна сумісність
 
-    // переносимо i18n як є
+    // i18n як є
     name_ua: rec?.name_ua, name_en: rec?.name_en, name_es: rec?.name_es,
     category_ua: rec?.category_ua, category_en: rec?.category_en, category_es: rec?.category_es,
     description_ua: rec?.description_ua, description_en: rec?.description_en, description_es: rec?.description_es,
 
-    [key]: vu,   // {value,unit} або null
+    [key]: { value: v, unit: u },
 
     is_official: true
   };
@@ -242,6 +258,7 @@ async function fetchUserByMode(mode) {
 }
 
 function dedupeMerge(officialNorm, userNorm) {
+  // Еталон: індексуємо OFFICIAL за id, поверх кладемо UGC за тим самим id
   const byId = new Map();
   for (const r of officialNorm) {
     if (!r?.id) continue;
@@ -249,7 +266,7 @@ function dedupeMerge(officialNorm, userNorm) {
   }
   for (const u of userNorm) {
     if (!u?.id) continue;
-    byId.set(String(u.id), u); // UGC має пріоритет за тим самим id
+    byId.set(String(u.id), u); // UGC має пріоритет
   }
   return Array.from(byId.values());
 }
@@ -260,12 +277,12 @@ async function buildForMode(mode) {
     fetchUserByMode(mode),
   ]);
 
-  // 1) Нормалізація офіційних
+  // 1) Нормалізація OFFICIAL
   const officialNorm = officialRaw
     .map(r => normalizeOfficial(r, mode))
     .filter(Boolean);
 
-  // 2) Юзерські вже нормалізовані
+  // 2) UGC вже нормалізовані
   const userNorm = userObjs;
 
   // 3) Мердж
@@ -295,13 +312,13 @@ function emitReloaded(mode, reason, extra = {}) {
 
 export async function loadGeoLibrary(mode) {
   if (!mode) throw new Error('[geo_lib] mode is required');
-  if (!MODE_FIELD[mode]) throw new Error(`[geo_lib] unknown mode: ${mode}`);
   if (__promises.has(mode)) return __promises.get(mode);
 
   const p = (async () => {
     const merged = await buildForMode(mode);
     __cache.set(mode, merged);
 
+    // перший раз — резолвимо readyOnce + кидаємо подію готовності
     if (!__readyOnce.has(mode)) {
       let resolveReady;
       const pr = new Promise(res => { resolveReady = res; });
@@ -309,6 +326,7 @@ export async function loadGeoLibrary(mode) {
       resolveReady();     // кеш уже є
       emitReady(mode, 'first-load');
     } else {
+      // якщо readyOnce уже створений — просто сигналізуємо, що кеш оновлено
       emitReady(mode, 'reload');
     }
   })();
@@ -317,14 +335,16 @@ export async function loadGeoLibrary(mode) {
   return p;
 }
 
+/** Детермінований бар’єр готовності кешу для mode. */
 export async function readyGeo(mode) {
   if (!mode) throw new Error('[geo_lib] mode is required');
-  if (!MODE_FIELD[mode]) throw new Error(`[geo_lib] unknown mode: ${mode}`);
+  // якщо кешу ще нема — стартуємо завантаження
   if (!__cache.has(mode) && !__promises.has(mode)) {
     await loadGeoLibrary(mode);
   }
   const r = __readyOnce.get(mode);
   if (r) return r;
+  // якщо readyOnce ще не було, але кеш уже є — створимо резолвнуте
   let resolveReady;
   const pr = new Promise(res => { resolveReady = res; });
   __readyOnce.set(mode, pr);
@@ -334,9 +354,9 @@ export async function readyGeo(mode) {
 
 export async function refreshGeoLibrary(mode) {
   if (!mode) throw new Error('[geo_lib] mode is required');
-  if (!MODE_FIELD[mode]) throw new Error(`[geo_lib] unknown mode: ${mode}`);
   __promises.delete(mode);
   __cache.delete(mode);
+  // readyOnce залишаємо — це бар’єр "один раз був готовий".
   await loadGeoLibrary(mode);
   emitReloaded(mode, 'refresh');
 }
@@ -345,9 +365,13 @@ export function getGeoLibrary(mode) {
   return __cache.get(mode) || [];
 }
 
+/**
+ * Миттєво додати/оновити UGC у кеші обраного режиму.
+ * Викликати одразу після успішного створення/редагування в Supabase.
+ * Повертає нормалізований запис або null.
+ */
 export function addToGeoLibrary(mode, userRow) {
   if (!mode || !userRow) return null;
-  if (!MODE_FIELD[mode]) return null;
 
   const normalized = normalizeUserObject(userRow, mode);
   if (!normalized) return null;
@@ -356,16 +380,18 @@ export function addToGeoLibrary(mode, userRow) {
 
   // за id
   const next = cur.filter(item => String(item?.id) !== String(normalized.id));
-  next.unshift(normalized);
+  next.unshift(normalized); // свіжий нагору
 
   __cache.set(mode, next);
   emitReloaded(mode, 'user-add', { id: normalized.id });
   return normalized;
 }
 
+/**
+ * Миттєво видалити UGC з кешу обраного режиму та кинути подію.
+ */
 export function removeFromGeoLibrary(mode, id) {
   if (!mode || !id) return false;
-  if (!MODE_FIELD[mode]) return false;
   const cur = Array.isArray(__cache.get(mode)) ? __cache.get(mode) : [];
   const next = cur.filter(it => String(it?.id) !== String(id));
   if (next.length === cur.length) return false;
@@ -375,6 +401,9 @@ export function removeFromGeoLibrary(mode, id) {
   return true;
 }
 
+/**
+ * Пошук у кеші за стабільним id.
+ */
 export function getById(mode, id) {
   if (!mode || !id) return null;
   const list = __cache.get(mode);
@@ -382,15 +411,18 @@ export function getById(mode, id) {
   return list.find(it => String(it?.id) === String(id)) || null;
 }
 
+/**
+ * Резолвер об’єкта за підказкою.
+ * Підтримує: id, category_key/category_id, name (+lang).
+ * Пріоритет: id → (category_key + name) → name.
+ * Використовує каскад локалізації імен (як еталон).
+ */
 export function resolveObject(mode, hint = {}) {
   const list = __cache.get(mode);
   if (!Array.isArray(list) || !list.length) return null;
 
   const lang = normalizeLang(hint.lang) || currentLang();
-  const pickName = (rec) => {
-    const key = `name_${lang}`;   // конкретна мова без каскаду
-    return norm(rec?.[key] || '');
-  };
+  const pickName = (rec) => pickLocalized(rec, 'name', lang);
 
   // 1) по id
   if (hint.id) {
@@ -419,6 +451,7 @@ export function resolveObject(mode, hint = {}) {
 }
 
 /* ───────────────────────────── Глобальні слухачі UGC ─────────────────────────────
+   Модульно: реагуємо на події з будь-якого місця (кабінет, інші UIs).
    Очікувані detail-поля:
      user-objects-updated: { mode, object }   // object — сирий рядок із Supabase
      user-objects-removed: { mode, id }       // id — UUID/PK
@@ -427,9 +460,8 @@ export function resolveObject(mode, hint = {}) {
 function __onUserObjectUpdated(e) {
   try {
     const d = e?.detail || {};
-    const m = d?.mode;
-    if (!m || !MODE_FIELD[m] || !d.object) return;
-    addToGeoLibrary(m, d.object);
+    if (!d.mode || !d.object) return;
+    addToGeoLibrary(d.mode, d.object);
   } catch(err) {
     console.warn('[geo_lib] user-objects-updated handler:', err);
   }
@@ -438,9 +470,8 @@ function __onUserObjectUpdated(e) {
 function __onUserObjectRemoved(e) {
   try {
     const d = e?.detail || {};
-    const m = d?.mode;
-    if (!m || !MODE_FIELD[m] || !d.id) return;
-    removeFromGeoLibrary(m, d.id);
+    if (!d.mode || !d.id) return;
+    removeFromGeoLibrary(d.mode, d.id);
   } catch(err) {
     console.warn('[geo_lib] user-objects-removed handler:', err);
   }

@@ -1,12 +1,15 @@
-// /full/js/events/geo_population_buttons.js
+// /js/events/geo_population_buttons.js
 'use strict';
 
 /**
- * Обробник для «Географія → Населення».
- * Побудовано за еталоном «Діаметри»:
- *  - локальний буфер обраних О2 + публічний геттер (для серіалізатора);
- *  - стабільний лічильник результатів для О2 (кольори/ID кіл);
- *  - на глобальний UI-RESET скидаємо лічильник і буфер О2.
+ * Обробник «Географія → Населення» — за еталоном «Діаметри» (SNAPSHOT-FIRST).
+ * - О1: фіксуємо snapshot з вибраного option, baseline-діаметр масштабує кола.
+ * - О2: додаємо результат, пишемо в буфер тільки те, що на екрані (SNAPSHOT-FIRST).
+ * - Серіалізатор читає буфери через window.orbit.* геттери.
+ *
+ * Публічні геттери:
+ *  - window.orbit.getGeoPopulationSelectedO1()  -> { categoryKey, objectId, name, snapshot } | null
+ *  - window.orbit.getGeoPopulationSelectedO2s() -> [ { categoryKey, objectId, name, snapshot }, ... ]
  */
 
 import { getGeoPopulationData } from '../data/data_geo_population.js';
@@ -15,54 +18,136 @@ import { addGroup, appendVariant, setGroupDescription, setModeLabelKeys } from '
 import { getColorForKey } from '../utils/color.js';
 import { addGeodesicCircle, setCircleLabelTextById } from '../globe/circles.js';
 
-// ——— СТАН СЕСІЇ ———
-let geoPopulationResultSeq = 0;       // лічильник О2
-const __geoPopulationSelectedO2s = []; // буфер вибраних О2
+/* ───────────────────────── helpers ───────────────────────── */
+
+const norm = s => String(s ?? '').trim();
+
+function getSelect(scope, id) {
+  const root = scope || document;
+  const el = root.querySelector(`#${id}`);
+  return (el && el.tagName === 'SELECT') ? el : null;
+}
+function getVal(scope, sel) {
+  const root = scope || document;
+  const el = root.querySelector(sel);
+  return el ? norm(el.value) : '';
+}
+function getSelectedOption(scope, selectId) {
+  const sel = getSelect(scope, selectId);
+  if (!sel) return null;
+  const idx = sel.selectedIndex;
+  if (idx < 0) return null;
+  return sel.options[idx] || null;
+}
+/** Перевірка snapshot: value>0 і є unit */
+function parseOptionSnapshot(opt) {
+  try {
+    const raw = opt?.dataset?.snapshot;
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || typeof s !== 'object') return null;
+    const v = Number(s.value);
+    if (!Number.isFinite(v) || v <= 0) return null;
+    if (!s.unit) return null;
+    return s;
+  } catch { return null; }
+}
+
+/* ─────────────────────── session state ───────────────────── */
+
+let geoPopulationResultSeq = 0;
+let __isRepaint = false;
+
+const __geoPopulationSelectedO2s = [];
+let __geoPopulationSelectedO1 = null;
+
+function __resetSelectedO2s() { __geoPopulationSelectedO2s.length = 0; }
+function __resetSelectedO1()  { __geoPopulationSelectedO1 = null; }
+
+function __readO2SnapshotFromDOM(scope) {
+  const opt = getSelectedOption(scope, 'geoPopObject2');
+  return parseOptionSnapshot(opt);
+}
+
+function __setSelectedO1FromDOM(scope) {
+  const opt = getSelectedOption(scope, 'geoPopObject1');
+  if (!opt) return;
+  const snap = parseOptionSnapshot(opt);
+  if (!snap) return;
+
+  const catKeySel = getVal(scope, '#geoPopCategoryObject1, .object1-group .category-select') || '';
+  const objectId  = String(snap?.id ?? getVal(scope, '#geoPopObject1, .object1-group .object-select') ?? '').trim();
+  const name      = String(opt.textContent || '').trim() || null;
+  const categoryKey = String(snap.category_key ?? catKeySel).trim();
+
+  if (!categoryKey || !objectId) return;
+  __geoPopulationSelectedO1 = { categoryKey, objectId, name, snapshot: snap };
+}
 
 function __pushSelectedO2(item) {
   try {
     const categoryKey = String(item?.object2?.category || item?.object2?.categoryKey || '').trim();
-    const name = String(item?.object2?.name || '').trim();
+    const name = String(item?.object2?.name || '').trim() || null;
+
+    // ID: пріоритет snapshot.id, далі userId/objectId/назва
+    const snap = __readO2SnapshotFromDOM(item?.__scope);
     const objectId = String(
-      item?.object2?.userId || item?.object2?.objectId || item?.object2?.name || ''
-    ).trim(); // офіц. id або fallback=назва
-    if (!categoryKey || !objectId) return;
-    __geoPopulationSelectedO2s.push({ categoryKey, objectId, name: name || null });
-  } catch (_) {}
+      snap?.id ?? item?.object2?.userId ?? item?.object2?.objectId ?? item?.object2?.name ?? ''
+    ).trim();
+
+    if (!categoryKey || !objectId || !snap) return;
+    __geoPopulationSelectedO2s.push({ categoryKey, objectId, name, snapshot: snap });
+  } catch {}
 }
 
-// Публічний геттер для geo_population_serializer.js
+/* ─────────────── expose getters for serializer ───────────── */
+
 try {
   (window.orbit ||= {});
-  window.orbit.getGeoPopulationSelectedO2s = () => __geoPopulationSelectedO2s.slice();
-} catch (_) {}
+  window.orbit.getGeoPopulationSelectedO1  = () => (__geoPopulationSelectedO1 ? { ...__geoPopulationSelectedO1 } : null);
+  window.orbit.getGeoPopulationSelectedO2s = () => __geoPopulationSelectedO2s.map(x => ({ ...x }));
+} catch {}
+
+/* ─────────────────────── global events ───────────────────── */
 
 try {
   window.addEventListener('orbit:ui-reset', () => {
     geoPopulationResultSeq = 0;
-    __geoPopulationSelectedO2s.length = 0;
+    __resetSelectedO1();
+    __resetSelectedO2s();
   });
+  window.addEventListener('orbit:repaint-start', () => { __isRepaint = true;  });
+  window.addEventListener('orbit:repaint-end',   () => { __isRepaint = false; });
 } catch {}
 
-/**
- * onGeoPopulationCalculate({ scope, object1Group, object2Group })
- * Викликається системою (panel_buttons.js) для режиму «географія → населення».
- */
-export function onGeoPopulationCalculate({ scope /*, object1Group, object2Group */ }) {
-  // 1) дані
-  const data = getGeoPopulationData(scope);
-  // Підпис інфопанелі: «Географія: Населення»
-  setModeLabelKeys({
-    modeKey: 'panel_title_geo',
-    subKey:  'panel_title_geo_population'
-  });
+/* ─────────────────────── main handler ────────────────────── */
 
+/**
+ * onGeoPopulationCalculate({ scope })
+ * - читає дані з адаптера;
+ * - ставить baseline (О1);
+ * - додає результат О2;
+ * - пише О1/О2 зі snapshot у буфери (лише якщо це не repaint).
+ */
+export function onGeoPopulationCalculate({ scope }) {
+  // Етикетки режиму
+  setModeLabelKeys({ modeKey: 'panel_title_geo', subKey: 'panel_title_geo_population' });
+
+  // 1) Дані
+  const data = getGeoPopulationData(scope);
+
+  // 1a) Зафіксувати О1 у буфер (snapshot-first), якщо це не repaint
+  if (!__isRepaint) {
+    __setSelectedO1FromDOM(scope);
+  }
+
+  // Кольори
   const color1 = getColorForKey('geo_population:baseline');
   const color2 = getColorForKey(`geo_population:o2:${++geoPopulationResultSeq}`);
 
-  // 2) baseline
-  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0;
-  const n1 = Number(data?.object1?.valueReal);
+  // 2) Baseline у калькуляторі
+  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // м
+  const n1 = Number(data?.object1?.valueReal);                         // реальне населення О1
   const u1 = data?.object1?.unit || 'people';
 
   resetGeoPopulationScale();
@@ -73,7 +158,7 @@ export function onGeoPopulationCalculate({ scope /*, object1Group, object2Group 
     color: color1
   });
 
-  // намалювати базове коло (якщо є)
+  // 2a) Намалювати базове коло
   const baselineRadius = baselineDiameter > 0 ? baselineDiameter / 2 : 0;
   const baselineId = 'geo_population_baseline';
   if (baselineRadius > 0) {
@@ -84,44 +169,63 @@ export function onGeoPopulationCalculate({ scope /*, object1Group, object2Group 
     }
   }
 
-  // інфопанель baseline
+  // 2b) Інфопанель: baseline
   const o1RealOk = Number.isFinite(n1) && n1 > 0;
-  addGroup({
-    id: 'geo_population_o1',
-    title: data?.object1?.name || '',
-    color: color1,
-    groupType: 'baseline',
-    uiLeftLabelKey:  'ui.geo.population.o1.left',
-    uiRightLabelKey: 'ui.geo.population.o1.right',
-  });
-  appendVariant({
-    id: 'geo_population_o1',
-    variant: 'single',
-    realValue: o1RealOk ? n1 : null,
-    realUnit:  o1RealOk ? u1 : null,
-    scaledMeters: baselineDiameter
-  });
-  if (String(data?.object1?.description || '').trim()) {
-    setGroupDescription({ id: 'geo_population_o1', description: data.object1.description });
-  }
-
-  // заблокувати О1 до reset
-  const baselineValid = o1RealOk && baselineDiameter > 0;
-  if (baselineValid && scope) {
-    const o1group = scope.querySelector('.object1-group');
-    if (o1group) {
-      o1group.classList.add('is-locked');
-      o1group.querySelectorAll('select, input, button, textarea').forEach(el => { el.disabled = true; });
+  if (!__isRepaint) {
+    addGroup({
+      id: 'geo_population_o1',
+      title: data?.object1?.name || '',
+      color: color1,
+      groupType: 'baseline',
+      uiLeftLabelKey:  'ui.geo.population.o1.left',
+      uiRightLabelKey: 'ui.geo.population.o1.right'
+    });
+    appendVariant({
+      id: 'geo_population_o1',
+      variant: 'single',
+      realValue: o1RealOk ? n1 : null,
+      realUnit:  o1RealOk ? u1 : null,
+      scaledMeters: baselineDiameter
+    });
+    if (String(data?.object1?.description || '').trim()) {
+      setGroupDescription({ id: 'geo_population_o1', description: data.object1.description });
     }
-    try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
   }
 
-  // 3) О2
+  // ——— START SESSION  ———
+  const baselineValid = o1RealOk && (baselineDiameter > 0);
+  if (baselineValid && scope) {
+    // LOCK O1 UI
+    const o1Group = scope.querySelector('.object1-group');
+    if (o1Group) {
+      o1Group.classList.add('is-locked');
+      o1Group.querySelectorAll('select, input, button, textarea').forEach(el => { el.disabled = true; });
+    }
+
+    try { window.dispatchEvent(new CustomEvent('orbit:session-start')); } catch {}
+
+    // — маркер центру кіл: один раз, тихо
+    (async () => {
+      try {
+        const { markerLayer, defaultCenterLon, defaultCenterLat } = await import('/js/globe/globe.js');
+        const { placeMarker } = await import('/js/globe/markers.js');
+
+        const ents = markerLayer.getEntities?.() || [];
+        if (!ents.length) {
+          placeMarker(defaultCenterLon, defaultCenterLat, { silent: true, suppressEvent: true });
+        }
+      } catch (e) {
+        console.warn('[geo_population] center marker skipped:', e);
+      }
+    })();
+  }
+
+  // 3) О2 через калькулятор
   const n2 = Number(data?.object2?.valueReal);
   const u2 = data?.object2?.unit || 'people';
   const res = addGeoPopulationCircle({ valueReal: n2, unit: u2, color: color2 });
 
-  // коло О2
+  // 3a) Коло О2
   if (res && Number(res.scaledRadiusMeters) > 0) {
     const id = addGeodesicCircle(res.scaledRadiusMeters, color2, `geo_population_r${geoPopulationResultSeq}`);
     if (id) {
@@ -130,36 +234,46 @@ export function onGeoPopulationCalculate({ scope /*, object1Group, object2Group 
     }
   }
 
-  // інфопанель О2
+  // 3b) Інфопанель для О2
   const o2RealOk = Number.isFinite(n2) && n2 > 0;
   const scaledDiameterMeters = res && Number(res.scaledRadiusMeters) > 0
     ? 2 * Number(res.scaledRadiusMeters)
     : 0;
 
   const groupId = `geo_population_o2_${geoPopulationResultSeq}`;
-  addGroup({
-    id: groupId,
-    title: data?.object2?.name || '',
-    color: color2,
-    groupType: 'item',
-    uiLeftLabelKey:  'ui.geo.population.o1.left',
-    uiRightLabelKey: 'ui.geo.population.o1.right',
-    invisibleReason: res?.tooLarge ? 'tooLarge' : null,
-    requiredBaselineMeters: res?.requiredBaselineMeters ?? null
-  });
-  appendVariant({
-    id: groupId,
-    variant: 'single',
-    realValue: o2RealOk ? n2 : null,
-    realUnit:  o2RealOk ? u2 : null,
-    scaledMeters: scaledDiameterMeters
-  });
-  if (String(data?.object2?.description || '').trim()) {
-    setGroupDescription({ id: groupId, description: data.object2.description });
+  if (!__isRepaint) {
+    addGroup({
+      id: groupId,
+      title: data?.object2?.name || '',
+      color: color2,
+      groupType: 'item',
+      uiLeftLabelKey:  'ui.geo.population.o1.left',
+      uiRightLabelKey: 'ui.geo.population.o1.right',
+      invisibleReason: res?.tooLarge ? 'tooLarge' : null,
+      requiredBaselineMeters: res?.requiredBaselineMeters ?? null
+    });
+    appendVariant({
+      id: groupId,
+      variant: 'single',
+      realValue: o2RealOk ? n2 : null,
+      realUnit:  o2RealOk ? u2 : null,
+      scaledMeters: scaledDiameterMeters
+    });
+    if (String(data?.object2?.description || '').trim()) {
+      setGroupDescription({ id: groupId, description: data.object2.description });
+    }
   }
 
-  __pushSelectedO2(data);
+  // 4) Записати О2 у буфер (SNAPSHOT-FIRST) — тільки якщо не repaint
+  if (!__isRepaint) {
+    const snap2 = __readO2SnapshotFromDOM(scope);
+    if (snap2) {
+      __pushSelectedO2({ object2: data?.object2, __scope: scope });
+    }
+  }
 
+  // 5) Лог
+  // eslint-disable-next-line no-console
   console.log(
     '[mode:geo:population] D1=%sm; N1=%s%s; N2=%s%s → D2=%sm',
     baselineDiameter,

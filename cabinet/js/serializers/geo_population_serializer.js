@@ -1,33 +1,25 @@
 // /cabinet/js/serializers/geo_population_serializer.js
-// Серіалізатор режиму «Географія → Населення» з підтримкою масиву О2 (o2s).
-// Працює незалежно від порядку завантаження: якщо місток ще не готовий — стає в чергу.
+// Серіалізатор режиму «Географія → Населення» (SNAPSHOT-FIRST).
+// ПРАВИЛО: зберігаємо лише те, що вже є в пам’яті сесії після «Розрахувати».
+// О1 — один об’єкт зі snapshot і власним baselineDiameterMeters.
+// О2 — масив об’єктів зі snapshot.
+// ЖОДНИХ пошуків у бібліотеках і ЖОДНИХ фолбеків до селекторів.
 
 import { getCurrentLang } from '/js/i18n.js';
 
 (function registerGeoPopulationSerializer() {
   'use strict';
 
-  // ---------- helpers ----------
+  /* ───────── helpers: DOM / orbit ───────── */
+
   function getCenterOrNull() {
     try {
       const c = window?.orbit?.getCenter?.();
       if (c && Number.isFinite(c.lat) && Number.isFinite(c.lon)) {
         return { lat: c.lat, lon: c.lon };
       }
-    } catch (_) {}
+    } catch {}
     return null;
-  }
-
-  function readSelectInfo(selectId) {
-    const el = document.getElementById(selectId);
-    if (!el || el.tagName !== 'SELECT') return { value: null, label: null };
-    const value = el.value ?? null;
-    let label = null;
-    try {
-      const opt = el.selectedIndex >= 0 ? el.options[el.selectedIndex] : null;
-      label = (opt?.textContent || '').trim() || null;
-    } catch (_) {}
-    return { value: value || null, label };
   }
 
   function readNumberOrNull(inputId) {
@@ -37,70 +29,94 @@ import { getCurrentLang } from '/js/i18n.js';
     return Number.isFinite(n) ? n : null;
   }
 
-  // Уніфікація одного елемента О2
-  function normO2(x) {
-    if (!x) return null;
-    const categoryKey = (x.categoryKey ?? x.category ?? null);
-    const objectId    = (x.objectId ?? x.id ?? null);
-    const name        = (x.name ?? x.label ?? null);
-    if (!categoryKey || !objectId) return null;
-    return {
-      categoryKey: String(categoryKey),
-      objectId: String(objectId),
-      name: name ? String(name) : null
-    };
+  /* ───────── валідація snapshot ───────── */
+
+  function isValidSnapshot(s) {
+    if (!s || typeof s !== 'object') return false;
+    const v = Number(s.value);
+    if (!Number.isFinite(v) || v <= 0) return false;
+    if (!s.unit) return false;
+    if (!s.id) return false;
+    if (!('category_key' in s)) return false;
+    return true;
   }
 
-  // Масив О2: спершу офіційний стан, інакше — фолбек на поточні селекти (1 елемент)
-  function readO2Array() {
+  /* ───────── читання з буферів сесії (БЕЗ фолбеків) ───────── */
+
+  function readO1FromBuffer() {
+    try {
+      if (typeof window?.orbit?.getGeoPopulationSelectedO1 === 'function') {
+        const x = window.orbit.getGeoPopulationSelectedO1();
+        if (!x || typeof x !== 'object') return null;
+
+        const categoryKey = x?.categoryKey ?? x?.category ?? null;
+        const objectId    = x?.objectId ?? x?.id ?? null;
+        const name        = x?.name ?? null;
+        const snapshot    = x?.snapshot ?? null;
+
+        if (!categoryKey || !objectId || !isValidSnapshot(snapshot)) return null;
+
+        return {
+          categoryKey: String(categoryKey),
+          objectId: String(objectId),
+          name: name ? String(name) : null,
+          snapshot
+        };
+      }
+    } catch {}
+    return null;
+  }
+
+  function readO2ArrayFromBuffer() {
     try {
       if (typeof window?.orbit?.getGeoPopulationSelectedO2s === 'function') {
-        const fromState = window.orbit.getGeoPopulationSelectedO2s();
-        if (!Array.isArray(fromState)) {
-          console.warn('[geo_population_serializer] getGeoPopulationSelectedO2s() must return array; got:', typeof fromState);
-        } else {
-          const norm = fromState.map(normO2).filter(Boolean);
-          if (norm.length) return norm;
+        const arr = window.orbit.getGeoPopulationSelectedO2s();
+        if (Array.isArray(arr)) {
+          return arr.map(x => {
+            const categoryKey = x?.categoryKey ?? x?.category ?? null;
+            const objectId    = x?.objectId ?? x?.id ?? null;
+            const name        = x?.name ?? null;
+            const snapshot    = x?.snapshot ?? null;
+
+            return (!categoryKey || !objectId || !isValidSnapshot(snapshot))
+              ? null
+              : {
+                  categoryKey: String(categoryKey),
+                  objectId: String(objectId),
+                  name: name ? String(name) : null,
+                  snapshot
+                };
+          }).filter(Boolean);
         }
       }
-    } catch (err) {
-      console.warn('[geo_population_serializer] Error reading O2 from state:', err);
-    }
-
-    // Фолбек: поточний вибір у випадайках → масив із 1 елемента або порожній
-    const cat2 = readSelectInfo('geoPopCategoryObject2');
-    const obj2 = readSelectInfo('geoPopObject2');
-    const one = normO2({ categoryKey: cat2.value, objectId: obj2.value, name: obj2.label });
-    return one ? [one] : [];
+    } catch {}
+    return [];
   }
 
-  // ---------- serializer ----------
+  /* ───────── основний серіалізатор ───────── */
+
   const serializer = function serializeGeoPopulationScene() {
-    // О1
-    const cat1 = readSelectInfo('geoPopCategoryObject1');
-    const obj1 = readSelectInfo('geoPopObject1');
+    // baseline керує масштабним колом; читаємо числове значення
     const baselineMeters = readNumberOrNull('geoPopBaselineDiameter');
 
-    // О2 (масив)
-    const o2s = readO2Array();
+    // Читаємо БЕЗПОСЕРЕДНЬО з буферів сесії (після «Розрахувати»)
+    const o1  = readO1FromBuffer();
+    const o2s = readO2ArrayFromBuffer();
 
-    // Мінімальна валідність: має бути О1 та хоча б один О2
-    if (!obj1.value || o2s.length === 0) {
-      console.warn('[geo_population_serializer] Incomplete data: need O1 and at least one O2');
+    // Мінімальні умови: валідний О1 (зі snapshot) і принаймні один О2 (зі snapshot)
+    if (!o1 || !o2s.length) {
+      console.warn('[geo_population_serializer] Потрібні валідні О1 і принаймні один О2 зі snapshot. Виконайте «Розрахувати».');
       return null;
     }
 
-    // Сцена
     const scene = {
       version: 2,
-      lang: getCurrentLang?.() || 'en',
+      lang: (typeof getCurrentLang === 'function' ? getCurrentLang() : 'en') || 'en',
       mode: 'geo_population',
       center: getCenterOrNull(),
       geo_population: {
         o1: {
-          categoryKey: cat1.value,
-          name: obj1.label,
-          objectId: obj1.value,
+          ...o1,
           baselineDiameterMeters: baselineMeters
         },
         o2s
@@ -110,7 +126,8 @@ import { getCurrentLang } from '/js/i18n.js';
     return scene;
   };
 
-  // ---------- реєстрація / черга ----------
+  /* ───────── реєстрація ───────── */
+
   try {
     if (window?.orbit?.registerSceneSerializer) {
       window.orbit.registerSceneSerializer('geo_population', serializer);

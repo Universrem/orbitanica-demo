@@ -1,10 +1,10 @@
-// full/js/blocks/geo_objects.js
+// /js/blocks/geo_objects.js
 'use strict';
 
 /**
- * Режим «Географія → Об’єкти (довжина/висота)» (UI) — SNAPSHOT-FIRST (еталон «Математика»).
- * - О1 і О2: категорії/об'єкти з geo-бібліотеки (офіційні + UGC);
- * - кожному <option> кріпимо snapshot у dataset.snapshot (length|height {value,unit});
+ * Режим «Географія → Об’єкти (довжина/висота)» (UI) — SNAPSHOT-FIRST (еталон «Діаметри»).
+ * - О1 і О2: категорії/об'єкти з geo-бібліотеки 'geo_objects' (мердж офіційні + UGC);
+ * - кожному <option> кріпимо snapshot у dataset.snapshot (object {value,unit}); фолбек: length|height;
  * - відновлення вибору за snapshot.id; локалізовані лейбли, UGC позначається (корист.);
  * - слухаємо reload/ready бібліотеки, user-objects-* та зміну мови; локальний reset на orbit:ui-reset.
  */
@@ -30,19 +30,27 @@ function isUser(rec) {
   return !!(rec?.is_user_object || rec?.source === 'user');
 }
 
-// Валідне лінійне значення (length або height)
+// Валідне лінійне значення: пріоритет object → фолбек length/height
 function hasValidLinear(rec) {
+  const O = Number(rec?.object?.value);
   const L = Number(rec?.length?.value);
   const H = Number(rec?.height?.value);
-  return (Number.isFinite(L) && L > 0) || (Number.isFinite(H) && H > 0);
+  return (Number.isFinite(O) && O > 0) ||
+         (Number.isFinite(L) && L > 0) ||
+         (Number.isFinite(H) && H > 0);
 }
 
-// Витягти нормалізоване {value, unit} для snapshot (перевага length, далі height)
+// Витягти нормалізоване {value, unit} для snapshot (пріоритет object, далі length, потім height)
 function pickLinearVU(rec) {
-  const L = rec?.length, H = rec?.height;
+  const O = rec?.object;
+  if (O && Number.isFinite(Number(O.value)) && Number(O.value) > 0 && s(O.unit)) {
+    return { value: Number(O.value), unit: s(O.unit) };
+  }
+  const L = rec?.length;
   if (L && Number.isFinite(Number(L.value)) && Number(L.value) > 0 && s(L.unit)) {
     return { value: Number(L.value), unit: s(L.unit) };
   }
+  const H = rec?.height;
   if (H && Number.isFinite(Number(H.value)) && Number(H.value) > 0 && s(H.unit)) {
     return { value: Number(H.value), unit: s(H.unit) };
   }
@@ -89,14 +97,8 @@ function getSelectedSnapshotId(sel) {
 
 /**
  * Прикріпити snapshot «лінійної» величини до option (О1/О2 однаково).
- * Snapshot формат:
- * {
- *   id, category_key,
- *   value, unit,         // з length|height.{value,unit}
- *   name_ua, name_en, name_es,
- *   description_ua, description_en, description_es,
- *   category_ua, category_en, category_es (якщо є)
- * }
+ * Snapshot:
+ * { id, category_key, value, unit, name_ua/en/es, description_ua/en/es, category_ua/en/es }
  */
 function attachGeoSnapshot(opt, rec) {
   if (!opt || !rec || !hasValidLinear(rec)) return;
@@ -127,7 +129,7 @@ function attachGeoSnapshot(opt, rec) {
 
 function rebuildCategories(scope) {
   const lang = currLangBase();
-  const lib  = (getGeoLibrary() || []).filter(hasValidLinear);
+  const lib  = (getGeoLibrary('geo_objects') || []).filter(hasValidLinear);
 
   const sel1 = scope.querySelector('#geoObjCategoryObject1') || scope.querySelector('.object1-group .category-select');
   const sel2 = scope.querySelector('#geoObjCategoryObject2') || scope.querySelector('.object2-group .category-select');
@@ -145,11 +147,11 @@ function rebuildCategories(scope) {
 
   const categories = [];
   for (const [key, rows] of map.entries()) {
-    // 1) Показуємо категорію лише якщо є хоч один об'єкт із локалізованою назвою
+    // показуємо категорію, якщо є хоч один об’єкт із локалізованою назвою
     const hasLocalizedObj = rows.some(r => hasValidLinear(r) && s(r?.[`name_${lang}`]));
     if (!hasLocalizedObj) continue;
 
-    // 2) Підпис категорії
+    // підпис категорії
     let labelBase = '';
     for (const r of rows) {
       const i18n = pickCategoryI18n(r);
@@ -201,7 +203,7 @@ function rebuildCategories(scope) {
 
 function rebuildObjects(scope, { catSel, objSel, isO1 }) {
   const lang = currLangBase();
-  const lib  = (getGeoLibrary() || []).filter(hasValidLinear);
+  const lib  = (getGeoLibrary('geo_objects') || []).filter(hasValidLinear);
 
   const cat = scope.querySelector(catSel);
   const obj = scope.querySelector(objSel);
@@ -285,7 +287,7 @@ function resetGeoObjectsForm(scope) {
 
 export async function initGeoObjectsBlock() {
   try {
-    await loadGeoLibrary();
+    await loadGeoLibrary('geo_objects');
   } catch (e) {
     console.error('[geo_objects] library load failed:', e);
   }
@@ -296,7 +298,7 @@ export async function initGeoObjectsBlock() {
   // стартове заповнення
   rebuildCategories(scope);
   rebuildObjects(scope, { catSel: '#geoObjCategoryObject1', objSel: '#geoObjObject1', isO1: true });
-  rebuildObjects(scope, { catSel: '#geoObjCategoryObject2', objSel: '#geoObjObject2', isO2: true });
+  rebuildObjects(scope, { catSel: '#geoObjCategoryObject2', objSel: '#geoObjObject2', isO1: false });
 
   // плейсхолдер і підказки для baseline О1
   const base = scope.querySelector('#geoObjBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
@@ -322,10 +324,10 @@ export async function initGeoObjectsBlock() {
 
   // очікувані події лоадера гео-бібліотеки + UGC
   document.addEventListener('geo-lib-reloaded', rebuildAll);
-  document.addEventListener('geo-lib:ready', rebuildAll);
+  document.addEventListener('geo-lib:ready:geo_objects', rebuildAll); // неймспейсний ready для режиму
+  // сумісність зі старими подіями
   document.addEventListener('user-objects-updated', rebuildAll);
   document.addEventListener('user-objects-removed', rebuildAll);
-  // сумісність зі старими подіями
   document.addEventListener('user-objects-added',   rebuildAll);
   document.addEventListener('user-objects-changed', rebuildAll);
 
