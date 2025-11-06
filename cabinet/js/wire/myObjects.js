@@ -11,7 +11,7 @@ import { openDeleteModal } from '/cabinet/js/wire/deleteModal.js';
 
 const MODAL_KEY = 'my-objects';
 const EDIT_MODAL_KEY = 'edit-object';
-const SUPPORTED_MODES = ['distance','diameter','mass','luminosity','money'];
+const SUPPORTED_MODES = ['distance','diameter','mass','luminosity','money','geo_population','geo_objects','geo_area','math','history'];
 
 const tStrict = (k, fb='') => { const v = t(k); return (v==null || v===k) ? fb : String(v); };
 
@@ -60,12 +60,46 @@ const catOf  = (it, L=currLang()) => pickI18n(it, 'category', L); // тільк�
 
 function modeLine(mode) {
   const m = String(mode||'').toLowerCase();
+
+  // Всесвіт
   if (['distance','diameter','mass','luminosity'].includes(m)) {
     const top = tStrict('panel_title_univers');
     const sub = tStrict(`panel_title_univers_${m}`);
     return top && sub ? `${top}: ${sub}` : (top || sub || m || '—');
   }
-  if (m === 'money') return tStrict('panel_title_money','Money');
+
+  // Гроші
+  if (m === 'money') {
+    return tStrict('panel_title_money','Money');
+  }
+
+  // Географія: населення / об’єкти / площі
+  if (m === 'geo_population') {
+    const top = tStrict('panel_title_geo');
+    const sub = tStrict('panel_title_geo_population');
+    return top && sub ? `${top}: ${sub}` : (top || sub || m || '—');
+  }
+  if (m === 'geo_objects') {
+    const top = tStrict('panel_title_geo');
+    const sub = tStrict('panel_title_geo_objects');
+    return top && sub ? `${top}: ${sub}` : (top || sub || m || '—');
+  }
+  if (m === 'geo_area') {
+    const top = tStrict('panel_title_geo');
+    const sub = tStrict('panel_title_geo_area');
+    return top && sub ? `${top}: ${sub}` : (top || sub || m || '—');
+  }
+
+  // Математика
+  if (m === 'math') {
+    return tStrict('panel_title_math','Math');
+  }
+
+  // Історія
+  if (m === 'history') {
+    return tStrict('panel_title_history','History');
+  }
+
   return m || '—';
 }
 

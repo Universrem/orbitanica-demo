@@ -95,6 +95,12 @@
     "yd": 0.9144,
     "mi": 1609.344,
     "nmi": 1852
+    }
+  },
+  "geo_population": {
+  "base": "people",
+  "units": {
+    "people": 1
+    }
   }
-}
 }

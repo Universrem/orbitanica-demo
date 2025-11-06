@@ -114,7 +114,7 @@ function attachPopulationSnapshot(opt, rec) {
 
 function rebuildCategories(scope) {
   const lang = currLangBase();
-  const lib  = (getGeoLibrary() || []).filter(hasValidPopulation);
+  const lib  = (getGeoLibrary('geo_population') || []).filter(hasValidPopulation);
 
   const sel1 = scope.querySelector('#geoPopCategoryObject1') || scope.querySelector('.object1-group .category-select');
   const sel2 = scope.querySelector('#geoPopCategoryObject2') || scope.querySelector('.object2-group .category-select');
@@ -188,7 +188,7 @@ function rebuildCategories(scope) {
 
 function rebuildObjects(scope, { catSel, objSel, isO1 }) {
   const lang = currLangBase();
-  const lib  = (getGeoLibrary() || []).filter(hasValidPopulation);
+  const lib  = (getGeoLibrary('geo_population') || []).filter(hasValidPopulation);
 
   const cat = scope.querySelector(catSel);
   const obj = scope.querySelector(objSel);
@@ -272,7 +272,7 @@ function resetGeoPopulationForm(scope) {
 
 export async function initGeoPopulationBlock() {
   try {
-    await loadGeoLibrary();
+    await loadGeoLibrary('geo_population');
   } catch (e) {
     console.error('[geo_population] library load failed:', e);
   }
