@@ -55,8 +55,8 @@
     "base": "USD",
     "units": {
       "USD": 1,
-      "EUR": 1.1,
-      "UAH": 0.027
+      "EUR": 1.16,
+      "UAH": 0.024
     }
   },
   "area": {
@@ -102,5 +102,10 @@
   "units": {
     "people": 1
     }
+  },
+  "history": { 
+    "base": "year", 
+    "units": { 
+      "year": 1 } 
   }
 }

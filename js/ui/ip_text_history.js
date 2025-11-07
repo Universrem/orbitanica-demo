@@ -1,4 +1,4 @@
-// full/js/ui/ip_text_history.js
+// /js/ui/ip_text_history.js
 'use strict';
 
 /**

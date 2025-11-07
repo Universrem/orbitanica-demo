@@ -1,4 +1,4 @@
-// full/js/data/math_lib.js
+// /js/data/math_lib.js
 'use strict';
 
 /**
@@ -370,3 +370,61 @@ try {
   window.addEventListener('user-objects-removed', onUserObjectsRemoved);
   document.addEventListener('user-objects-removed', onUserObjectsRemoved);
 } catch {}
+/** ───────────────────────────── Категорії для селектора ─────────────────────────────
+ * Повертає масив категорій у форматі:
+ *   { key, name_i18n: { ua, en, es }, isUser }
+ * - Працює для режиму 'math'
+ * - Читає лише з кешу (readyMathLibrary() → getMathLibrary()).
+ * - Групування строго за category_key.
+ * - isUser === true, якщо для key немає жодного запису з is_official===true.
+ * - Порядок — за першою появою key у кеші (стабільний), тай-брейк — по key.
+ */
+export async function listCategories(mode = MODE) {
+  if (mode && mode !== MODE) return [];
+
+  await readyMathLibrary();
+  const list = Array.isArray(getMathLibrary()) ? getMathLibrary() : [];
+
+  const S = (v) => (v == null ? '' : String(v).trim());
+  const byKey = new Map();  // key -> { key, name_i18n, isUser }
+  const order = [];         // стабільний порядок за першою появою
+
+  for (const rec of list) {
+    const key = S(rec?.category_key || rec?.category_id);
+    if (!key) continue;
+
+    let entry = byKey.get(key);
+    if (!entry) {
+      entry = {
+        key,
+        name_i18n: {
+          ua: S(rec?.category_ua),
+          en: S(rec?.category_en),
+          es: S(rec?.category_es),
+        },
+        // стартуємо з припущення "користувацька", скинемо до false якщо побачимо офіційний запис
+        isUser: rec?.is_official ? false : true,
+      };
+      byKey.set(key, entry);
+      order.push(key);
+    } else {
+      // дозаповнюємо локалізовані назви, якщо якісь порожні
+      if (!entry.name_i18n.ua && rec?.category_ua) entry.name_i18n.ua = S(rec.category_ua);
+      if (!entry.name_i18n.en && rec?.category_en) entry.name_i18n.en = S(rec.category_en);
+      if (!entry.name_i18n.es && rec?.category_es) entry.name_i18n.es = S(rec.category_es);
+      // якщо зустріли офіційний запис — категорія вважається офіційною
+      if (rec?.is_official) entry.isUser = false;
+    }
+  }
+
+  // стабілізуємо вихід: порядок першої появи, тай-брейк по ключу
+  const out = order.map(k => byKey.get(k)).filter(Boolean);
+  out.sort((a, b) => {
+    const ia = order.indexOf(a.key);
+    const ib = order.indexOf(b.key);
+    if (ia !== ib) return ia - ib;
+    return a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
+  });
+
+  return out;
+}

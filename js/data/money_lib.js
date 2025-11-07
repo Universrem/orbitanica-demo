@@ -413,3 +413,66 @@ try {
   window.addEventListener('user-objects-removed', __onUserObjectRemoved);
   document.addEventListener('user-objects-removed', __onUserObjectRemoved);
 } catch {}
+/** ───────────────────────────── Категорії для селектора ─────────────────────────────
+ * Повертає масив категорій у форматі:
+ *   { key, name_i18n: { ua, en, es }, isUser }
+ * - Читає лише з кешу (readyMoney() → getMoneyLibrary()).
+ * - Групування строго за category_key.
+ * - isUser === true, якщо для key немає жодного запису з is_official===true.
+ * - Порядок — за першою появою key у кеші (стабільний), тай-брейк — за key.
+ * - mode параметр для уніфікації сигнатури серед *_lib.js; тут очікуємо 'money'.
+ */
+export async function listCategories(mode = MODE) {
+  if (mode && mode !== MODE) return [];
+
+  await readyMoney();
+  const list = Array.isArray(getMoneyLibrary()) ? getMoneyLibrary() : [];
+
+  const byKey = new Map();   // key -> { key, name_i18n, isUser }
+  const order = [];          // перша поява key (стабільний порядок)
+
+  const normStr = (s) => (s == null ? '' : String(s).trim());
+
+  for (const rec of list) {
+    const key = normStr(rec?.category_key || rec?.category_id);
+    if (!key) continue;
+
+    let entry = byKey.get(key);
+    if (!entry) {
+      entry = {
+        key,
+        name_i18n: {
+          ua: normStr(rec?.category_ua),
+          en: normStr(rec?.category_en),
+          es: normStr(rec?.category_es),
+        },
+        // якщо перший запис неофіційний — стартуємо з true; далі можемо скинути до false
+        isUser: !!rec && rec.is_official ? false : true,
+      };
+      byKey.set(key, entry);
+      order.push(key);
+    } else {
+      // Дозаповнення локалізованих назв, якщо в entry порожньо
+      if (!entry.name_i18n.ua && rec?.category_ua) entry.name_i18n.ua = normStr(rec.category_ua);
+      if (!entry.name_i18n.en && rec?.category_en) entry.name_i18n.en = normStr(rec.category_en);
+      if (!entry.name_i18n.es && rec?.category_es) entry.name_i18n.es = normStr(rec.category_es);
+      // Якщо зустріли офіційний запис — категорія вважається офіційною
+      if (rec && rec.is_official) entry.isUser = false;
+    }
+  }
+
+  // Формуємо вихід у стабільному порядку; тай-брейк по key для гарантованої детермінованості
+  const out = order
+    .map(k => byKey.get(k))
+    .filter(Boolean);
+
+  // На випадок, якщо однакові ключі потрапили з різним порядком (не повинно, але зробимо стабілізацію):
+  out.sort((a, b) => {
+    const ia = order.indexOf(a.key);
+    const ib = order.indexOf(b.key);
+    if (ia !== ib) return ia - ib;
+    return a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
+  });
+
+  return out;
+}
