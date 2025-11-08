@@ -128,7 +128,6 @@ if (!window.__panelCreateBound) {
     if (!block) return;
 
     const blockId = block.id || '';
-    if (blockId === 'history') return;
 
     // mode з id (univers_* → *), money → money
     let mode = blockId;

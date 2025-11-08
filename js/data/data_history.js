@@ -1,4 +1,4 @@
-// full/js/data/data_history.js
+// /js/data/data_history.js
 'use strict';
 
 /**

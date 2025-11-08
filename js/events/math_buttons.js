@@ -1,4 +1,4 @@
-// /full/js/events/math_buttons.js
+// /js/events/math_buttons.js
 'use strict';
 
 /**

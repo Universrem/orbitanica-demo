@@ -62,7 +62,7 @@ async function __loadLibCategories(mode) {
 
   // ====== МАТЕМАТИКА ======
   if (mode === 'math') {
-    const lib = await import('/full/js/data/math_lib.js'); // абсолютний шлях, як у проекті
+    const lib = await import('../data/math_lib.js'); // абсолютний шлях, як у проекті
     // очікується export async function listCategories(mode='math')
     return await lib.listCategories('math');
   }
@@ -74,10 +74,16 @@ async function __loadLibCategories(mode) {
     return await lib.listCategories('money');
   }
 
+  // ====== ІСТОРІЯ ======
+  if (mode === 'history') {
+    const lib = await import('../data/history_lib.js');
+    // історія повертає категорії без параметра
+    return await lib.listCategories();
+  }
+
   // інші режими поки не підключені
   return [];
 }
-
 
 function __formatCategoryLabel(item) {
   const mark = USER_MARK();
@@ -194,7 +200,6 @@ export async function openCreateModal({ mode, presetCategory = '', slot = 'objec
   if (!mode) { console.error('[modal] mode is required'); return null; }
   await ensureUnitsLoaded();
 
-
   const root = document.getElementById(ROOT_ID);
   if (!root) {
     console.error('[modal] #modal-root not found');
@@ -208,6 +213,8 @@ export async function openCreateModal({ mode, presetCategory = '', slot = 'objec
 
   // Правильно обробляємо presetCategory (це key)
   const presetCategoryName = await resolvePresetCategory(mode, presetCategory);
+
+  const isHistory = mode === 'history';
 
   return new Promise(async (resolve) => {
     const dispose = () => { root.innerHTML = ''; document.body.classList.remove('modal-open'); };
@@ -242,14 +249,28 @@ export async function openCreateModal({ mode, presetCategory = '', slot = 'objec
           <!-- Значення + одиниця -->
           <div class="ouo-row">
             <label class="ouo-field">
-              <span>${t('field_value')}</span>
-              <input type="number" id="ouo-value" step="any" min="0" placeholder="0">
+              <span>${isHistory ? (t('field_value_start') || t('field_value')) : t('field_value')}</span>
+              <input type="number" id="ouo-value" step="${isHistory ? '1' : 'any'}" ${isHistory ? '' : 'min="0"'} placeholder="${isHistory ? '0' : '0'}">
             </label>
             <label class="ouo-field">
               <span>${t('field_unit')}</span>
               <select id="ouo-unit"></select>
             </label>
           </div>
+
+          ${isHistory ? `
+          <!-- ТІЛЬКИ ДЛЯ ІСТОРІЇ: Кінець періоду (необов'язково) -->
+          <div class="ouo-row">
+            <label class="ouo-field">
+              <span>${t('field_value_end_optional') || 'Кінець (необов’язково)'}</span>
+              <input type="number" id="ouo-value2" step="1" placeholder="">
+            </label>
+            <label class="ouo-field">
+              <span>${t('field_unit')}</span>
+              <select id="ouo-unit2"></select>
+            </label>
+          </div>
+          ` : ''}
 
           <!-- Опис (опційно) -->
           <label class="ouo-field">
@@ -265,14 +286,28 @@ export async function openCreateModal({ mode, presetCategory = '', slot = 'objec
       </div>
     `;
 
-    // Заповнити список одиниць згідно з mode
+    // Заповнити список одиниць згідно з mode (тільки з base_units)
+    const units = listUnits(mode) || [];
+
     const unitSel = wrap.querySelector('#ouo-unit');
-    (listUnits(mode) || []).forEach(u => {
+    units.forEach(u => {
       const opt = document.createElement('option');
       opt.value = u;
       opt.textContent = u;
       unitSel.appendChild(opt);
     });
+    if (units.length === 1) unitSel.disabled = true;
+
+    if (isHistory) {
+      const unitSel2 = wrap.querySelector('#ouo-unit2');
+      units.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u;
+        opt.textContent = u;
+        unitSel2.appendChild(opt);
+      });
+      if (units.length === 1) unitSel2.disabled = true;
+    }
 
     // Закриття модалки
     wrap.addEventListener('click', (e) => { if (e.target === wrap) { dispose(); resolve(null); } });
@@ -282,7 +317,12 @@ export async function openCreateModal({ mode, presetCategory = '', slot = 'objec
     wrap.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         const target = e.target;
-        const inText = target && (target.id === 'ouo-name' || target.id === 'ouo-value' || target.id === 'ouo-category');
+        const inText = target && (
+          target.id === 'ouo-name' ||
+          target.id === 'ouo-value' ||
+          target.id === 'ouo-value2' ||
+          target.id === 'ouo-category'
+        );
         if (inText) {
           e.preventDefault();
           wrap.querySelector('#ouo-create')?.click();
@@ -308,6 +348,13 @@ export async function openCreateModal({ mode, presetCategory = '', slot = 'objec
         const unit = wrap.querySelector('#ouo-unit').value;
         const desc = wrap.querySelector('#ouo-desc').value.trim();
 
+        const value2El = isHistory ? wrap.querySelector('#ouo-value2') : null;
+        const value2Raw = isHistory ? value2El.value : null;
+        const value2 = isHistory && value2Raw !== '' ? Number(value2Raw) : null;
+
+        const unit2El = isHistory ? wrap.querySelector('#ouo-unit2') : null;
+        const unit2 = isHistory ? unit2El.value : null;
+
         // Категорія: текст → офіційний key або новий slug (все через lib)
         const categoryName = processCategoryInput(categoryInput);
         const categoryKey  = await resolveCategoryKey(mode, categoryName);
@@ -315,26 +362,52 @@ export async function openCreateModal({ mode, presetCategory = '', slot = 'objec
         const invalid = [];
         if (!categoryName) invalid.push('category');
         if (!name) invalid.push('name');
-        if (!(value > 0)) invalid.push('value');
+
+        // ІСТОРІЯ: дозволяємо будь-яке скінченне число (може бути <0, 0)
+        // Інші режими: >0
+        const valueOk = isHistory ? Number.isFinite(value) : (value > 0);
+        if (!valueOk) invalid.push('value');
+
         if (!unit) invalid.push('unit');
 
+        // value2 (історія) — якщо введене, має бути скінченним
+        if (isHistory && value2Raw !== '' && !Number.isFinite(value2)) {
+          invalid.push('value2');
+        }
+
         wrap.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-        invalid.forEach(k => wrap.querySelector(`#ouo-${k}`).classList.add('is-invalid'));
+        invalid.forEach(k => wrap.querySelector(`#ouo-${k}`)?.classList.add('is-invalid'));
         if (invalid.length) return;
 
-        const payload = {
+        const payloadBase = {
           mode,
           [`name_${lang}`]: name,
           [`description_${lang}`]: desc || null,
           category_key: categoryKey,
           [`category_${lang}`]: categoryName,
-          value: value,
-          value2: null,
-          unit_key: unit,
-          unit2_key: null,
           is_public: true,
           status: 'published'
         };
+
+        // Формуємо значення/одиниці за режимом
+        let payload;
+        if (isHistory) {
+          payload = {
+            ...payloadBase,
+            value: value,              // start (рік)
+            value2: value2 ?? null,    // end (рік) опційно
+            unit_key: unit,            // з listUnits(mode)
+            unit2_key: (value2 != null) ? unit2 : null
+          };
+        } else {
+          payload = {
+            ...payloadBase,
+            value: value,
+            value2: null,
+            unit_key: unit,
+            unit2_key: null
+          };
+        }
 
         const store = getStore();
         const rec = await store.add(payload); // Supabase + оновлення кешів через події
@@ -346,8 +419,14 @@ export async function openCreateModal({ mode, presetCategory = '', slot = 'objec
           document.dispatchEvent(new CustomEvent('user-objects-added',   { detail }));
           document.dispatchEvent(new CustomEvent('user-objects-changed', { detail }));
           document.dispatchEvent(new CustomEvent('user-objects-updated', { detail }));
-          // Загальний сигнал для кешів (існують також режимні money-lib-reloaded тощо)
-          document.dispatchEvent(new CustomEvent('univers-lib-reloaded', { detail: { mode, reason: 'user-add', id: created.id } }));
+          // Загальні/режимні сигнали для кешів
+          if (mode === 'history') {
+            document.dispatchEvent(new CustomEvent('history-lib-reloaded', { detail: { mode, reason: 'user-add', id: created.id } }));
+          } else if (mode === 'geo_objects' || mode === 'geo_area' || mode === 'geo_population') {
+            document.dispatchEvent(new CustomEvent('geo-lib-reloaded', { detail: { mode, reason: 'user-add', id: created.id } }));
+          } else {
+            document.dispatchEvent(new CustomEvent('univers-lib-reloaded', { detail: { mode, reason: 'user-add', id: created.id } }));
+          }
         } catch {}
 
         dispose();

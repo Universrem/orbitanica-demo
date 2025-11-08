@@ -1,4 +1,4 @@
-// full/js/data/data_geo_population.js
+// /js/data/data_geo_population.js
 'use strict';
 
 /**
