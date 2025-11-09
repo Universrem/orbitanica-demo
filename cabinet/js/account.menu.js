@@ -6,21 +6,38 @@
 import { t } from '/js/i18n.js';
 import { signInWithEmail, signOut, getUserEmail, watchAuth } from '/cabinet/js/cloud/auth.cloud.js';
 
+function mapAuthUiError(err) {
+  const code = err?.code || '';
+  switch (code) {
+    case 'invalid_email':
+      return t('auth.error.invalid_email');
+    case 'cooldown': {
+      const sec = err?.seconds ?? '';
+      const tpl = t('auth.error.cooldown') || '';
+      return tpl.replace('{sec}', String(sec));
+    }
+    case 'link_expired':
+      return t('auth.error.link_expired');
+    default:
+      return err?.message || t('auth.error.generic');
+  }
+}
+
 // Експортований відкривач модалки входу (без глобалів/вікон)
 export function openCabinetSignInDialog() {
   openSignInModal(async (value, setError, close) => {
     try {
       await signInWithEmail(value);
-      close();
+            openSignInSent(value);
     } catch (err) {
-      setError(err?.message || t('auth.error.generic'));
+            setError(mapAuthUiError(err));
     }
   });
 }
 
 // ——— Модалка вводу email ———
 // Перенесено у верхній рівень модуля, щоб її могли викликати інші модулі через експорт вище
-function openSignInModal(onSubmit /* (email, setError, close) */) {
+function openSignInModal(onSubmit /* (email, setError, close) */, initialEmail = '') {
   closeSignInModal();
 
   const overlay = document.createElement('div');
@@ -42,6 +59,7 @@ function openSignInModal(onSubmit /* (email, setError, close) */) {
   input.type = 'email';
   input.className = 'cab-input';
   input.placeholder = t('auth.field.email');
+    input.value = initialEmail;
 
   const hint = document.createElement('div');
   hint.className = 'cab-hint';
@@ -96,6 +114,71 @@ function openSignInModal(onSubmit /* (email, setError, close) */) {
 function closeSignInModal() {
   const el = document.getElementById('cab-auth-overlay');
   if (el) el.remove();
+}
+function openSignInSent(email) {
+  // якщо модалки ще нема — відкриємо заново «ввід email» і одразу перемкнемося
+  let overlay = document.getElementById('cab-auth-overlay');
+  if (!overlay) {
+    openSignInModal(async (value, setError, close) => {
+      try { await signInWithEmail(value); openSignInSent(value); }
+      catch (err) { setError(err?.message || t('auth.error.generic')); }
+    }, email);
+    overlay = document.getElementById('cab-auth-overlay');
+  }
+  if (!overlay) return;
+
+  const box = overlay.querySelector('.cab-modal');
+  if (!box) return;
+
+  box.innerHTML = '';
+
+  const h = document.createElement('h3');
+  h.className = 'cab-modal-title';
+  h.textContent = t('auth.email_sent_title');
+  box.setAttribute('aria-label', t('auth.email_sent_title'));
+
+
+  const p = document.createElement('div');
+  p.className = 'cab-hint';
+
+  p.innerHTML = `${t('auth.note.sent_done')}<br><strong>${email}</strong>`;
+
+  const err = document.createElement('div');
+  err.className = 'cab-error';
+  err.hidden = true;
+
+  const row = document.createElement('div');
+  row.className = 'cab-row';
+
+  const btnClose = document.createElement('button');
+  btnClose.className = 'cab-btn';
+  btnClose.textContent = t('ui.close')
+  btnClose.addEventListener('click', closeSignInModal);
+
+  const btnResend = document.createElement('button');
+  btnResend.className = 'cab-btn cab-primary';
+  btnResend.textContent = t('auth.button.send_link');
+  btnResend.addEventListener('click', async () => {
+    err.hidden = true;
+    btnResend.disabled = true;
+    try {
+      await signInWithEmail(email);
+      // опц.: можна мигнути тостом, але не закриваємо модалку
+    } catch (e) {
+            err.textContent = mapAuthUiError(e);
+      err.hidden = false;
+    } finally {
+      btnResend.disabled = false;
+    }
+  });
+
+  box.appendChild(h);
+  box.appendChild(p);
+  box.appendChild(err);
+  box.appendChild(row);
+
+  row.appendChild(btnClose);
+  row.appendChild(btnResend);
 }
 
 // Іконки (поклади /res/icons/user-auth.png; гість використовує чинний user.png)

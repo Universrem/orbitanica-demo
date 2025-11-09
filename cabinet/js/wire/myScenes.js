@@ -18,6 +18,49 @@ let escHandlerMain = null;
 let escHandlerEdit = null;
 let currentRows = [];
 
+function modeLine(mode) {
+  const raw = String(mode || '').toLowerCase();
+  const m = raw.startsWith('univers_') ? raw.slice(8) : raw; // univers_distance -> distance
+
+  // === Geography: підрежими (population/objects/area) ===
+  if (m === 'geo_population' || m === 'geo_objects' || m === 'geo_area') {
+    const top = tStrict('panel_title_geo');
+    const sub = tStrict(`panel_title_geo_${m.split('_')[1]}`); // population / objects / area
+    return top && sub ? `${top}: ${sub}` : (top || sub || raw || '');
+  }
+
+  // === Universe: підрежими (distance/diameter/mass/luminosity) — так само, як вище ===
+  const uni = ['distance','diameter','mass','luminosity'];
+  if (uni.includes(m)) {
+    const top = tStrict('panel_title_unvers') || tStrict('panel_title_univers'); // про всяк випадок
+    const sub = tStrict(`panel_title_univers_${m}`);
+    return top && sub ? `${top}: ${sub}` : (top || sub || raw || '');
+  }
+
+  // === Однорівневі режими ===
+  if (m === 'money')   return tStrict('panel_title_money','Money');
+  if (m === 'math')    return tStrict('panel_title_math','Math');
+  if (m === 'history') return tStrict('panel_title_history','History');
+
+  return raw || '';
+}
+
+
+// Витяг mode із сцени (пряме поле, payload-об’єкт, JSON, або URL-параметри)
+function getSceneMode(row) {
+  if (row && typeof row.mode === 'string') return row.mode;
+  if (row && row.query && typeof row.query === 'object' && typeof row.query.mode === 'string') return row.query.mode;
+  if (row && typeof row.query === 'string') {
+    try { const o = JSON.parse(row.query); if (o && typeof o.mode === 'string') return o.mode; } catch {}
+    try {
+      const u = new URL(row.query, location.origin);
+      const m = u.searchParams.get('m') || u.searchParams.get('mode');
+      if (m) return m;
+    } catch {}
+  }
+  return '';
+}
+
 // --- toast: показ короткого повідомлення поверх сторінки ---
 function showCabToast(msgKey = 'scenes.link_copied') {
   const text = tStrict(msgKey);
@@ -171,19 +214,32 @@ function renderList(rows) {
   const list = getListContainer();
   if (!list) return;
   clearElement(list);
+const rowsSorted = [...rows].sort((a, b) => {
+  const ad = new Date(a.created_at || a.updated_at || 0).getTime();
+  const bd = new Date(b.created_at || b.updated_at || 0).getTime();
+  return ad - bd; // 1 — найстарший
+});
 
-  rows.forEach((row) => {
+  rowsSorted.forEach((row, idx) => {
     const card = createEl('div', 'cab-scene-card');
 
-    const title = createEl('div', 'cab-scene-title', {
-      text: (row.title && row.title.trim()) || tStrict('scenes.untitled'),
-    });
+    // Верхній рядок «Режим:підрежим»
+const topModeEl = createEl('div','cab-scene-meta',{ text: modeLine(getSceneMode(row)) });
+
+
+    const titleText = (row.title && row.title.trim()) || tStrict('scenes.untitled');
+const title = createEl('div', 'cab-scene-title', {
+  text: `${idx + 1}. ${titleText}`,
+});
+
 
     const desc = createEl('div', 'cab-scene-desc', {
       text: (row.description && row.description.trim()) || '',
     });
 
-    const createdDate = formatDateOnly(row.created_at);
+    const dateIso = row.created_at || row.updated_at;
+const createdDate = formatDateOnly(dateIso);
+
     const meta = createEl('div', 'cab-scene-meta', { text: createdDate });
 
     // actions (іконки з тултіпами)
@@ -242,7 +298,7 @@ function renderList(rows) {
 
 
     actions.append(btnOpen, btnShare, btnToggle, btnEdit, btnDelete);
-    card.append(title, desc, meta, actions);
+    card.append(topModeEl, title, desc, meta, actions);
     list.appendChild(card);
   });
 }

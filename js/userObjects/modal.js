@@ -4,6 +4,8 @@
 import { t, getCurrentLang } from '../i18n.js';
 import { loadBaseUnits, listUnits } from '../utils/unit_converter.js';
 import { getStore } from './api.js';
+import { getUserEmail } from '/cabinet/js/cloud/auth.cloud.js';
+import { openCabinetSignInDialog } from '/cabinet/js/account.menu.js';
 
 const ROOT_ID = 'modal-root';
 let unitsLoaded = false;
@@ -198,6 +200,13 @@ async function ensureUnitsLoaded() {
 
 export async function openCreateModal({ mode, presetCategory = '', slot = 'object2' } = {}) {
   if (!mode) { console.error('[modal] mode is required'); return null; }
+// Доступ лише для авторизованих
+const email = await getUserEmail();
+if (!email) {
+  openCabinetSignInDialog();
+  return null;
+}
+
   await ensureUnitsLoaded();
 
   const root = document.getElementById(ROOT_ID);

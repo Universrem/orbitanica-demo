@@ -957,16 +957,22 @@
     "en": "Send sign-in link",
     "es": "Enviar enlace de acceso"
   },
-  "auth.note.sent_body": {
-    "ua": "Ми надішлемо захищене одноразове посилання.",
-    "en": "We’ll email you a secure one-time link.",
-    "es": "Te enviaremos un enlace seguro de un solo uso."
-  },
+"auth.note.sent_body": {
+  "ua": "Ми надішлемо одноразове посилання на вашу пошту.",
+  "en": "We’ll send a one-time sign-in link to your email.",
+  "es": "Enviaremos un enlace de acceso de un solo uso a tu correo."
+},
+"auth.note.sent_done": { 
+  "ua": "Ми надіслали одноразове посилання на вашу пошту.", 
+  "en": "We’ve sent a one-time sign-in link to your email.", 
+  "es": "Hemos enviado un enlace de acceso de un solo uso a tu correo."
+},
   "auth.error.invalid_email": {
     "ua": "Введіть коректну адресу.",
     "en": "Please enter a valid email.",
     "es": "Introduce un correo válido."
   },
+  "auth.email_sent_title": { "ua": "Перевірте пошту", "en": "Check your email", "es": "Revisa tu correo" },
   "auth.error.generic":           { "ua": "Щось пішло не так. Спробуйте ще раз.", "en": "Something went wrong. Please try again.", "es": "Algo salió mal. Vuelve a intentarlo." },
   "ui.topbar.my_scenes":          { "ua": "Мої сцени", "en": "My scenes", "es": "Mis escenas" },
   "ui.topbar.save_scene":         { "ua": "Зберегти сцену", "en": "Save scene", "es": "Guardar escena" },
@@ -999,7 +1005,9 @@
   "scenes.field_public":       { "ua": "Публічна", "en": "Public", "es": "Pública" },
   "scenes.edit": { "ua": "Редагувати", "en": "Edit", "es": "Editar" },
   "field_mode": { "ua": "Режим", "en": "Mode", "es": "Modo" },
-
+  "ui.close":                     { "ua": "Закрити", "en": "Close", "es": "Cerrar" },
+"auth.error.cooldown": { "ua": "З міркувань безпеки повторний запит можливий через {sec} с.", "en": "For security purposes, you can request this again in {sec} seconds.", "es": "Por seguridad, puedes volver a solicitarlo en {sec} segundos." },
+"auth.error.link_expired": { "ua": "Посилання застаріло. Запросіть нове.", "en": "The link has expired. Please request a new one.", "es": "El enlace ha expirado. Solicita uno nuevo." },
   "cab_save_title":               { "ua": "Зберегти сцену", "en": "Save scene", "es": "Guardar escena" },
   "cab_save_field_title":         { "ua": "Назва*", "en": "Title*", "es": "Título*" },
   "cab_save_field_desc":          { "ua": "Опис", "en": "Description", "es": "Descripción" },

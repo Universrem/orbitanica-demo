@@ -7,6 +7,8 @@ import { loadBaseUnits } from '../utils/unit_converter.js';
 import { resetAllUI } from './reset.js';
 import { getMode } from '../modes/registry.js';
 import '../modes/builtin.js'; // реєструє режими (side-effect)
+import { getUserEmail } from '/cabinet/js/cloud/auth.cloud.js';
+import { openCabinetSignInDialog } from '/cabinet/js/account.menu.js';
 
 // Знімати .is-invalid при вводі (один раз)
 if (!window.__orbitInvalidFix) {
@@ -146,6 +148,14 @@ if (!window.__panelCreateBound) {
     );
     const presetCategory =
       presetCategoryEl && typeof presetCategoryEl.value === 'string' ? presetCategoryEl.value : '';
+
+    // Перевірка авторизації: гість → відкриваємо модалку входу і не продовжуємо
+    const email = await getUserEmail();
+    if (!email) {
+      openCabinetSignInDialog();
+      return;
+    }
+
 
     await openCreateModal({ mode, presetCategory, slot });
   });

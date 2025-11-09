@@ -10,14 +10,39 @@ function isValidEmail(email) {
 }
 
 /** Map повідомлень Supabase у зрозумілий текст (можна замінити на i18n) */
-function normalizeAuthError(error) {
-  if (!error) return null;
-  const msg = (error.message || '').toLowerCase();
-  if (msg.includes('rate')) return 'Too many requests. Try again later.';
-  if (msg.includes('invalid') && msg.includes('email')) return 'Please enter a valid email.';
-  if (msg.includes('expired')) return 'This link is no longer valid. Request a new one.';
-  return error.message || 'Something went wrong. Please try again.';
+/** Створює помилку з кодом та додатковими полями (для UI) */
+function makeAuthError(code, message, extra = {}) {
+  const e = new Error(message || code);
+  e.code = code;
+  Object.assign(e, extra);
+  return e;
 }
+
+/** Нормалізація помилок від Supabase у стабільні коди для UI */
+function mapSupabaseError(error) {
+  if (!error) return makeAuthError('generic', 'Unknown auth error');
+
+  const rawMsg = String(error.message || '');
+  const msg = rawMsg.toLowerCase();
+
+  // Типовий ліміт: "For security purposes, you can only request this after 54 seconds."
+  const m = /only request this after\s+(\d+)\s+seconds/i.exec(rawMsg);
+  if (error.status === 429 || m) {
+    const seconds = m ? Number(m[1]) : undefined;
+    return makeAuthError('cooldown', 'Cooldown in effect', seconds ? { seconds } : {});
+  }
+
+  if (msg.includes('invalid') && msg.includes('email')) {
+    return makeAuthError('invalid_email', 'Invalid email');
+  }
+
+  if (msg.includes('expired')) {
+    return makeAuthError('link_expired', 'Magic link expired');
+  }
+
+  return makeAuthError('generic', rawMsg || 'Auth error');
+}
+
 
 /**
  * Надіслати лист для входу (magic link).
@@ -25,7 +50,7 @@ function normalizeAuthError(error) {
  */
 export async function signInWithEmail(email) {
   if (!isValidEmail(email)) {
-    throw new Error('Please enter a valid email.');
+    throw makeAuthError('invalid_email', 'Invalid email');
   }
   const supabase = await getSupabase();
 
@@ -37,7 +62,7 @@ export async function signInWithEmail(email) {
     }
   });
 
-  if (error) throw new Error(normalizeAuthError(error));
+  if (error) throw mapSupabaseError(error);
   return { ok: true };
 }
 
