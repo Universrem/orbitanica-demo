@@ -1428,9 +1428,6 @@ body.modal-open { overflow: hidden; }
   overflow: hidden;
   text-overflow: ellipsis; /* крапки в кінці 2-го рядка */
 }
-/* Розкриття заголовка повністю при наведенні/фокусі/активі */
-#left-panel .section-content .public-scene-item:hover .public-scene-title,
-#left-panel .section-content .public-scene-item:focus-within .public-scene-title,
 #left-panel .section-content .public-scene-item.is-active .public-scene-title {
   display: block;             /* знімаємо -webkit-box */
   -webkit-line-clamp: unset;  /* прибираємо обмеження */
@@ -1460,15 +1457,6 @@ body.modal-open { overflow: hidden; }
   overflow: visible;
   text-overflow: clip;
   display: block;          /* повний текст, як при :hover */
-}
-
-/* При наведенні на картку — показуємо повний опис, без обрізання */
-#left-panel .section-content .public-scene-item:hover .public-scene-desc,
-#left-panel .section-content .public-scene-item:focus-within .public-scene-desc {
-  white-space: normal;      /* дозволяємо перенос */
-  overflow: visible;
-  text-overflow: clip;
-  display: block;
 }
 
 /* Статистика: ♥ і 👁 акуратно по рядку */

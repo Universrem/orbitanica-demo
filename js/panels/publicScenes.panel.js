@@ -113,12 +113,23 @@ likeBtn.setAttribute('aria-pressed', likedInit ? 'true' : 'false');
     const viewsSpan = el('span', 'scene-views', { text: `👁 ${row.views ?? 0}` });
 
     stats.append(likeBtn, viewsSpan);
+// У списках опис прихований до кліку по назві
+desc.hidden = true;
 
-    // Клік по картці: +1 перегляд → чисте застосування сцени → позначаємо активною
-btn.addEventListener('click', async () => {
+// Клік по НАЗВІ: 1) показ/приховати опис, 2) views++, 3) застосувати сцену, 4) підсвітити картку
+title.addEventListener('click', async (ev) => {
+  ev.stopPropagation();
+
+  // Закрити інші відкриті описи в межах цього контейнера списку
+  cardsContainer.querySelectorAll('.public-scene-desc').forEach(d => { d.hidden = true; });
+  // Тогл опису поточної сцени
+  desc.hidden = !desc.hidden;
+
+  // Інкремент переглядів і застосування сцени
   try {
     if (row?.id) {
       const cur = Number(row.views ?? 0) || 0;
+      // Оновити локально лічильник переглядів
       viewsSpan.textContent = `👁 ${cur + 1}`;
       row.views = cur + 1;
       await incrementSceneView(row.id);
@@ -128,12 +139,17 @@ btn.addEventListener('click', async () => {
     console.error('[views]', e);
   }
 
-  // 1) повний reset + 2) apply сцени
+  // Чисте застосування сцени
   applyPublicScene(row);
-
-  // 3) фіксуємо активну картку (персистентно, незалежно від hover/focus)
+  // Підсвітити активну картку
   setActiveSceneButton(btn);
 });
+
+// Клік по всій картці більше НЕ запускає відтворення
+btn.addEventListener('click', (ev) => {
+  ev.preventDefault();
+});
+
 
 
     // Клік по сердечку: toggle лайк (не запускає застосування сцени)
@@ -166,14 +182,81 @@ likeBtn.addEventListener('click', async (ev) => {
 
 /* ---------- handlers ---------- */
 
-async function handleSceneDayClick(summaryEl) {
+async function handleSceneDayOpen(detailsEl) {
+  const content = ensureSectionContent(detailsEl);
+  content.replaceChildren();
+
   try {
     const scene = await getSceneOfDay();
-    if (scene) applyPublicScene(scene);
+    if (!scene) {
+      content.textContent = (t('scenes.empty') || '');
+      return;
+    }
+
+    // Використовуємо ті самі класи, що й у списках (щоб стилі лишилися незмінні)
+    const btn   = el('button', 'public-scene-item', { type: 'button' });
+    const title = el('div', 'public-scene-title', { text: (scene.title?.trim() || t('scenes.untitled') || '') });
+    const desc  = el('div',  'public-scene-desc',  { text: (scene.description?.trim() || '') });
+
+    // Статистика: ♥ лайки + 👁 перегляди
+    const stats = el('div', 'public-scene-stats');
+    const likeBtn  = el('button', 'scene-like-btn', { type: 'button', 'aria-label': 'Like' });
+    const heartOutline = el('span', 'heart-outline', { text: '♡' });
+    const heartFill    = el('span', 'heart-fill',    { text: '♥' });
+    const likeNum      = el('span', 'scene-like-num', { text: String(scene.likes ?? 0) });
+    likeBtn.append(heartOutline, heartFill, likeNum);
+
+    const likedInit = scene.likedByMe ?? scene.liked ?? false;
+    likeBtn.classList.toggle('is-liked', !!likedInit);
+    likeBtn.setAttribute('aria-pressed', likedInit ? 'true' : 'false');
+
+    const viewsSpan = el('span', 'scene-views', { text: `👁 ${scene.views ?? 0}` });
+    stats.append(likeBtn, viewsSpan);
+
+    // Лайк не запускає відтворення
+    likeBtn.addEventListener('click', async (ev) => {
+      ev.stopPropagation();
+      try {
+        const res = await toggleLike(scene.id);
+        const likedNow = !!res.liked;
+        const likesNow = Number(res.likes ?? 0);
+        likeNum.textContent = String(likesNow);
+        scene.likes = likesNow;
+        likeBtn.classList.toggle('is-liked', likedNow);
+        likeBtn.setAttribute('aria-pressed', likedNow ? 'true' : 'false');
+      } catch (e) {
+        console.error('[like: day]', e);
+      }
+    });
+
+    // У "Сцені дня" опис показуємо одразу (повний текст — як у вас, через фокус/hover)
+    desc.hidden = false;
+
+    btn.append(title, desc, stats);
+    content.append(btn);
+
+    // Автовідтворення при відкритті секції: +1 перегляд
+    try {
+      if (scene?.id) {
+        const cur = Number(scene.views ?? 0) || 0;
+        viewsSpan.textContent = `👁 ${cur + 1}`;
+        scene.views = cur + 1;
+        await incrementSceneView(scene.id);
+      }
+    } catch (e) {
+      viewsSpan.textContent = `👁 ${scene.views ?? 0}`;
+      console.error('[views: day]', e);
+    }
+
+    applyPublicScene(scene);
+    setActiveSceneButton(btn);
+
   } catch (e) {
     console.error('[scene_day]', e);
+    content.textContent = (t('scenes.empty') || '');
   }
 }
+
 
 async function handleInterestingOpen(detailsEl) {
   // не повторюємо завантаження при кожному відкритті
@@ -269,29 +352,51 @@ try {
     state.allBusy = false;
   }
 }
+// Згорнути всі описи і зняти .is-active всередині конкретної секції
+function resetSectionUI(detailsEl) {
+  if (!detailsEl) return;
+  detailsEl.querySelectorAll('.public-scene-item.is-active')
+    .forEach(el => el.classList.remove('is-active'));
+  detailsEl.querySelectorAll('.public-scene-desc')
+    .forEach(d => { d.hidden = true; });
+}
 
 /* ---------- init ---------- */
 export function initPublicScenesPanel() {
   const root = document.getElementById('left-panel');
   if (!root) return;
 
-  // scene_day — клік по summary застосовує сцену (ініціалізуємо один раз)
-  const dayDet = q('#left-panel > details#scene_day');
-  if (dayDet && dayDet.dataset.inited !== 'true') {
-    dayDet.dataset.inited = 'true';
-    const sum = q(':scope > summary', dayDet);
-    if (sum) sum.addEventListener('click', () => handleSceneDayClick(sum));
+// scene_day — при відкритті рендеримо назву/опис/статистику і авто-відтворюємо
+const dayDet = q('#left-panel > details#scene_day');
+if (dayDet && dayDet.dataset.inited !== 'true') {
+  dayDet.dataset.inited = 'true';
+  dayDet.addEventListener('toggle', () => {
+  if (dayDet.open) {
+    handleSceneDayOpen(dayDet);
+  } else {
+    // Закрили секцію: прибрати активні/згорнути описи та почистити контент
+    resetSectionUI(dayDet);
+    const content = ensureSectionContent(dayDet);
+    content.replaceChildren();
   }
+});
+}
+
 
   // interesting — вантажимо один раз при першому відкритті
   const interDet = q('#left-panel > details#interesting');
   if (interDet && interDet.dataset.inited !== 'true') {
     interDet.dataset.inited = 'true';
     interDet.addEventListener('toggle', () => {
-      if (!interDet.open) return;
-      if (interDet.dataset.loaded === 'true') return;
-      handleInterestingOpen(interDet);
-    });
+  if (interDet.open) {
+    if (interDet.dataset.loaded === 'true') return;
+    handleInterestingOpen(interDet);
+  } else {
+    // Закрито: синхронізуємо UI зі станом глобуса
+    resetSectionUI(interDet);
+  }
+});
+
   }
 
   // all_scenes — пагінація; перше відкриття робить перший феч
@@ -299,21 +404,33 @@ export function initPublicScenesPanel() {
   if (allDet && allDet.dataset.inited !== 'true') {
     allDet.dataset.inited = 'true';
     allDet.addEventListener('toggle', () => {
-      if (!allDet.open) return;
-      if (allDet.dataset.loaded !== 'true') {
-        state.allOffset = 0; state.allDone = false; state.allBusy = false;
-        handleAllOpen(allDet);
-        allDet.dataset.loaded = 'true';
-      }
-    });
+  if (allDet.open) {
+    if (allDet.dataset.loaded !== 'true') {
+      state.allOffset = 0; state.allDone = false; state.allBusy = false;
+      handleAllOpen(allDet);
+      allDet.dataset.loaded = 'true';
+    }
+  } else {
+    // Закрито: прибрати активні/згорнути описи
+    resetSectionUI(allDet);
   }
-  // Сцени: знімати .is-active тільки при натисканні кнопки Reset у лівій панелі
-  root.addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-action="reset"]');
-    if (!btn) return;
-    root.querySelectorAll('.section-content .public-scene-item.is-active')
-      .forEach(el => el.classList.remove('is-active'));
-  });
+});
+
+  }
+  // Сцени: при Reset — прибрати .is-active і згорнути всі описи
+root.addEventListener('click', (e) => {
+  const resetBtn = e.target.closest('button[data-action="reset"]');
+  if (!resetBtn) return;
+
+  // Прибрати підсвітку активних
+  root.querySelectorAll('.section-content .public-scene-item.is-active')
+    .forEach(el => el.classList.remove('is-active'));
+
+  // Згорнути всі описи у списках
+  root.querySelectorAll('.section-content .public-scene-desc')
+    .forEach(d => { d.hidden = true; });
+});
+
 
 }
 
