@@ -1,4 +1,4 @@
-// full/js/data/data_luminosity.js
+// js/data/data_luminosity.js
 'use strict';
 
 /**

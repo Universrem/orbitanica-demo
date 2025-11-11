@@ -1,4 +1,4 @@
-// /full/js/data/data_mass.js
+// js/data/data_mass.js
 'use strict';
 
 /**

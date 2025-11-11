@@ -1,4 +1,4 @@
-// full/js/data/data_geo_area.js
+// js/data/data_geo_area.js
 'use strict';
 
 /**

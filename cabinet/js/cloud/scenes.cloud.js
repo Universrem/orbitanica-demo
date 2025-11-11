@@ -148,58 +148,54 @@ export async function ensureShortLink(sceneId) {
   }
   throw new Error('Failed to generate unique short code');
 }
+
+// === Counters: authoritative fetch + broadcast ===
+async function fetchSceneCounters(sceneId) {
+  const sb = await getSupabase();
+  const { data, error } = await sb
+    .from('scenes_public_feed')
+    .select('id, views, likes')
+    .eq('id', sceneId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  const id = data?.id ?? sceneId;
+  return { id, views: data?.views ?? 0, likes: data?.likes ?? 0 };
+}
+
+function emitCountersUpdate(payload) {
+  try {
+    window.dispatchEvent(new CustomEvent('sceneCountersUpdated', { detail: payload }));
+  } catch (_) { /* no-op for SSR/tests */ }
+}
+
 // === Public feeds: scene of the day / interesting / all public ===
 
-// 1) One active scene of the day (or null)
+// 1) Сцена дня — читаємо з view, де вже є views/likes
 export async function getSceneOfDay() {
   const sb = await getSupabase();
   const { data, error } = await sb
-    .from('scene_picks')
-    .select(`
-      created_at,
-      scene:scene_id (
-        id, owner_id, is_public, created_at, updated_at,
-        title, description, mode, query
-      )
-    `)
-    .eq('type', 'day')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
+    .from('scene_of_day_feed')
+    .select('*')
+    .order('pick_date', { ascending: false })
     .limit(1);
 
   if (error) throw new Error(error.message);
-  return (data && data[0]) ? data[0].scene : null;
+  return (data && data[0]) ? data[0] : null;
 }
 
-
-// 2) Curated "interesting" list (rank ASC NULLS LAST, then created_at DESC)
+// 2) Цікаві сцени — теж з view (плоскі рядки з views/likes)
 export async function listInteresting({ limit = 20 } = {}) {
   const sb = await getSupabase();
   const { data, error } = await sb
-    .from('scene_picks')
-    .select(`
-      rank,
-      created_at,
-      scene:scene_id (
-        id, owner_id, is_public, created_at, updated_at,
-        title, description, mode, query
-      )
-    `)
-    .eq('type', 'interesting')
-    .eq('is_active', true)
+    .from('scenes_interesting_feed')
+    .select('*')
     .order('rank', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(limit);
 
   if (error) throw new Error(error.message);
-
-  return (data || [])
-    .map(row => {
-      const scene = row.scene || null;
-      if (scene) scene._pick_rank = row.rank;
-      return scene;
-    })
-    .filter(Boolean);
+  return data || [];
 }
 
 // 3) All public scenes (newest first) with pagination
@@ -222,22 +218,22 @@ export async function listAllPublic({ limit = 30, offset = 0 } = {}) {
   if (error) throw new Error(error.message);
   return data || [];
 }
-/** Збільшити лічильник переглядів сцени (RPC) */
+
 export async function incrementSceneView(sceneId) {
   const sb = await getSupabase();
   const { error } = await sb.rpc('inc_scene_view', { p_scene_id: sceneId });
   if (error) throw new Error(error.message);
-  return true;
+
+  const counters = await fetchSceneCounters(sceneId);
+  emitCountersUpdate(counters);
+  return counters; // { id, views, likes }
 }
-/**
- * Поставити/зняти лайк для поточного користувача.
- * Повертає { liked:boolean, likes:number } — актуальний стан та кількість.
- */
+
 export async function toggleLike(sceneId) {
   const sb = await getSupabase();
   const userId = await getUserIdRequired();
 
-  // Чи вже лайкнуто?
+  // перевіряємо стан
   const exists = await sb
     .from('scene_likes')
     .select('scene_id', { count: 'exact', head: false })
@@ -246,37 +242,24 @@ export async function toggleLike(sceneId) {
     .maybeSingle();
 
   if (exists.error && exists.error.code !== 'PGRST116') {
-    // PGRST116 — no rows; інші помилки — пробросити
     throw new Error(exists.error.message);
   }
 
   if (exists.data) {
-    // Вже було — знімаємо лайк
-    const del = await sb
-      .from('scene_likes')
-      .delete()
-      .eq('scene_id', sceneId)
-      .eq('user_id', userId);
+    const del = await sb.from('scene_likes').delete()
+      .eq('scene_id', sceneId).eq('user_id', userId);
     if (del.error) throw new Error(del.error.message);
   } else {
-    // Не було — ставимо лайк
-    const ins = await sb
-      .from('scene_likes')
-      .insert({ scene_id: sceneId, user_id: userId });
+    const ins = await sb.from('scene_likes').insert({ scene_id: sceneId, user_id: userId });
     if (ins.error) throw new Error(ins.error.message);
   }
 
-  // Повернути актуальну кількість
-  const cnt = await sb
-    .from('scene_likes')
-    .select('*', { count: 'exact', head: true })
-    .eq('scene_id', sceneId);
+  // читаємо фактичні лічильники з БД
+  const counters = await fetchSceneCounters(sceneId);
+  const liked = !exists.data;
 
-  if (cnt.error) throw new Error(cnt.error.message);
-  const likes = typeof cnt.count === 'number' ? cnt.count : 0;
-  const liked = !exists.data; // якщо вставили — тепер liked=true; якщо видалили — false
-
-  return { liked, likes };
+  emitCountersUpdate(counters);
+  return { liked, likes: counters.likes, views: counters.views };
 }
 
 // === Моє: набір scene_id, які лайкнув поточний користувач серед переданих ===

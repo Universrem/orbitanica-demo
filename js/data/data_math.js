@@ -1,4 +1,4 @@
-// full/js/data/data_math.js
+// js/data/data_math.js
 'use strict';
 
 /**

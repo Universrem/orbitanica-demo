@@ -91,6 +91,7 @@ function renderList(cardsContainer, rows, { append = false, seen = null } = {}) 
     if (seen && row.id && seen.has(row.id)) return;
 
     const btn   = el('button', 'public-scene-item', { type: 'button' });
+    btn.dataset.sceneId = row.id;
     const title = el('div', 'public-scene-title', { text: (row.title?.trim() || t('scenes.untitled') || '') });
     const desc  = el('div',  'public-scene-desc',  { text: (row.description?.trim() || '') });
 
@@ -116,32 +117,34 @@ likeBtn.setAttribute('aria-pressed', likedInit ? 'true' : 'false');
 // У списках опис прихований до кліку по назві
 desc.hidden = true;
 
-// Клік по НАЗВІ: 1) показ/приховати опис, 2) views++, 3) застосувати сцену, 4) підсвітити картку
+/// Клік по НАЗВІ: 1) показ/приховати опис, 2) інкремент через бек і взяти «правду», 3) застосувати сцену, 4) підсвітити картку
 title.addEventListener('click', async (ev) => {
   ev.stopPropagation();
 
-  // Закрити інші відкриті описи в межах цього контейнера списку
+  // Закрити інші описи в межах цього списку
   cardsContainer.querySelectorAll('.public-scene-desc').forEach(d => { d.hidden = true; });
   // Тогл опису поточної сцени
   desc.hidden = !desc.hidden;
 
-  // Інкремент переглядів і застосування сцени
+  // Інкремент переглядів — беремо фактичні значення з БД
   try {
-    if (row?.id) {
-      const cur = Number(row.views ?? 0) || 0;
-      // Оновити локально лічильник переглядів
-      viewsSpan.textContent = `👁 ${cur + 1}`;
-      row.views = cur + 1;
-      await incrementSceneView(row.id);
+    if (row && row.id) {
+      const res = await incrementSceneView(row.id);
+      if (res && typeof res.views === 'number') {
+        row.views = res.views;
+        viewsSpan.textContent = `👁 ${res.views}`;
+      }
+      if (res && typeof res.likes === 'number') {
+        row.likes = res.likes;
+        likeNum.textContent = String(res.likes);
+      }
     }
   } catch (e) {
-    viewsSpan.textContent = `👁 ${row.views ?? 0}`;
     console.error('[views]', e);
   }
 
-  // Чисте застосування сцени
+  // Застосувати сцену та підсвітити картку
   applyPublicScene(row);
-  // Підсвітити активну картку
   setActiveSceneButton(btn);
 });
 
@@ -150,28 +153,31 @@ btn.addEventListener('click', (ev) => {
   ev.preventDefault();
 });
 
-
-
-    // Клік по сердечку: toggle лайк (не запускає застосування сцени)
+// Клік по сердечку: toggle лайк (беремо «правду» з бекенду)
 likeBtn.addEventListener('click', async (ev) => {
   ev.stopPropagation();
   try {
     const res = await toggleLike(row.id);
-    // лічильник з бекенду — джерело правди
     const likedNow = !!res.liked;
     const likesNow = Number(res.likes ?? 0);
 
+    // оновлюємо лічильники з відповіді
     likeNum.textContent = String(likesNow);
     row.likes = likesNow;
 
-    // візуальний стан: заповнення серця + ARIA
+    if (typeof res.views === 'number') {
+      row.views = res.views;
+      viewsSpan.textContent = `👁 ${res.views}`;
+    }
+
+    // оновлюємо стан сердечка
     likeBtn.classList.toggle('is-liked', likedNow);
     likeBtn.setAttribute('aria-pressed', likedNow ? 'true' : 'false');
+      window.dispatchEvent(new CustomEvent('sceneLikeToggled', { detail: { id: row.id, liked: likedNow } }));
   } catch (e) {
     console.error('[like]', e);
   }
 });
-
 
     btn.append(title, desc, stats);
     cardsContainer.append(btn);
@@ -195,6 +201,7 @@ async function handleSceneDayOpen(detailsEl) {
 
     // Використовуємо ті самі класи, що й у списках (щоб стилі лишилися незмінні)
     const btn   = el('button', 'public-scene-item', { type: 'button' });
+    btn.dataset.sceneId = scene.id;
     const title = el('div', 'public-scene-title', { text: (scene.title?.trim() || t('scenes.untitled') || '') });
     const desc  = el('div',  'public-scene-desc',  { text: (scene.description?.trim() || '') });
 
@@ -206,7 +213,14 @@ async function handleSceneDayOpen(detailsEl) {
     const likeNum      = el('span', 'scene-like-num', { text: String(scene.likes ?? 0) });
     likeBtn.append(heartOutline, heartFill, likeNum);
 
-    const likedInit = scene.likedByMe ?? scene.liked ?? false;
+    let likedInit = false;
+try {
+  const set = await getMyLikedSceneIds([scene.id]);
+  likedInit = set.has(scene.id);
+} catch (e) {
+  console.warn('[likes init: day]', e);
+}
+
     likeBtn.classList.toggle('is-liked', !!likedInit);
     likeBtn.setAttribute('aria-pressed', likedInit ? 'true' : 'false');
 
@@ -224,6 +238,8 @@ async function handleSceneDayOpen(detailsEl) {
         scene.likes = likesNow;
         likeBtn.classList.toggle('is-liked', likedNow);
         likeBtn.setAttribute('aria-pressed', likedNow ? 'true' : 'false');
+          window.dispatchEvent(new CustomEvent('sceneLikeToggled', { detail: { id: scene.id, liked: likedNow } }));
+
       } catch (e) {
         console.error('[like: day]', e);
       }
@@ -235,18 +251,25 @@ async function handleSceneDayOpen(detailsEl) {
     btn.append(title, desc, stats);
     content.append(btn);
 
-    // Автовідтворення при відкритті секції: +1 перегляд
-    try {
-      if (scene?.id) {
-        const cur = Number(scene.views ?? 0) || 0;
-        viewsSpan.textContent = `👁 ${cur + 1}`;
-        scene.views = cur + 1;
-        await incrementSceneView(scene.id);
-      }
-    } catch (e) {
+    // Автовідтворення при відкритті секції: інкремент і беремо «правду» з БД
+try {
+  if (scene?.id) {
+    const res = await incrementSceneView(scene.id);
+    if (res && typeof res.views === 'number') {
+      scene.views = res.views;
+      viewsSpan.textContent = `👁 ${res.views}`;
+    } else {
       viewsSpan.textContent = `👁 ${scene.views ?? 0}`;
-      console.error('[views: day]', e);
     }
+    if (res && typeof res.likes === 'number') {
+      scene.likes = res.likes;
+      likeNum.textContent = String(res.likes);
+    }
+  }
+} catch (e) {
+  viewsSpan.textContent = `👁 ${scene.views ?? 0}`;
+  console.error('[views: day]', e);
+}
 
     applyPublicScene(scene);
     setActiveSceneButton(btn);
@@ -429,6 +452,30 @@ root.addEventListener('click', (e) => {
   // Згорнути всі описи у списках
   root.querySelectorAll('.section-content .public-scene-desc')
     .forEach(d => { d.hidden = true; });
+});
+// Синхронізація лічильників між розділами (після перегляду/лайку)
+window.addEventListener('sceneCountersUpdated', (e) => {
+  const { id, views, likes } = e.detail || {};
+  if (!id) return;
+
+  document.querySelectorAll(`.public-scene-item[data-scene-id="${id}"]`).forEach(card => {
+    const v = card.querySelector('.scene-views');
+    const l = card.querySelector('.scene-like-num');
+    if (v && typeof views === 'number') v.textContent = `👁 ${views}`;
+    if (l && typeof likes === 'number') l.textContent = String(likes);
+  });
+});
+// Синхронізація стану «сердечка» між розділами
+window.addEventListener('sceneLikeToggled', (e) => {
+  const { id, liked } = e.detail || {};
+  if (!id) return;
+
+  document.querySelectorAll(`.public-scene-item[data-scene-id="${id}"]`).forEach(card => {
+    const btn = card.querySelector('.scene-like-btn');
+    if (!btn) return;
+    btn.classList.toggle('is-liked', !!liked);
+    btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+  });
 });
 
 
