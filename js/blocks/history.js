@@ -2,10 +2,16 @@
 'use strict';
 
 /**
- * Режим «Історія» (UI) — SNAPSHOT-FIRST, за еталоном «Географія → Населення».
+ * Режим «Історія» (UI) — SNAPSHOT-FIRST, строго за еталоном «Географія → Населення».
+ * ЄДИНА різниця: у об'єкта завжди є start (обов'язково), end — опційно.
  * - О1 і О2: категорії/об'єкти з history-бібліотеки (мердж OFFICIAL + UGC);
- * - у КОЖНОМУ <option> dataset.snapshot:
- *   { id, category_key, start, end, unit: 'year', name_ua/en/es, description_ua/en/es, category_ua/en/es }
+ * - у КОЖНОМУ <option> зберігаємо snapshot в dataset.snapshot:
+ *   {
+ *     id, category_key,
+ *     value: <start>, unit: 'year',
+ *     value2?: <end>, unit2: 'year',
+ *     name_ua/en/es, description_ua/en/es, category_ua/en/es
+ *   }
  * - відновлення вибору за snapshot.id; UGC позначається (корист.);
  * - слухаємо reload/ready, зміну мови, orbit:ui-reset.
  */
@@ -31,11 +37,10 @@ function isUser(rec) {
   return !!(rec?.is_user_object || rec?.source === 'user');
 }
 
-// Валідація: обидві дати ОБОВ’ЯЗКОВО присутні (дві value)
+// Валідація «історії»: start обов'язковий, end опційний
 function hasValidHistory(rec) {
   const v1 = Number(rec?.time_start?.value);
-  const v2 = Number(rec?.time_end?.value);
-  return Number.isFinite(v1) && Number.isFinite(v2);
+  return Number.isFinite(v1);
 }
 
 function getCatKey(rec) {
@@ -43,6 +48,7 @@ function getCatKey(rec) {
 }
 
 function pickName(rec, lang) {
+  // лише назва мовою системи; без фолбеків
   return s(rec?.[`name_${lang}`] || '');
 }
 
@@ -78,18 +84,26 @@ function getSelectedSnapshotId(sel) {
 
 /**
  * Прикріпити snapshot історії до option.
- * З полів бібліотеки: time_start/value, time_end/value → start/end (Number), unit='year'
+ * Формат snapshot (узгоджений з еталоном «населення»):
+ *  - value  = start (Number, обов'язково), unit  = 'year'
+ *  - value2 = end   (Number, опційно),     unit2 = 'year'
  */
 function attachHistorySnapshot(opt, rec) {
   if (!opt || !rec || !hasValidHistory(rec)) return;
+
+  const start = Number(rec?.time_start?.value);
+  const end   = Number(rec?.time_end?.value);
+
   const snap = {
     id: rec?.id ?? null,
     category_key: rec?.category_key ?? rec?.category_id ?? null,
 
-    start: Number(rec?.time_start?.value),
-    end:   Number(rec?.time_end?.value),
+    // start
+    value: start,
     unit:  'year',
+    unit_key: 'year',
 
+    // локалізація
     name_ua: rec?.name_ua ?? null,
     name_en: rec?.name_en ?? null,
     name_es: rec?.name_es ?? null,
@@ -102,7 +116,15 @@ function attachHistorySnapshot(opt, rec) {
     category_en: rec?.category_en ?? rec?.category_i18n?.en ?? null,
     category_es: rec?.category_es ?? rec?.category_i18n?.es ?? null
   };
-  if (!Number.isFinite(snap.start) || !Number.isFinite(snap.end)) return;
+
+  // end — опційно (додаємо обидва ключі сумісності)
+  if (Number.isFinite(end)) {
+    snap.value2    = end;
+    snap.unit2     = 'year';
+    snap.unit2_key = 'year';
+  }
+
+  if (!Number.isFinite(snap.value)) return;
   try { opt.dataset.snapshot = JSON.stringify(snap); } catch {}
   if (isUser(rec)) opt.dataset.user = '1';
 }
@@ -120,6 +142,7 @@ function rebuildCategories(scope) {
   const selects = [sel1, sel2].filter(Boolean);
   if (!selects.length) return;
 
+  // group by key
   const map = new Map();
   for (const rec of lib) {
     const key = getCatKey(rec);
@@ -130,9 +153,11 @@ function rebuildCategories(scope) {
 
   const categories = [];
   for (const [key, rows] of map.entries()) {
-    const hasLocalizedObj = rows.some(r => s(r?.[`name_${lang}`]));
+    // показуємо категорію лише якщо є хоч один об'єкт із локалізованою назвою
+    const hasLocalizedObj = rows.some(r => hasValidHistory(r) && s(r?.[`name_${lang}`]));
     if (!hasLocalizedObj) continue;
 
+    // підпис категорії
     let labelBase = '';
     for (const r of rows) {
       const i18n = pickCategoryI18n(r);
@@ -179,7 +204,7 @@ function rebuildCategories(scope) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Об'єкти у вибраній категорії (О1/О2)
+   Об'єкти у вибраній категорії (О1/О2 однакова логіка)
 ───────────────────────────────────────────────────────────── */
 
 function rebuildObjects(scope, { catSel, objSel, isO1 }) {
@@ -191,6 +216,8 @@ function rebuildObjects(scope, { catSel, objSel, isO1 }) {
   if (!obj) return;
 
   const key = low(cat?.value || '');
+
+  // попередній обраний за snapshot.id
   const prevId = getSelectedSnapshotId(obj);
 
   clearSelect(obj);
@@ -207,11 +234,12 @@ function rebuildObjects(scope, { catSel, objSel, isO1 }) {
   for (const rec of rows) {
     const name = pickName(rec, lang);
     if (!name) continue;
-    const value = String(rec?.id || name);
+    const value = String(rec?.id || name); // value = id (фолбек name)
     const label = isUser(rec) ? `${name} ${t('ui.user_mark') || '(корист.)'}` : name;
     items.push({ value, label, rec });
   }
 
+  // без дублів за value
   const seen = new Set();
   const frag = document.createDocumentFragment();
   for (const it of items) {
@@ -225,6 +253,7 @@ function rebuildObjects(scope, { catSel, objSel, isO1 }) {
   }
   obj.appendChild(frag);
 
+  // Відновити вибір по snapshot.id
   if (prevId) {
     const match = [...obj.options].find(o => {
       try { return JSON.parse(o.dataset.snapshot || '{}').id === prevId; }
@@ -235,16 +264,18 @@ function rebuildObjects(scope, { catSel, objSel, isO1 }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Reset форми
+   Reset форми режиму
 ───────────────────────────────────────────────────────────── */
 
 function resetHistoryForm(scope) {
+  // розблокувати О1
   scope.querySelector('.object1-group')?.classList.remove('is-locked');
   scope.querySelectorAll('.object1-group select, .object1-group input').forEach(el => {
     el.disabled = false;
     el.classList.remove('is-invalid');
   });
 
+  // інпут базового діаметра (масштаб)
   const base = scope.querySelector('#historyBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
     base.placeholder = t('panel_placeholder_input_diameter');
@@ -270,16 +301,19 @@ export async function initHistoryBlock() {
   const scope = document.getElementById('history');
   if (!scope) { console.warn('[history] #history not found'); return; }
 
+  // стартове заповнення
   rebuildCategories(scope);
   rebuildObjects(scope, { catSel: '#histCategoryObject1', objSel: '#histObject1', isO1: true });
   rebuildObjects(scope, { catSel: '#histCategoryObject2', objSel: '#histObject2', isO1: false });
 
+  // плейсхолдер і підказки для baseline О1
   const base = scope.querySelector('#historyBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
     base.placeholder = t('panel_placeholder_input_diameter');
     try { attachO1QuickSuggest({ inputEl: base }); } catch {}
   }
 
+  // зміна категорій → оновити список об'єктів у відповідній групі
   scope.querySelector('#histCategoryObject1')?.addEventListener('change', () => {
     rebuildObjects(scope, { catSel: '#histCategoryObject1', objSel: '#histObject1', isO1: true });
   });
@@ -287,6 +321,7 @@ export async function initHistoryBlock() {
     rebuildObjects(scope, { catSel: '#histCategoryObject2', objSel: '#histObject2', isO1: false });
   });
 
+  // перезбірка при оновленні бібліотеки/UGC та зміні мови
   const rebuildAll = () => {
     rebuildCategories(scope);
     rebuildObjects(scope, { catSel: '#histCategoryObject1', objSel: '#histObject1', isO1: true });
@@ -295,16 +330,19 @@ export async function initHistoryBlock() {
 
   document.addEventListener('history-lib-reloaded', rebuildAll);
   document.addEventListener('history-lib:ready',   rebuildAll);
+  // сумісність зі старими подіями
   document.addEventListener('user-objects-added',   rebuildAll);
   document.addEventListener('user-objects-changed', rebuildAll);
   document.addEventListener('user-objects-removed', rebuildAll);
 
+  // зміна мови
   const onLang = () => rebuildAll();
   document.addEventListener('languageChanged', onLang);
   document.addEventListener('lang-changed', onLang);
   document.addEventListener('i18nextLanguageChanged', onLang);
   document.addEventListener('i18n:ready', onLang);
 
+  // системний UI reset
   const onUiReset = () => resetHistoryForm(scope);
   window.addEventListener('orbit:ui-reset', onUiReset);
   document.addEventListener('orbit:ui-reset', onUiReset);

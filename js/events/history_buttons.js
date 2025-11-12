@@ -1,9 +1,12 @@
-// /full/js/events/history_buttons.js
+// /js/events/history_buttons.js
 'use strict';
 
 /**
- * Обробник «Історія» — СТРОГО за еталоном «Гео → Населення» (SNAPSHOT-FIRST).
- * - О1: фіксуємо snapshot із вибраного <option> (year start/optional end), baseline-діаметр масштабує кола.
+ * Обробник «Історія» — СТРОГО за еталоном «Географія → Населення» (SNAPSHOT-FIRST).
+ * ЄДИНА різниця режиму: у об'єкта завжди є start (обов'язково), end — опційно.
+ *
+ * - О1: фіксуємо snapshot із вибраного <option> (value=start, unit='year', value2=end?),
+ *       baseline-діаметр масштабує кола.
  * - О2: додаємо результат, пишемо в буфер тільки те, що на екрані (SNAPSHOT-FIRST).
  * - Серіалізатор читає буфери через window.orbit.* геттери.
  *
@@ -46,8 +49,8 @@ function getSelectedOption(scope, selectId) {
 }
 
 /** Перевірка snapshot для історії:
- *  - value (start) є числом (допускаємо ≤0/від'ємні роки як н. е./до н. е.);
- *  - unit або unit_key дорівнює 'year' (чутливість до регістру і пробілів знімаємо);
+ *  - value (start) є числом (допускаємо ≤0/від'ємні роки як н.е./до н.е.);
+ *  - unit/unit_key дорівнює 'year' (без чутливості до регістру);
  *  - value2/unit2_key (end) МОЖЕ бути відсутнім або валідним числом.
  */
 function parseOptionSnapshot(opt) {
@@ -58,8 +61,9 @@ function parseOptionSnapshot(opt) {
     if (!s || typeof s !== 'object') return null;
 
     const v1 = Number(s.value ?? s.year ?? s.time_start?.value);
-    const u1 = String(s.unit ?? s.unit_key ?? s.time_start?.unit ?? '').trim().toLowerCase();
     if (!Number.isFinite(v1)) return null;
+
+    const u1 = String(s.unit ?? s.unit_key ?? s.time_start?.unit ?? '').trim().toLowerCase();
     if (u1 && u1 !== 'year' && u1 !== 'years') return null;
 
     const v2 = s.value2 ?? s.year_end ?? s.time_end?.value;
@@ -167,7 +171,7 @@ export function onHistoryCalculate({ scope }) {
   const color2 = getColorForKey(`history:o2:${++historyResultSeq}`);
 
   // Baseline
-  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // діаметр із UI
+  const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // діаметр із UI (м)
   const baselineRadius   = baselineDiameter > 0 ? baselineDiameter / 2 : 0;
 
   const yearsStartO1 = data?.object1?.yearsStart; // |pivot - yearStart|
@@ -216,7 +220,7 @@ export function onHistoryCalculate({ scope }) {
     setGroupDescription({ id: 'history_o1', description: data.object1.description });
   }
 
-  // 2c) Позначити поточний рік (тонке коло біля центру), ідемпотентно
+  // 2c) Позначити pivot-рік (тонке коло біля центру), ідемпотентно
   if (baselineRadius > 0) {
     const EPS = 1e-9;
     const resC = addHistoryCircle({ year: pivot + EPS, pivotYear: pivot, color: color1 });

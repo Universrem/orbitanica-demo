@@ -1027,7 +1027,18 @@
   "confirm.title": { "ua":"Підтвердження", "en":"Confirmation", "es":"Confirmación" },
   "confirm.delete.object": { "ua":"Видалити об’єкт: {name}?", "en":"Delete object: {name}?", "es":"¿Eliminar el objeto: {name}?" },
   "confirm.delete.scene": { "ua":"Видалити сцену: {name}?", "en":"Delete scene: {name}?", "es":"¿Eliminar la escena: {name}?" },
-  "btn_play":         { "ua": "Відтворити", "en": "Play",        "es": "Reproducir" } 
+  "btn_play":         { "ua": "Відтворити", "en": "Play",        "es": "Reproducir" }, 
+
+  "field_value_start": {
+  "ua": "Рік початку події",
+  "en": "Start year",
+  "es": "Año de inicio"
+},
+"field_value_end_optional": {
+  "ua": "Рік завершення події (необов’язково)",
+  "en": "End year (optional)",
+  "es": "Año de fin (opcional)"
+}
 }
 
 

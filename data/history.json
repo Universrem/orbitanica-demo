@@ -1,7 +1,7 @@
 [
   {
     "category_en": "Humans",
-    "category_ua": "Люди",
+    "category_ua": "Історія людини",
     "category_es": "Humanos",
     "name_en": "First human",
     "name_ua": "Перша людина",
@@ -309,7 +309,7 @@
   },
   { "category_en": "Wars", "category_ua": "Війни", "category_es": "Guerras", "name_en": "American Revolution", "name_ua": "Амер. Революція", "name_es": "Revolución Americana", "description_en": "War in which the 13 American colonies won independence from Great Britain.", "description_ua": "Війна, в якій 13 американських колоній здобули незалежність від Британії.", "description_es": "Guerra en la que las 13 colonias americanas ganaron la independencia de Gran Bretaña.", "time_start": { "value": 1775, "unit": "year" }, "time_end": { "value": 1783, "unit": "year" } },
   { "category_en": "Wars", "category_ua": "Війни", "category_es": "Guerras", "name_en": "Wars of the Diadochi", "name_ua": "Війни діадохів", "name_es": "Guerras de los Diádocos", "description_en": "Series of conflicts between Alexander the Great's generals over his empire.", "description_ua": "Серія конфліктів між генералами Олександра Македонського за його імперію.", "description_es": "Serie de conflictos entre los generales de Alejandro Magno por su imperio.", "time_start": { "value": -323, "unit": "year" }, "time_end": { "value": -281, "unit": "year" } },
-  { "category_en": "Humans", "category_ua": "Люди", "category_es": "Humanos", "name_en": "Crucifixion of Christ", "name_ua": "Розп’яття Христа", "name_es": "Crucifixión de Cristo", "description_en": "Event traditionally dated around AD 33.", "description_ua": "Подія, що традиційно датується близько 33 р. н.е.", "description_es": "Evento datado tradicionalmente alrededor del 33 d.C.", "time_start": { "value": 33, "unit": "year" } },
+  { "category_en": "Humans", "category_ua": "Історія людини", "category_es": "Humanos", "name_en": "Crucifixion of Christ", "name_ua": "Розп’яття Христа", "name_es": "Crucifixión de Cristo", "description_en": "Event traditionally dated around AD 33.", "description_ua": "Подія, що традиційно датується близько 33 р. н.е.", "description_es": "Evento datado tradicionalmente alrededor del 33 d.C.", "time_start": { "value": 33, "unit": "year" } },
   {
     "category_en": "Events",
     "category_ua": "Події",

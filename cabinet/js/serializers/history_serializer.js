@@ -34,23 +34,30 @@ import { getCurrentLang } from '/js/i18n.js';
      Додатково (якщо присутні): value2 має мати unit2_key.
   ──────────────────────────────────────── */
   function isValidSnapshot(s) {
-    if (!s || typeof s !== 'object') return false;
+  if (!s || typeof s !== 'object') return false;
 
-    const v1 = Number(s.value);
-    if (!Number.isFinite(v1) || v1 <= 0) return false;
-    if (!s.unit) return false;
+  // start: дозволяємо будь-яке скінченне число (у т.ч. 0/від’ємні роки)
+  const v1 = Number(s.value ?? s.year ?? s.time_start?.value);
+  if (!Number.isFinite(v1)) return false;
 
-    if (!s.id) return false;
-    if (!('category_key' in s)) return false;
+  // unit для років може бути відсутній або 'year'/'years'
+  const u1 = String(s.unit ?? s.unit_key ?? s.time_start?.unit ?? '').trim().toLowerCase();
+  if (u1 && u1 !== 'year' && u1 !== 'years') return false;
 
-    // Якщо задано друге значення — перевіряємо його ключ одиниці
-    if (s.value2 != null) {
-      const v2 = Number(s.value2);
-      if (!Number.isFinite(v2)) return false; // дозволяємо 0/від'ємні роки? — ні, як і для value
-      if (!s.unit2_key) return false;
-    }
-    return true;
+  // id та category_key обов’язкові (ідентифікація об’єкта)
+  if (!s.id) return false;
+  if (!('category_key' in s)) return false;
+
+  // end: опційно; якщо є — має бути числом; unit2 може бути відсутній або 'year'/'years'
+  if (s.value2 != null || s.year_end != null || (s.time_end && s.time_end.value != null)) {
+    const v2 = Number(s.value2 ?? s.year_end ?? s.time_end?.value);
+    if (!Number.isFinite(v2)) return false;
+    const u2 = String(s.unit2 ?? s.unit2_key ?? s.time_end?.unit ?? '').trim().toLowerCase();
+    if (u2 && u2 !== 'year' && u2 !== 'years') return false;
   }
+  return true;
+}
+
 
   /* ───────── читання з буферів сесії (БЕЗ фолбеків) ───────── */
 

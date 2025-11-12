@@ -59,7 +59,7 @@
       "UAH": 0.024
     }
   },
-  "area": {
+  "geo_area": {
     "base": "m2",
     "units": {
       "m2": 1,
