@@ -41,6 +41,80 @@ function slugifySafe(s) {
 function slugify(s) {
   return slugifySafe(s) || 'category';
 }
+// ───── Локалізація одиниць вимірювання для селекторів ─────
+const UNIT_LABEL_MAP = {
+  // Довжина / відстань
+  mm:   'unit.mm',
+  cm:   'unit.cm',
+  m:    'unit.m',
+  km:   'unit.km',
+  AU:   'unit.AU',
+  ly:   'unit.ly',
+  kly:  'unit.kly',
+  Mly:  'unit.Mly',
+  Gly:  'unit.Gly',
+
+  // Маса
+  'M⊕': 'unit.M_earth',
+  g:    'unit.g',
+  kg:   'unit.kg',
+  t:    'unit.t',
+  Mt:   'unit.Mt',
+  Gt:   'unit.Gt',
+  'M☉': 'unit.M_sun',
+
+  // Світність
+  'L☉': 'unit.L_sun',
+  W:    'unit.W',
+  kW:   'unit.kW',
+  MW:   'unit.MW',
+  GW:   'unit.GW',
+  TW:   'unit.TW',
+
+  // Гроші
+  USD:  'unit.USD',
+  EUR:  'unit.EUR',
+  UAH:  'unit.UAH',
+
+  // Площа
+  m2:   'unit.m2',
+  km2:  'unit.km2',
+  ha:   'unit.ha',
+  acre: 'unit.acre',
+
+  // Населення / кількість
+  person:   'unit.person',
+  people:   'unit.people',
+  thousand: 'unit.thousand',
+  million:  'unit.million',
+  billion:  'unit.billion',
+
+  // Математика
+  unit: 'unit.unit',
+
+  // Імперські довжини
+  in:  'unit.in',
+  ft:  'unit.ft',
+  yd:  'unit.yd',
+  mi:  'unit.mi',
+  nmi: 'unit.nmi',
+
+  // Історія
+  year: 'unit.year'
+};
+
+/**
+ * Локалізована назва юніта для селекторів.
+ * Якщо переклад не знайдено — показуємо сирий код.
+ */
+function formatUnitLabel(code) {
+  const key = UNIT_LABEL_MAP[code];
+  if (key) {
+    const label = t(key);
+    if (label && label !== key) return label;
+  }
+  return code || '';
+}
 
 /* ───────────────── Категорії з режимних *_lib.js (єдине джерело) ─────────────────
    Мінімум: підтримуємо money. Інші режими додамо аналогічно. */
@@ -89,10 +163,22 @@ async function __loadLibCategories(mode) {
 
 function __formatCategoryLabel(item) {
   const mark = USER_MARK();
-  const ua = item?.name_i18n?.ua?.trim() || '';
-  const en = item?.name_i18n?.en?.trim() || '';
-  const es = item?.name_i18n?.es?.trim() || '';
-  const base = en || ua || es || String(item.key).replace(/[-_]+/g, ' ').trim();
+  const lang = getCurrentLang();
+
+  const i18n = item?.name_i18n || {};
+  const preferred =
+    (lang && typeof i18n[lang] === 'string' && i18n[lang].trim()) ?
+      i18n[lang].trim() :
+      '';
+
+  const fallback =
+    (typeof i18n.en === 'string' && i18n.en.trim()) ? i18n.en.trim() :
+    (typeof i18n.ua === 'string' && i18n.ua.trim()) ? i18n.ua.trim() :
+    (typeof i18n.es === 'string' && i18n.es.trim()) ? i18n.es.trim() :
+    String(item.key).replace(/[-_]+/g, ' ').trim();
+
+  const base = preferred || fallback;
+
   return item.isUser ? `${base} ${mark}` : base;
 }
 
@@ -296,13 +382,13 @@ if (!email) {
     `;
 
     // Заповнити список одиниць згідно з mode (тільки з base_units)
-    const units = listUnits(mode) || [];
+      const units = listUnits(mode) || [];
 
     const unitSel = wrap.querySelector('#ouo-unit');
     units.forEach(u => {
       const opt = document.createElement('option');
       opt.value = u;
-      opt.textContent = u;
+      opt.textContent = formatUnitLabel(u);
       unitSel.appendChild(opt);
     });
     if (units.length === 1) unitSel.disabled = true;
@@ -312,7 +398,7 @@ if (!email) {
       units.forEach(u => {
         const opt = document.createElement('option');
         opt.value = u;
-        opt.textContent = u;
+        opt.textContent = formatUnitLabel(u);
         unitSel2.appendChild(opt);
       });
       if (units.length === 1) unitSel2.disabled = true;

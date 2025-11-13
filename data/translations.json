@@ -1038,7 +1038,49 @@
   "ua": "Рік завершення події (необов’язково)",
   "en": "End year (optional)",
   "es": "Año de fin (opcional)"
-}
+},
+
+  "unit.AU":      { "ua": "а.о.",        "en": "AU",                      "es": "UA" },
+  "unit.kly":     { "ua": "тис. св. р.", "en": "thousand light-years",    "es": "mil años luz" },
+  "unit.Mly":     { "ua": "млн св. р.",  "en": "million light-years",     "es": "millones de años luz" },
+  "unit.Gly":     { "ua": "млрд св. р.", "en": "billion light-years",     "es": "mil millones de años luz" },
+
+  "unit.M_earth": { "ua": "M⊕ (маса Землі)",   "en": "M⊕ (Earth masses)",       "es": "M⊕ (masas terrestres)" },
+  "unit.g":       { "ua": "г",                  "en": "g",                       "es": "g" },
+  "unit.kg":      { "ua": "кг",                 "en": "kg",                      "es": "kg" },
+  "unit.t":       { "ua": "т",                  "en": "t",                       "es": "t" },
+  "unit.Mt":      { "ua": "Мт",                 "en": "Mt",                      "es": "Mt" },
+  "unit.Gt":      { "ua": "Гт",                 "en": "Gt",                      "es": "Gt" },
+  "unit.M_sun":   { "ua": "M☉ (маса Сонця)",   "en": "M☉ (solar masses)",       "es": "M☉ (masas solares)" },
+
+  "unit.L_sun":   { "ua": "L☉ (яскравість Сонця)", "en": "L☉ (solar luminosities)", "es": "L☉ (luminosidades solares)" },
+  "unit.W":       { "ua": "Вт",                 "en": "W",                       "es": "W" },
+  "unit.kW":      { "ua": "кВт",                "en": "kW",                      "es": "kW" },
+  "unit.MW":      { "ua": "МВт",                "en": "MW",                      "es": "MW" },
+  "unit.GW":      { "ua": "ГВт",                "en": "GW",                      "es": "GW" },
+  "unit.TW":      { "ua": "ТВт",                "en": "TW",                      "es": "TW" },
+
+
+  "unit.EUR":     { "ua": "EUR",                "en": "EUR",                     "es": "EUR" },
+  "unit.UAH":     { "ua": "UAH",                "en": "UAH",                     "es": "UAH" },
+
+  "unit.m2":      { "ua": "м²",                 "en": "m²",                      "es": "m²" },
+  "unit.km2":     { "ua": "км²",                "en": "km²",                     "es": "km²" },
+  "unit.ha":      { "ua": "га",                 "en": "ha",                      "es": "ha" },
+  "unit.acre":    { "ua": "акр",                "en": "acre",                    "es": "acre" },
+
+  "unit.person":  { "ua": "особа",              "en": "person",                  "es": "persona" },
+
+  "unit.unit":    { "ua": "од.",                "en": "unit",                    "es": "unidad" },
+
+  "unit.in":      { "ua": "дюйм",               "en": "inch",                    "es": "pulgada" },
+  "unit.ft":      { "ua": "фут",                "en": "foot",                    "es": "pie" },
+  "unit.yd":      { "ua": "ярд",                "en": "yard",                    "es": "yarda" },
+  "unit.mi":      { "ua": "миля",               "en": "mile",                    "es": "milla" },
+  "unit.nmi":     { "ua": "мор. миля",          "en": "nautical mile",           "es": "milla náutica" },
+
+  "unit.year":    { "ua": "рік",                "en": "year",                    "es": "año" }
+
 }
 
 
