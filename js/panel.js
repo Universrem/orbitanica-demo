@@ -119,135 +119,143 @@ export function initLeftPanel(t) {
   console.log('🔧 initLeftPanel запущено');
   const ALWAYS_OPEN_SECTIONS = new Set();
 
-  const panelConfig = [
+    const panelConfig = [
 
     { type: 'note', i18nKey: 'panel_note_scenes', text: t('panel_note_scenes'), className: 'panel-section-title' },
 
-    { id: 'scene_day', title: t('panel_title_scene_day') },
-    { id: 'interesting', title: t('panel_title_interesting') },
-    { id: 'all_scenes', title: t('panel_title_all_scenes') },
+    { id: 'scene_day',    titleKey: 'panel_title_scene_day' },
+    { id: 'interesting',  titleKey: 'panel_title_interesting' },
+    { id: 'all_scenes',   titleKey: 'panel_title_all_scenes' },
 
     { type: 'note', i18nKey: 'panel_note_create_scenes', text: t('panel_note_create_scenes'), className: 'panel-section-title' },
 
+    // ===== Всесвіт =====
+    { type: 'note', i18nKey: 'panel_title_univers', text: t('panel_title_univers'), className: 'panel-section-title panel-family panel-family-univers' },
+
     {
-      id: 'univers',
-      title: t('panel_title_univers'),
-      children: [
+      id: 'univers_diameter',
+      titleKey: 'panel_title_univers_diameter',
+      fields: [
         {
-          id: 'univers_diameter', title: t('panel_title_univers_diameter'),
-          fields: [
-            {
-              type: 'group', className: 'sector-block object1-group', children: [
-                { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-                { type: 'select', id: 'diamCategoryObject1', placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'diamObject1',         placeholder: t('panel_placeholder_object1') },
-                { type: 'input',  id: 'diamCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'button', id: 'create',              text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block object2-group', children: [
-                { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-                { type: 'select', id: 'diamCategoryObject2', placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'diamObject2',         placeholder: t('panel_placeholder_object2') },
-                { type: 'button', id: 'create',              text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
-              ]
-            }
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
+            { type: 'select', id: 'diamCategoryObject1', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'diamObject1',         placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'diamCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
-          id: 'univers_distance', title: t('panel_title_univers_distance'),
-          fields: [
-            {
-              type: 'group', className: 'sector-block object1-group', children: [
-                { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-                { type: 'select', id: 'distObject1',         placeholder: t('panel_placeholder_object1') },
-                { type: 'input',  id: 'distCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block object2-group', children: [
-                { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-                { type: 'select', id: 'distCategoryObject2', placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'distObject2',         placeholder: t('panel_placeholder_object2') },
-                { type: 'button', id: 'create',              text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
-              ]
-            }
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
+            { type: 'select', id: 'diamCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'diamObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
           ]
         },
         {
-          id: 'univers_luminosity', title: t('panel_title_univers_luminosity'),
-          fields: [
-            {
-              type: 'group', className: 'sector-block object1-group', children: [
-                { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-                { type: 'select', id: 'lumiCategoryObject1', placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'lumiObject1',         placeholder: t('panel_placeholder_object1') },
-                { type: 'input',  id: 'lumiCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'button', id: 'create',              text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block object2-group', children: [
-                { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-                { type: 'select', id: 'lumiCategoryObject2', placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'lumiObject2',         placeholder: t('panel_placeholder_object2') },
-                { type: 'button', id: 'create',              text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
-              ]
-            }
-          ]
-        },
-        {
-          id: 'univers_mass', title: t('panel_title_univers_mass'),
-          fields: [
-            {
-              type: 'group', className: 'sector-block object1-group', children: [
-                { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
-                { type: 'select', id: 'massCategoryObject1', placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'massObject1',         placeholder: t('panel_placeholder_object1') },
-                { type: 'input',  id: 'massCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'button', id: 'create',              text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block object2-group', children: [
-                { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
-                { type: 'select', id: 'massCategoryObject2', placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'massObject2',         placeholder: t('panel_placeholder_object2') },
-                { type: 'button', id: 'create',              text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
-              ]
-            }
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
           ]
         }
       ]
     },
 
     {
-      id: 'history', title: t('panel_title_history'),
+      id: 'univers_distance',
+      titleKey: 'panel_title_univers_distance',
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
+            { type: 'select', id: 'distObject1',         placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'distCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
+            { type: 'select', id: 'distCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'distObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    },
+
+    {
+      id: 'univers_luminosity',
+      titleKey: 'panel_title_univers_luminosity',
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
+            { type: 'select', id: 'lumiCategoryObject1', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'lumiObject1',         placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'lumiCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
+            { type: 'select', id: 'lumiCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'lumiObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    },
+
+    {
+      id: 'univers_mass',
+      titleKey: 'panel_title_univers_mass',
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
+            { type: 'select', id: 'massCategoryObject1', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'massObject1',         placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'massCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
+            { type: 'select', id: 'massCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'massObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    },
+
+    // ===== Історія =====
+    { type: 'note', i18nKey: 'panel_title_history', text: t('panel_title_history'), className: 'panel-section-title panel-family panel-family-history' },
+
+    {
+      id: 'history',
+      titleKey: 'panel_title_history_main',
       fields: [
         {
           type: 'group', className: 'sector-block object1-group', children: [
@@ -275,114 +283,121 @@ export function initLeftPanel(t) {
       ]
     },
 
+    // ===== Географія =====
+    { type: 'note', i18nKey: 'panel_title_geo', text: t('panel_title_geo'), className: 'panel-section-title panel-family panel-family-geo' },
+
     {
-      id: 'geo', title: t('panel_title_geo'),
-      children: [
+      id: 'geo_population',
+      titleKey: 'panel_title_geo_population',
+      fields: [
         {
-          id: 'geo_population', title: t('panel_title_geo_population'),
-          fields: [
-            {
-              type: 'group', className: 'sector-block object1-group', children: [
-                { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
-                { type: 'select', id: 'geoPopCategoryObject1',    placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'geoPopObject1',            placeholder: t('panel_placeholder_object1') },
-                { type: 'input',  id: 'geoPopBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'button', id: 'create',                   text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block object2-group', children: [
-                { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
-                { type: 'select', id: 'geoPopCategoryObject2', placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'geoPopObject2',         placeholder: t('panel_placeholder_object2') },
-                { type: 'button', id: 'create',                text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
-              ]
-            }
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
+            { type: 'select', id: 'geoPopCategoryObject1',   placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoPopObject1',           placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'geoPopBaselineDiameter',  placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',                  text: t('panel_button_create') },
           ]
         },
         {
-          id: 'geo_area', title: t('panel_title_geo_area'),
-          fields: [
-            {
-              type: 'group', className: 'sector-block object1-group', children: [
-                { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
-                { type: 'select', id: 'geoAreaCategoryObject1',   placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'geoAreaObject1',           placeholder: t('panel_placeholder_object1') },
-                { type: 'input',  id: 'geoAreaBaselineDiameter',  placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'button', id: 'create',                   text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block object2-group', children: [
-                { type: 'text',   id: 'selectSecondObject',     text: t('note_select_second_object') },
-                { type: 'select', id: 'geoAreaCategoryObject2',  placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'geoAreaObject2',          placeholder: t('panel_placeholder_object2') },
-                { type: 'button', id: 'create',                  text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
-              ]
-            }
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
+            { type: 'select', id: 'geoPopCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoPopObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',                text: t('panel_button_create') },
           ]
         },
         {
-          id: 'geo_objects', title: t('panel_title_geo_objects'),
-          fields: [
-            {
-              type: 'group', className: 'sector-block object1-group', children: [
-                { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
-                { type: 'select', id: 'geoObjCategoryObject1',    placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'geoObjObject1',            placeholder: t('panel_placeholder_object1') },
-                { type: 'input',  id: 'geoObjBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
-                { type: 'button', id: 'create',                   text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block object2-group', children: [
-                { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
-                { type: 'select', id: 'geoObjCategoryObject2',  placeholder: t('panel_placeholder_category') },
-                { type: 'select', id: 'geoObjObject2',          placeholder: t('panel_placeholder_object2') },
-                { type: 'button', id: 'create',                 text: t('panel_button_create') },
-              ]
-            },
-            {
-              type: 'group', className: 'sector-block', children: [
-                { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
-                { type: 'button', id: 'reset',     text: t('panel_button_reset') }
-              ]
-            }
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
           ]
         }
       ]
     },
 
     {
-      id: 'money', title: t('panel_title_money'),
+      id: 'geo_area',
+      titleKey: 'panel_title_geo_area',
       fields: [
         {
           type: 'group', className: 'sector-block object1-group', children: [
             { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
-            { type: 'select', id: 'moneyCategoryObject1', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'moneyObject1',         placeholder: t('panel_placeholder_object1') },
-            { type: 'input',  id: 'moneyBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
-            { type: 'button', id: 'create',              text: t('panel_button_create') },
+            { type: 'select', id: 'geoAreaCategoryObject1',  placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoAreaObject1',          placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'geoAreaBaselineDiameter', placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',                  text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',     text: t('note_select_second_object') },
+            { type: 'select', id: 'geoAreaCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoAreaObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',                 text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    },
+
+    {
+      id: 'geo_objects',
+      titleKey: 'panel_title_geo_objects',
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
+            { type: 'select', id: 'geoObjCategoryObject1',   placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoObjObject1',           placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'geoObjBaselineDiameter',  placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',                  text: t('panel_button_create') },
           ]
         },
         {
           type: 'group', className: 'sector-block object2-group', children: [
             { type: 'text',   id: 'selectSecondObject',    text: t('note_select_second_object') },
-            { type: 'select', id: 'moneyCategoryObject2', placeholder: t('panel_placeholder_category') },
-            { type: 'select', id: 'moneyObject2',         placeholder: t('panel_placeholder_object2') },
-            { type: 'button', id: 'create',              text: t('panel_button_create') },
+            { type: 'select', id: 'geoObjCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'geoObjObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',                text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    },
+
+    // ===== Гроші =====
+    { type: 'note', i18nKey: 'panel_title_money', text: t('panel_title_money'), className: 'panel-section-title panel-family panel-family-money' },
+
+    {
+      id: 'money',
+      titleKey: 'panel_title_money_main',
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',       text: t('note_select_first_object') },
+            { type: 'select', id: 'moneyCategoryObject1',    placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'moneyObject1',            placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'moneyBaselineDiameter',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',                 text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',     text: t('note_select_second_object') },
+            { type: 'select', id: 'moneyCategoryObject2',   placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'moneyObject2',           placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',                 text: t('panel_button_create') },
           ]
         },
         {
@@ -394,8 +409,12 @@ export function initLeftPanel(t) {
       ]
     },
 
+    // ===== Математика =====
+    { type: 'note', i18nKey: 'panel_title_math', text: t('panel_title_math'), className: 'panel-section-title panel-family panel-family-math' },
+
     {
-      id: 'math', title: t('panel_title_math'),
+      id: 'math',
+      titleKey: 'panel_title_math_main',
       fields: [
         {
           type: 'group', className: 'sector-block object1-group', children: [
@@ -423,28 +442,19 @@ export function initLeftPanel(t) {
       ]
     },
 
+    // ===== Опції =====
     { type: 'note', i18nKey: 'panel_title_options', text: t('panel_title_options'), className: 'panel-section-title' },
 
-    { id: 'settings', title: t('panel_title_settings') },
-
-    { id: 'faq', title: t('panel_title_faq') },
+    { id: 'settings', titleKey: 'panel_title_settings' },
+    { id: 'faq',      titleKey: 'panel_title_faq' },
 
   ];
-
   // ==== Reactivity на зміну мови
-  const onLangChanged = () => {
-    // Заголовки секцій
+    const onLangChanged = () => {
+    // Заголовки секцій (режими + сцени)
     document.querySelectorAll('#left-panel > details > summary').forEach(summary => {
-      const id = summary.parentElement.id;
-      const key = 'panel_title_' + id;
-      summary.textContent = t(key);
-    });
-
-    // Заголовки підсекцій
-    document.querySelectorAll('#left-panel details > .section-content > details > summary').forEach(summary => {
-      const id = summary.parentElement.id;
-      const key = 'panel_title_' + id;
-      summary.textContent = t(key);
+      const key = summary.getAttribute('data-i18n-key');
+      if (key) summary.textContent = t(key);
     });
 
     // Поля
@@ -504,6 +514,7 @@ export function initLeftPanel(t) {
     });
   };
 
+
   document.addEventListener('languageChanged', onLangChanged);
 
   // ==== Рендер панелі
@@ -522,12 +533,21 @@ export function initLeftPanel(t) {
     }
 
     // головна секція
-    const det = document.createElement('details');
+        const det = document.createElement('details');
     det.id = sec.id;
 
     const sum = document.createElement('summary');
-    sum.textContent = sec.title;
+    const titleKey = sec.titleKey;
+    if (titleKey) {
+      sum.textContent = t(titleKey);
+      sum.setAttribute('data-i18n-key', titleKey);
+    } else if (sec.title) {
+      sum.textContent = sec.title;
+    } else {
+      sum.textContent = '';
+    }
     det.append(sum);
+
 
     // вміст секції
     const content = document.createElement('div');
@@ -604,6 +624,11 @@ export function initLeftPanel(t) {
 
       resetAllUI();
       det.open = opening;
+
+            if (opening && leftPanel) {
+        det.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+
 
       if (!opening && isContainer) {
         det.querySelectorAll('details').forEach(d => d.open = false);

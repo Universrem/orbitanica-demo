@@ -522,6 +522,21 @@
     "en": "Money",
     "es": "Dinero"
   },
+    "panel_title_history_main": {
+    "ua": "Люди, події, періоди",
+    "en": "People, events, periods",
+    "es": "Personas, eventos, períodos"
+  },
+  "panel_title_money_main": {
+    "ua": "Капітал, статки, доходи",
+    "en": "Capital, wealth, income",
+    "es": "Capital, patrimonio, ingresos"
+  },
+  "panel_title_math_main": {
+    "ua": "Числа, степені, константи",
+    "en": "Numbers, powers, constants",
+    "es": "Números, potencias, constantes"
+  },
   "panel_title_geo": {
     "ua": "Географія",
     "en": "Geography",

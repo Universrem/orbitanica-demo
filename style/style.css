@@ -287,6 +287,63 @@ summary {
   color: #222;
   transition: color 0.2s ease;
 }
+/* Режими під сімействами: центр, без крапки, трохи менший шрифт */
+#left-panel > details#univers_diameter > summary,
+#left-panel > details#univers_distance > summary,
+#left-panel > details#univers_luminosity > summary,
+#left-panel > details#univers_mass > summary,
+#left-panel > details#history > summary,
+#left-panel > details#geo_population > summary,
+#left-panel > details#geo_area > summary,
+#left-panel > details#geo_objects > summary,
+#left-panel > details#money > summary,
+#left-panel > details#math > summary {
+  padding-left: 52px;
+  text-align: left;
+  font-size: 1rem;   /* на щабель менше за сімейства */
+}
+/* Плавний ефект "наближення" для режимів (без зміни розкладки) */
+#left-panel > details#univers_diameter > summary,
+#left-panel > details#univers_distance > summary,
+#left-panel > details#univers_luminosity > summary,
+#left-panel > details#univers_mass > summary,
+#left-panel > details#history > summary,
+#left-panel > details#geo_population > summary,
+#left-panel > details#geo_area > summary,
+#left-panel > details#geo_objects > summary,
+#left-panel > details#money > summary,
+#left-panel > details#math > summary {
+  transform-origin: left center;
+  transition: transform .12s ease, color .2s ease;
+}
+
+#left-panel > details#univers_diameter > summary:hover,
+#left-panel > details#univers_distance > summary:hover,
+#left-panel > details#univers_luminosity > summary:hover,
+#left-panel > details#univers_mass > summary:hover,
+#left-panel > details#history > summary:hover,
+#left-panel > details#geo_population > summary:hover,
+#left-panel > details#geo_area > summary:hover,
+#left-panel > details#geo_objects > summary:hover,
+#left-panel > details#money > summary:hover,
+#left-panel > details#math > summary:hover {
+  transform: scale(1.1); /* легке наближення, без стрибків макета */
+}
+
+/* Прибрати кружечок перед назвами режимів */
+#left-panel > details#univers_diameter > summary::before,
+#left-panel > details#univers_distance > summary::before,
+#left-panel > details#univers_luminosity > summary::before,
+#left-panel > details#univers_mass > summary::before,
+#left-panel > details#history > summary::before,
+#left-panel > details#geo_population > summary::before,
+#left-panel > details#geo_area > summary::before,
+#left-panel > details#geo_objects > summary::before,
+#left-panel > details#money > summary::before,
+#left-panel > details#math > summary::before {
+  content: none;
+}
+
 #left-panel > details > summary::before {
   content: "";
   position: absolute;
@@ -316,46 +373,6 @@ summary {
   width: 18px;
   height: 18px;
   background: url("../res/icons/all.png") center / contain no-repeat;
-  border-radius: 0;
-  background-color: transparent;
-}
-
-#left-panel > details#univers > summary::before {
-  width: 18px;
-  height: 18px;
-  background: url("../res/icons/telescope.png") center / contain no-repeat;
-  border-radius: 0;
-  background-color: transparent;
-}
-
-#left-panel > details#history > summary::before {
-  width: 18px;
-  height: 18px;
-  background: url("../res/icons/history.png") center / contain no-repeat;
-  border-radius: 0;
-  background-color: transparent;
-}
-
-#left-panel > details#geo > summary::before {
-  width: 18px;
-  height: 18px;
-  background: url("../res/icons/globe.png") center / contain no-repeat;
-  border-radius: 0;
-  background-color: transparent;
-}
-
-#left-panel > details#money > summary::before {
-  width: 18px;
-  height: 18px;
-  background: url("../res/icons/money.png") center / contain no-repeat;
-  border-radius: 0;
-  background-color: transparent;
-}
-
-#left-panel > details#math > summary::before {
-  width: 18px;
-  height: 18px;
-  background: url("../res/icons/power.png") center / contain no-repeat;
   border-radius: 0;
   background-color: transparent;
 }
@@ -591,6 +608,52 @@ input::placeholder {
   margin: 12px 0 10px;
   padding: 6px 6px;
   letter-spacing: .05em;
+}
+/* Сімейства режимів усередині "Створення сцен" */
+#left-panel .panel-family {
+  text-align: left;         /* не по центру, а як звичайний текст */
+  font-style: normal;       /* без курсиву, щоб відрізнялись від великих заголовків */
+  font-weight: 500;
+  font-size: 1rem;
+  color: #444;
+  margin: 14px 0 6px;
+  padding-left: 26px;       /* місце під іконку зліва */
+  position: relative;
+}
+
+/* Базовий контейнер під іконку */
+#left-panel .panel-family::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* Іконки для конкретних сімейств */
+#left-panel .panel-family-univers::before {
+  background-image: url("../res/icons/telescope.png");
+}
+
+#left-panel .panel-family-history::before {
+  background-image: url("../res/icons/history.png");
+}
+
+#left-panel .panel-family-geo::before {
+  background-image: url("../res/icons/globe.png");
+}
+
+#left-panel .panel-family-money::before {
+  background-image: url("../res/icons/money.png");
+}
+
+#left-panel .panel-family-math::before {
+  background-image: url("../res/icons/power.png");
 }
 
 #left-panel .sector-block {
