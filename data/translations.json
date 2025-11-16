@@ -1019,6 +1019,29 @@
   "scenes.field_description":  { "ua": "Опис", "en": "Description", "es": "Descripción" },
   "scenes.field_public":       { "ua": "Публічна", "en": "Public", "es": "Pública" },
   "scenes.edit": { "ua": "Редагувати", "en": "Edit", "es": "Editar" },
+
+    "scenes.field_lang": {
+    "ua": "Мова перекладу",
+    "en": "Translation language",
+    "es": "Idioma de traducción"
+  },
+
+  "scenes.saved": {
+    "ua": "Зміни збережені",
+    "en": "Changes saved",
+    "es": "Cambios guardados"
+  },
+  "objects.field_lang": {
+  "ua": "Мова перекладу",
+  "en": "Translation language",
+  "es": "Idioma de traducción"
+  },
+  "objects.saved": {
+    "ua": "Зміни збережені",
+    "en": "Changes saved",
+    "es": "Cambios guardados"
+  },
+
   "field_mode": { "ua": "Режим", "en": "Mode", "es": "Modo" },
   "ui.close":                     { "ua": "Закрити", "en": "Close", "es": "Cerrar" },
 "auth.error.cooldown": { "ua": "З міркувань безпеки повторний запит можливий через {sec} с.", "en": "For security purposes, you can request this again in {sec} seconds.", "es": "Por seguridad, puedes volver a solicitarlo en {sec} segundos." },

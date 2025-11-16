@@ -30,7 +30,7 @@ export async function listMine({ limit = 50, offset = 0 } = {}) {
   const to = offset + limit - 1;
   const { data, error } = await sb
     .from('scenes')
-    .select('id, created_at, updated_at, is_public, lang, title, description, mode')
+    .select('id, created_at, updated_at, is_public, lang, title, description, mode, title_ua, title_en, title_es, description_ua, description_en, description_es')
     .eq('owner_id', uid)
     .order('created_at', { ascending: false })
     .range(from, to);
@@ -68,7 +68,7 @@ export async function listPublic({ limit = 20, offset = 0 } = {}) {
   const to = offset + limit - 1;
   const { data, error } = await sb
     .from('scenes')
-    .select('id, created_at, is_public, lang, title, description, mode')
+    .select('id, created_at, is_public, lang, title, description, mode, title_ua, title_en, title_es, description_ua, description_en, description_es')
     .eq('is_public', true)
     .order('created_at', { ascending: false })
     .range(from, to);
@@ -78,21 +78,36 @@ export async function listPublic({ limit = 20, offset = 0 } = {}) {
 
 /**
  * Створити сцену
- * @param {{title:string, description?:string, lang?:'uk'|'en'|'es', is_public?:boolean, mode:string, query:object}} payload
+ * @param {{title:string, description?:string, lang?:'ua'|'en'|'es', is_public?:boolean, mode:string, query:object}} payload
  * @returns {Promise<string>} id нової сцени
  */
 export async function createScene(payload) {
   const sb = await getSupabase();
   const owner_id = await getUserIdRequired();
+  const lang = payload.lang ?? 'ua';
+
   const row = {
     owner_id,
     title: payload.title,
     description: payload.description ?? null,
-    lang: payload.lang ?? 'uk',
+    lang,
     is_public: !!payload.is_public,
     mode: payload.mode,
     query: payload.query,
   };
+
+  // Одразу заповнюємо локалізовані поля для базової мови
+  if (lang === 'ua') {
+    row.title_ua = payload.title;
+    row.description_ua = payload.description ?? null;
+  } else if (lang === 'en') {
+    row.title_en = payload.title;
+    row.description_en = payload.description ?? null;
+  } else if (lang === 'es') {
+    row.title_es = payload.title;
+    row.description_es = payload.description ?? null;
+  }
+
   const { data, error } = await sb.from('scenes').insert(row).select('id').single();
   if (error) throw new Error(error.message);
   return data.id;
@@ -101,7 +116,20 @@ export async function createScene(payload) {
 /**
  * Оновити сцену (повертає true або кидає помилку «Not found or access denied»)
  * @param {string} id
- * @param {{title?:string, description?:string, lang?:'uk'|'en'|'es', is_public?:boolean, mode?:string, query?:object}} patch
+ * @param {{
+ *   title?:string,
+ *   description?:string,
+ *   lang?:'ua'|'en'|'es',
+ *   is_public?:boolean,
+ *   mode?:string,
+ *   query?:object,
+ *   title_ua?:string,
+ *   title_en?:string,
+ *   title_es?:string,
+ *   description_ua?:string,
+ *   description_en?:string,
+ *   description_es?:string
+ * }} patch
  */
 export async function updateScene(id, patch) {
   const sb = await getSupabase();
@@ -209,7 +237,10 @@ export async function listAllPublic({ limit = 30, offset = 0 } = {}) {
     .from('scenes_public_feed')
     .select(`
       id, owner_id, created_at, updated_at,
-      lang, title, description, mode, query,
+      lang, title, description,
+      title_ua, title_en, title_es,
+      description_ua, description_en, description_es,
+      mode, query,
       views, likes
     `)
     .order('created_at', { ascending: false })
@@ -218,6 +249,8 @@ export async function listAllPublic({ limit = 30, offset = 0 } = {}) {
   if (error) throw new Error(error.message);
   return data || [];
 }
+
+
 
 export async function incrementSceneView(sceneId) {
   const sb = await getSupabase();
@@ -284,4 +317,3 @@ export async function getMyLikedSceneIds(sceneIds = []) {
     return new Set();
   }
 }
-

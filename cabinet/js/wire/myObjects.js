@@ -37,7 +37,8 @@ function parseMaybeJson(x) {
   if (!x || typeof x !== 'string') return x;
   try { return JSON.parse(x); } catch { return null; }
 }
-/** Вибір значення: *_<curr> → *_<fallback> → base */
+
+/** Вибір значення для ВІДОБРАЖЕННЯ: *_<curr> → *_<fallback> → base → bag */
 function pickI18n(it, base, L = currLang()) {
   const order = langsOrder(L);
   const rawBag = it?.[`${base}_i18n`];
@@ -50,7 +51,28 @@ function pickI18n(it, base, L = currLang()) {
     const via = trim(it?.[`${base}_${order[i]}`]);  if (via) return via;
     const viaBag = trim(bag?.[order[i]]);           if (viaBag) return viaBag;
   }
-  return trim(it?.[base]) || '';
+  const baseVal = trim(it?.[base]);                 if (baseVal) return baseVal;
+
+  return '';
+}
+
+/** Сирове значення ДЛЯ РЕДАГУВАННЯ: тільки конкретна мова (+ bag), без перетікання між мовами */
+function rawLocalized(it, base, L) {
+  const rawBag = it?.[`${base}_i18n`];
+  const bag = (rawBag && typeof rawBag === 'string') ? parseMaybeJson(rawBag) : rawBag;
+
+  const col = trim(it?.[`${base}_${L}`]);
+  if (col) return col;
+
+  const bagVal = trim(bag?.[L]);
+  if (bagVal) return bagVal;
+
+  // для UA ще можемо підхопити базове поле
+  if (L === 'ua') {
+    const baseVal = trim(it?.[base]);
+    if (baseVal) return baseVal;
+  }
+  return '';
 }
 
 /* ───── поля ───── */
@@ -109,6 +131,28 @@ function toast(text){
   const el = document.createElement('div'); el.className = 'cab-toast'; el.textContent = text;
   root.appendChild(el); void el.offsetWidth; el.classList.add('show');
   setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),200); },1600);
+}
+
+/* ───── локальний стан редагування (багатомовний) ───── */
+
+let editLang = currLang(); // активна мова в модалці редагування
+let editFields = {
+  ua: { name: '', desc: '' },
+  en: { name: '', desc: '' },
+  es: { name: '', desc: '' },
+};
+
+function initEditFieldsFromItem(item) {
+  const make = (L) => ({
+    name: rawLocalized(item, 'name', L),
+    desc: rawLocalized(item, 'description', L),
+  });
+
+  editFields = {
+    ua: make('ua'),
+    en: make('en'),
+    es: make('es'),
+  };
 }
 
 /* ───────────────────────── події для синхронізації ───────────────────────── */
@@ -178,12 +222,57 @@ function ensureMainModal(){
   document.addEventListener('keydown', escMain);
   return overlay;
 }
-const setMainStatus = txt => { const el=document.querySelector(`.cab-modal-overlay[data-modal="${MODAL_KEY}"]`); if(!el) return; const s=el.querySelector('.cab-status'); if(!s) return; s.textContent=txt||''; s.style.display=txt?'':'none'; };
+const setMainStatus = txt => {
+  const el=document.querySelector(`.cab-modal-overlay[data-modal="${MODAL_KEY}"]`); if(!el) return;
+  const s=el.querySelector('.cab-status'); if(!s) return;
+  s.textContent=txt||''; s.style.display=txt?'':'none';
+};
 const listEl = () => document.getElementById('cab-my-objects-list');
 
 /* ───────── modal (редагування) ───────── */
 let escEdit = null;
 let currentEdit = null;
+
+function syncFormToBuffer() {
+  const overlay = document.querySelector(`.cab-modal-overlay[data-modal="${EDIT_MODAL_KEY}"]`);
+  if (!overlay || !currentEdit) return;
+  const form = overlay.querySelector('#obj-edit-form');
+  if (!form) return;
+
+  const L = editLang || 'ua';
+  const nameInput = form.elements.name_local;
+  const descInput = form.elements.description_local;
+
+  if (!editFields[L]) editFields[L] = { name: '', desc: '' };
+  if (nameInput) editFields[L].name = trim(nameInput.value);
+  if (descInput) editFields[L].desc = trim(descInput.value);
+}
+
+function setActiveLang(L, opts = {}) {
+  const overlay = document.querySelector(`.cab-modal-overlay[data-modal="${EDIT_MODAL_KEY}"]`);
+  if (!overlay || !currentEdit) return;
+  const form = overlay.querySelector('#obj-edit-form');
+  if (!form) return;
+
+  const next = validateLang(L);
+
+  if (!opts.skipSync) {
+    syncFormToBuffer();
+  }
+
+    editLang = next;
+  form.setAttribute('data-lang', editLang);
+
+  const select = overlay.querySelector('#obj-edit-lang-select');
+  if (select && select.value !== editLang) {
+    select.value = editLang;
+  }
+
+  const f = editFields[editLang] || { name: '', desc: '' };
+
+  if (form.elements.name_local) form.elements.name_local.value = f.name || '';
+  if (form.elements.description_local) form.elements.description_local.value = f.desc || '';
+}
 
 function ensureEditModal(){
   let overlay = document.querySelector(`.cab-modal-overlay[data-modal="${EDIT_MODAL_KEY}"]`);
@@ -193,48 +282,69 @@ function ensureEditModal(){
   overlay.className = 'cab-modal-overlay';
   overlay.setAttribute('data-modal', EDIT_MODAL_KEY);
 
-  const modal = document.createElement('div'); modal.className='cab-modal';
+  const modal = document.createElement('div');
+  modal.className='cab-modal';
 
-  const head = document.createElement('div'); head.className='cab-modal-header';
-  const h = document.createElement('div'); h.className='cab-modal-title'; h.textContent = tStrict('scenes.edit','Edit');
+  // ── Хедер: "Редагувати" + хрестик ────────────────────────────
+  const head = document.createElement('div');
+  head.className='cab-modal-header';
 
-  const langBar = document.createElement('div');
-  langBar.className = 'cab-lang-switch';
-  langBar.id = 'obj-edit-lang';
-  langBar.innerHTML = `
-    <button type="button" data-lang="ua" class="cab-btn cab-btn--chip">UA</button>
-    <button type="button" data-lang="en" class="cab-btn cab-btn--chip">EN</button>
-    <button type="button" data-lang="es" class="cab-btn cab-btn--chip">ES</button>
-  `;
+  const h = document.createElement('div');
+  h.className='cab-modal-title';
+  h.textContent = tStrict('scenes.edit','Edit');
 
   const btnX = document.createElement('button');
-  btnX.type='button'; btnX.className='cab-close-btn'; btnX.setAttribute('aria-label', tStrict('cab_save_btn_close','Close')); btnX.textContent='×';
+  btnX.type='button';
+  btnX.className='cab-close-btn';
+  btnX.setAttribute('aria-label', tStrict('cab_save_btn_close','Close'));
+  btnX.textContent='×';
 
-  head.append(h, langBar, btnX);
+  head.append(h, btnX);
 
-  const body = document.createElement('div'); body.className='cab-modal-body';
+  // ── Тіло ─────────────────────────────────────────────────────
+  const body = document.createElement('div');
+  body.className='cab-modal-body';
+
   body.innerHTML = `
     <div class="cab-edit-meta" id="obj-edit-mode-line"></div>
     <div class="cab-edit-meta" id="obj-edit-category-line"></div>
 
     <form id="obj-edit-form" class="cab-form">
-      <div class="cab-form-row">
-        <label>${tStrict('field_name','Name')}</label>
-        <input name="name_local" autocomplete="off">
+      <!-- 1. Мова перекладу — як у сцен: окремий рядок форми -->
+      <div class="cab-form-row cab-form-row--lang">
+        <label for="obj-edit-lang-select">${tStrict('objects.field_lang','Мова перекладу')}</label>
+        <select id="obj-edit-lang-select" name="lang_local" class="cab-select">
+          <option value="ua">UA</option>
+          <option value="en">EN</option>
+          <option value="es">ES</option>
+        </select>
       </div>
 
+      <!-- 2. Назва -->
+      <div class="cab-form-row">
+        <label for="obj-edit-name">${tStrict('field_name','Name')}</label>
+        <input id="obj-edit-name" name="name_local" autocomplete="off">
+      </div>
+
+      <!-- 3. Value + unit (read-only рядок) -->
       <div class="cab-form-row">
         <div id="obj-edit-valueunit"></div>
       </div>
 
+      <!-- 4. Опис -->
       <div class="cab-form-row">
-        <label>${tStrict('modal_field_desc','Description')}</label>
-        <textarea name="description_local" rows="3"></textarea>
+        <label for="obj-edit-desc">${tStrict('modal_field_desc','Description')}</label>
+        <textarea id="obj-edit-desc" name="description_local" rows="3"></textarea>
       </div>
 
+      <!-- 5. Кнопки -->
       <div class="cab-form-actions">
-        <button type="submit" class="cab-btn cab-btn--primary">${tStrict('cab_save_btn_save','Save')}</button>
-        <button type="button" id="obj-edit-cancel" class="cab-btn">${tStrict('btn_cancel','Cancel')}</button>
+        <button type="submit" class="cab-btn cab-btn--primary">
+          ${tStrict('cab_save_btn_save','Save')}
+        </button>
+        <button type="button" id="obj-edit-cancel" class="cab-btn">
+          ${tStrict('btn_cancel','Cancel')}
+        </button>
       </div>
     </form>
   `;
@@ -243,29 +353,46 @@ function ensureEditModal(){
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
 
-  const close = ()=>{ overlay.remove(); if(escEdit) document.removeEventListener('keydown', escEdit); escEdit=null; currentEdit=null; };
+  // ── Закриття ─────────────────────────────────────────────────
+  const close = ()=>{ 
+    overlay.remove(); 
+    if(escEdit) document.removeEventListener('keydown', escEdit); 
+    escEdit=null; 
+    currentEdit=null; 
+  };
   btnX.addEventListener('click', close);
   overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
   escEdit = (e)=>{ if(e.key==='Escape') close(); };
   document.addEventListener('keydown', escEdit);
 
-  overlay.querySelector('#obj-edit-lang').addEventListener('click', (e)=>{
-    const btn = e.target.closest('[data-lang]');
-    if (!btn || !currentEdit) return;
-    setActiveLang(btn.getAttribute('data-lang'));
-  });
+  // ── Селектор мови (select) ───────────────────────────────────
+  const langSelect = overlay.querySelector('#obj-edit-lang-select');
+  if (langSelect) {
+    langSelect.addEventListener('change', (e) => {
+      if (!currentEdit) return;
+      const L = e.target.value;
+      setActiveLang(L);
+    });
+  }
 
+  // ── Сабміт: зберігаємо всі мови разом ────────────────────────
   overlay.querySelector('#obj-edit-form').addEventListener('submit', async (e)=>{
     e.preventDefault();
     if (!currentEdit) return close();
 
-    const form = e.currentTarget;
-    const L = form.getAttribute('data-lang') || 'ua';
-    const fd = new FormData(form);
+    // синхронізуємо активну мову в буфер
+    syncFormToBuffer();
 
-    const patch = { id: currentEdit.id, mode: currentEdit.mode };
-    patch[`name_${L}`] = trim(fd.get('name_local'));
-    patch[`description_${L}`] = trim(fd.get('description_local'));
+    const patch = {
+      id: currentEdit.id,
+      mode: currentEdit.mode,
+    };
+
+    ['ua','en','es'].forEach(L => {
+      const f = editFields[L] || { name: '', desc: '' };
+      patch[`name_${L}`] = trim(f.name);
+      patch[`description_${L}`] = trim(f.desc);
+    });
 
     try{
       const saved = await getStore().add({ ...currentEdit, ...patch });
@@ -274,7 +401,7 @@ function ensureEditModal(){
       renderList(rows);
       broadcastAddedOrChanged(saved);
 
-      toast(tStrict('ui.saved','Saved'));
+      toast(tStrict('objects.saved','Зміни збережені'));
       close();
     }catch(err){
       console.error(err);
@@ -282,15 +409,19 @@ function ensureEditModal(){
     }
   });
 
-  overlay.querySelector('#obj-edit-cancel').addEventListener('click', ()=> { 
-    const closeBtn = btnX; closeBtn.click(); 
-  });
+  // Cancel
+  const btnCancel = overlay.querySelector('#obj-edit-cancel');
+  if (btnCancel) {
+    btnCancel.addEventListener('click', () => btnX.click());
+  }
 
   return overlay;
 }
 
 function openEditModal(item){
   currentEdit = item;
+  initEditFieldsFromItem(item);
+
   const overlay = ensureEditModal();
   const modeEl = overlay.querySelector('#obj-edit-mode-line');
   const catEl  = overlay.querySelector('#obj-edit-category-line');
@@ -300,25 +431,16 @@ function openEditModal(item){
   const cat = catOf(item);
   if (catEl) catEl.textContent = cat ? `${tStrict('field_category','Category')}: ${cat}` : '';
 
-  setActiveLang(currLang());
+  // значення value + unit (read-only)
   const unit = (item?.unit_key ?? item?.unit ?? '').toString().trim();
   const val  = (item?.value != null) ? String(item.value) : '';
   const vu   = (val || unit) ? `${tStrict('field_value','Value')}: ${[val, unit].filter(Boolean).join(' ')}` : '';
   const roEl = overlay.querySelector('#obj-edit-valueunit');
   if (roEl) roEl.textContent = vu;
-}
 
-function setActiveLang(L){
-  const overlay = document.querySelector(`.cab-modal-overlay[data-modal="${EDIT_MODAL_KEY}"]`);
-  if (!overlay || !currentEdit) return;
-  const form = overlay.querySelector('#obj-edit-form');
-  if (!form) return;
-  form.setAttribute('data-lang', L);
-  overlay.querySelectorAll('#obj-edit-lang [data-lang]').forEach(btn=>{
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === L);
-  });
-  if (form.elements.name_local) form.elements.name_local.value = nameOf(currentEdit, L) || '';
-  if (form.elements.description_local) form.elements.description_local.value = descOf(currentEdit, L) || '';
+  // активна мова — поточна мова інтерфейсу; перший setActiveLang без sync
+  editLang = currLang();
+  setActiveLang(editLang, { skipSync: true });
 }
 
 /* ───────── список ───────── */
@@ -482,7 +604,14 @@ function rerenderForLangChange(){
     const cat     = catOf(currentEdit);
     if (catEl) catEl.textContent = cat ? `${tStrict('field_category','Category')}: ${cat}` : '';
 
-    setActiveLang(currLang());
+        const langLabelText = overlayEdit.querySelector('label[for="obj-edit-lang-select"]');
+    if (langLabelText) {
+      langLabelText.textContent = tStrict('objects.field_lang','Мова перекладу');
+    }
+
+    // переактивувати мову за мовою інтерфейсу, але збережені значення лишаються в editFields
+    editLang = currLang();
+    setActiveLang(editLang, { skipSync: true });
   }
 }
 ['languageChanged','lang-changed','i18n:changed','i18nextLanguageChanged']

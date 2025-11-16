@@ -1,5 +1,5 @@
 // /js/panels/publicScenes.panel.js
-import { t } from '/js/i18n.js';
+import { t, getCurrentLang } from '/js/i18n.js';
 import { getSceneOfDay, listInteresting, listAllPublic } from '/cabinet/js/cloud/scenes.cloud.js';
 import { incrementSceneView, toggleLike } from '/cabinet/js/cloud/scenes.cloud.js';
 import { getMyLikedSceneIds } from '/cabinet/js/cloud/scenes.cloud.js';
@@ -37,6 +37,63 @@ function ensureSectionContent(detailsEl) {
   }
   return c;
 }
+
+// --- i18n helpers ---
+function tStrict(key) {
+  const v = t(key);
+  return v && v !== key ? v : '';
+}
+
+// === Мови сцен (UA / EN / ES) ===
+const SCENE_LANGS = ['ua', 'en', 'es'];
+
+const trim = (v) => (v == null ? '' : String(v).trim());
+
+function validateSceneLang(l) {
+  const v = trim(l).toLowerCase();
+  return SCENE_LANGS.includes(v) ? v : 'ua';
+}
+
+function currSceneLang() {
+  try {
+    if (typeof getCurrentLang === 'function') {
+      return validateSceneLang(getCurrentLang());
+    }
+  } catch (_) {}
+  return 'ua';
+}
+
+// порядок мов: спочатку поточна, потім інші
+function sceneLangsOrder(L) {
+  const base = validateSceneLang(L || currSceneLang());
+  return [base, ...SCENE_LANGS.filter((x) => x !== base)];
+}
+
+function pickSceneI18n(row, base, L = currSceneLang()) {
+  const order = sceneLangsOrder(L);
+
+  // прямий переклад для поточної мови
+  const direct = trim(row && row[`${base}_${order[0]}`]);
+  if (direct) return direct;
+
+  // інші переклади (якщо нема поточної)
+  for (let i = 1; i < order.length; i++) {
+    const via = trim(row && row[`${base}_${order[i]}`]);
+    if (via) return via;
+  }
+
+  // fallback на «старе» поле
+  return trim(row && row[base]) || '';
+}
+
+function titleOf(row, L = currSceneLang()) {
+  return pickSceneI18n(row, 'title', L) || tStrict('scenes.untitled') || '';
+}
+
+function descOf(row, L = currSceneLang()) {
+  return pickSceneI18n(row, 'description', L);
+}
+
 // Контроль дублювань у списках
 const seenAllIds = new Set();
 const seenInterestingIds = new Set();
@@ -92,92 +149,96 @@ function renderList(cardsContainer, rows, { append = false, seen = null } = {}) 
 
     const btn   = el('button', 'public-scene-item', { type: 'button' });
     btn.dataset.sceneId = row.id;
-    const title = el('div', 'public-scene-title', { text: (row.title?.trim() || t('scenes.untitled') || '') });
-    const desc  = el('div',  'public-scene-desc',  { text: (row.description?.trim() || '') });
+
+    const titleText = titleOf(row);
+    const descText  = descOf(row);
+
+    const title = el('div', 'public-scene-title', { text: titleText });
+    const desc  = el('div',  'public-scene-desc',  { text: descText });
 
     // ── Статистика: ♥ лайки + 👁 перегляди
     const stats = el('div', 'public-scene-stats');
 
-const likeBtn  = el('button', 'scene-like-btn', { type: 'button', 'aria-label': 'Like' });
-const heartOutline = el('span', 'heart-outline', { text: '♡' });  // контур
-const heartFill    = el('span', 'heart-fill',    { text: '♥' });  // заливка (ховається CSS)
-const likeNum      = el('span', 'scene-like-num', { text: String(row.likes ?? 0) });
+    const likeBtn  = el('button', 'scene-like-btn', { type: 'button', 'aria-label': 'Like' });
+    const heartOutline = el('span', 'heart-outline', { text: '♡' });  // контур
+    const heartFill    = el('span', 'heart-fill',    { text: '♥' });  // заливка (ховається CSS)
+    const likeNum      = el('span', 'scene-like-num', { text: String(row.likes ?? 0) });
 
-likeBtn.append(heartOutline, heartFill, likeNum);
+    likeBtn.append(heartOutline, heartFill, likeNum);
 
-// початковий стан: показуємо ♡; якщо з бекенду прийшов флаг — відразу ♥
-const likedInit = row.likedByMe ?? row.liked ?? false;
-likeBtn.classList.toggle('is-liked', !!likedInit);
-likeBtn.setAttribute('aria-pressed', likedInit ? 'true' : 'false');
-
+    // початковий стан: показуємо ♡; якщо з бекенду прийшов флаг — відразу ♥
+    const likedInit = row.likedByMe ?? row.liked ?? false;
+    likeBtn.classList.toggle('is-liked', !!likedInit);
+    likeBtn.setAttribute('aria-pressed', likedInit ? 'true' : 'false');
 
     const viewsSpan = el('span', 'scene-views', { text: `👁 ${row.views ?? 0}` });
 
     stats.append(likeBtn, viewsSpan);
-// У списках опис прихований до кліку по назві
-desc.hidden = true;
 
-/// Клік по НАЗВІ: 1) показ/приховати опис, 2) інкремент через бек і взяти «правду», 3) застосувати сцену, 4) підсвітити картку
-title.addEventListener('click', async (ev) => {
-  ev.stopPropagation();
+    // У списках опис прихований до кліку по назві
+    desc.hidden = true;
 
-  // Закрити інші описи в межах цього списку
-  cardsContainer.querySelectorAll('.public-scene-desc').forEach(d => { d.hidden = true; });
-  // Тогл опису поточної сцени
-  desc.hidden = !desc.hidden;
+    // Клік по НАЗВІ: 1) показ/приховати опис, 2) інкремент через бек і взяти «правду», 3) застосувати сцену, 4) підсвітити картку
+    title.addEventListener('click', async (ev) => {
+      ev.stopPropagation();
 
-  // Інкремент переглядів — беремо фактичні значення з БД
-  try {
-    if (row && row.id) {
-      const res = await incrementSceneView(row.id);
-      if (res && typeof res.views === 'number') {
-        row.views = res.views;
-        viewsSpan.textContent = `👁 ${res.views}`;
+      // Закрити інші описи в межах цього списку
+      cardsContainer.querySelectorAll('.public-scene-desc').forEach(d => { d.hidden = true; });
+      // Тогл опису поточної сцени
+      desc.hidden = !desc.hidden;
+
+      // Інкремент переглядів — беремо фактичні значення з БД
+      try {
+        if (row && row.id) {
+          const res = await incrementSceneView(row.id);
+          if (res && typeof res.views === 'number') {
+            row.views = res.views;
+            viewsSpan.textContent = `👁 ${res.views}`;
+          }
+          if (res && typeof res.likes === 'number') {
+            row.likes = res.likes;
+            likeNum.textContent = String(res.likes);
+          }
+        }
+      } catch (e) {
+        console.error('[views]', e);
       }
-      if (res && typeof res.likes === 'number') {
-        row.likes = res.likes;
-        likeNum.textContent = String(res.likes);
+
+      // Застосувати сцену та підсвітити картку
+      applyPublicScene(row);
+      setActiveSceneButton(btn);
+    });
+
+    // Клік по всій картці більше НЕ запускає відтворення
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+    });
+
+    // Клік по сердечку: toggle лайк (беремо «правду» з бекенду)
+    likeBtn.addEventListener('click', async (ev) => {
+      ev.stopPropagation();
+      try {
+        const res = await toggleLike(row.id);
+        const likedNow = !!res.liked;
+        const likesNow = Number(res.likes ?? 0);
+
+        // оновлюємо лічильники з відповіді
+        likeNum.textContent = String(likesNow);
+        row.likes = likesNow;
+
+        if (typeof res.views === 'number') {
+          row.views = res.views;
+          viewsSpan.textContent = `👁 ${res.views}`;
+        }
+
+        // оновлюємо стан сердечка
+        likeBtn.classList.toggle('is-liked', likedNow);
+        likeBtn.setAttribute('aria-pressed', likedNow ? 'true' : 'false');
+        window.dispatchEvent(new CustomEvent('sceneLikeToggled', { detail: { id: row.id, liked: likedNow } }));
+      } catch (e) {
+        console.error('[like]', e);
       }
-    }
-  } catch (e) {
-    console.error('[views]', e);
-  }
-
-  // Застосувати сцену та підсвітити картку
-  applyPublicScene(row);
-  setActiveSceneButton(btn);
-});
-
-// Клік по всій картці більше НЕ запускає відтворення
-btn.addEventListener('click', (ev) => {
-  ev.preventDefault();
-});
-
-// Клік по сердечку: toggle лайк (беремо «правду» з бекенду)
-likeBtn.addEventListener('click', async (ev) => {
-  ev.stopPropagation();
-  try {
-    const res = await toggleLike(row.id);
-    const likedNow = !!res.liked;
-    const likesNow = Number(res.likes ?? 0);
-
-    // оновлюємо лічильники з відповіді
-    likeNum.textContent = String(likesNow);
-    row.likes = likesNow;
-
-    if (typeof res.views === 'number') {
-      row.views = res.views;
-      viewsSpan.textContent = `👁 ${res.views}`;
-    }
-
-    // оновлюємо стан сердечка
-    likeBtn.classList.toggle('is-liked', likedNow);
-    likeBtn.setAttribute('aria-pressed', likedNow ? 'true' : 'false');
-      window.dispatchEvent(new CustomEvent('sceneLikeToggled', { detail: { id: row.id, liked: likedNow } }));
-  } catch (e) {
-    console.error('[like]', e);
-  }
-});
+    });
 
     btn.append(title, desc, stats);
     cardsContainer.append(btn);
@@ -199,11 +260,14 @@ async function handleSceneDayOpen(detailsEl) {
       return;
     }
 
+    const titleText = titleOf(scene);
+    const descText  = descOf(scene);
+
     // Використовуємо ті самі класи, що й у списках (щоб стилі лишилися незмінні)
     const btn   = el('button', 'public-scene-item', { type: 'button' });
     btn.dataset.sceneId = scene.id;
-    const title = el('div', 'public-scene-title', { text: (scene.title?.trim() || t('scenes.untitled') || '') });
-    const desc  = el('div',  'public-scene-desc',  { text: (scene.description?.trim() || '') });
+    const title = el('div', 'public-scene-title', { text: titleText });
+    const desc  = el('div',  'public-scene-desc',  { text: descText });
 
     // Статистика: ♥ лайки + 👁 перегляди
     const stats = el('div', 'public-scene-stats');
@@ -214,12 +278,12 @@ async function handleSceneDayOpen(detailsEl) {
     likeBtn.append(heartOutline, heartFill, likeNum);
 
     let likedInit = false;
-try {
-  const set = await getMyLikedSceneIds([scene.id]);
-  likedInit = set.has(scene.id);
-} catch (e) {
-  console.warn('[likes init: day]', e);
-}
+    try {
+      const set = await getMyLikedSceneIds([scene.id]);
+      likedInit = set.has(scene.id);
+    } catch (e) {
+      console.warn('[likes init: day]', e);
+    }
 
     likeBtn.classList.toggle('is-liked', !!likedInit);
     likeBtn.setAttribute('aria-pressed', likedInit ? 'true' : 'false');
@@ -238,38 +302,38 @@ try {
         scene.likes = likesNow;
         likeBtn.classList.toggle('is-liked', likedNow);
         likeBtn.setAttribute('aria-pressed', likedNow ? 'true' : 'false');
-          window.dispatchEvent(new CustomEvent('sceneLikeToggled', { detail: { id: scene.id, liked: likedNow } }));
+        window.dispatchEvent(new CustomEvent('sceneLikeToggled', { detail: { id: scene.id, liked: likedNow } }));
 
       } catch (e) {
         console.error('[like: day]', e);
       }
     });
 
-    // У "Сцені дня" опис показуємо одразу (повний текст — як у вас, через фокус/hover)
+    // У "Сцені дня" опис показуємо одразу
     desc.hidden = false;
 
     btn.append(title, desc, stats);
     content.append(btn);
 
     // Автовідтворення при відкритті секції: інкремент і беремо «правду» з БД
-try {
-  if (scene?.id) {
-    const res = await incrementSceneView(scene.id);
-    if (res && typeof res.views === 'number') {
-      scene.views = res.views;
-      viewsSpan.textContent = `👁 ${res.views}`;
-    } else {
+    try {
+      if (scene?.id) {
+        const res = await incrementSceneView(scene.id);
+        if (res && typeof res.views === 'number') {
+          scene.views = res.views;
+          viewsSpan.textContent = `👁 ${res.views}`;
+        } else {
+          viewsSpan.textContent = `👁 ${scene.views ?? 0}`;
+        }
+        if (res && typeof res.likes === 'number') {
+          scene.likes = res.likes;
+          likeNum.textContent = String(res.likes);
+        }
+      }
+    } catch (e) {
       viewsSpan.textContent = `👁 ${scene.views ?? 0}`;
+      console.error('[views: day]', e);
     }
-    if (res && typeof res.likes === 'number') {
-      scene.likes = res.likes;
-      likeNum.textContent = String(res.likes);
-    }
-  }
-} catch (e) {
-  viewsSpan.textContent = `👁 ${scene.views ?? 0}`;
-  console.error('[views: day]', e);
-}
 
     applyPublicScene(scene);
     setActiveSceneButton(btn);
@@ -293,13 +357,13 @@ async function handleInterestingOpen(detailsEl) {
   try {
     const rows = await listInteresting({ limit: 50 });
     // мої лайки між сесіями
-try {
-  const ids = rows.map(r => r.id).filter(Boolean);
-  const likedSet = await getMyLikedSceneIds(ids);
-  rows.forEach(r => { r.liked = likedSet.has(r.id); });
-} catch (e) {
-  console.warn('[likes init: interesting]', e);
-}
+    try {
+      const ids = rows.map(r => r.id).filter(Boolean);
+      const likedSet = await getMyLikedSceneIds(ids);
+      rows.forEach(r => { r.liked = likedSet.has(r.id); });
+    } catch (e) {
+      console.warn('[likes init: interesting]', e);
+    }
 
     cards.replaceChildren();
     if (!rows?.length) {
@@ -334,14 +398,13 @@ async function handleAllOpen(detailsEl) {
   try {
     const rows = await listAllPublic({ limit: state.allLimit, offset: state.allOffset });
     // мої лайки між сесіями
-try {
-  const ids = rows.map(r => r.id).filter(Boolean);
-  const likedSet = await getMyLikedSceneIds(ids);
-  rows.forEach(r => { r.liked = likedSet.has(r.id); });
-} catch (e) {
-  console.warn('[likes init: all]', e);
-}
-
+    try {
+      const ids = rows.map(r => r.id).filter(Boolean);
+      const likedSet = await getMyLikedSceneIds(ids);
+      rows.forEach(r => { r.liked = likedSet.has(r.id); });
+    } catch (e) {
+      console.warn('[likes init: all]', e);
+    }
 
     if (first) cards.replaceChildren();
 
@@ -389,36 +452,35 @@ export function initPublicScenesPanel() {
   const root = document.getElementById('left-panel');
   if (!root) return;
 
-// scene_day — при відкритті рендеримо назву/опис/статистику і авто-відтворюємо
-const dayDet = q('#left-panel > details#scene_day');
-if (dayDet && dayDet.dataset.inited !== 'true') {
-  dayDet.dataset.inited = 'true';
-  dayDet.addEventListener('toggle', () => {
-  if (dayDet.open) {
-    handleSceneDayOpen(dayDet);
-  } else {
-    // Закрили секцію: прибрати активні/згорнути описи та почистити контент
-    resetSectionUI(dayDet);
-    const content = ensureSectionContent(dayDet);
-    content.replaceChildren();
+  // scene_day — при відкритті рендеримо назву/опис/статистику і авто-відтворюємо
+  const dayDet = q('#left-panel > details#scene_day');
+  if (dayDet && dayDet.dataset.inited !== 'true') {
+    dayDet.dataset.inited = 'true';
+    dayDet.addEventListener('toggle', () => {
+      if (dayDet.open) {
+        handleSceneDayOpen(dayDet);
+      } else {
+        // Закрили секцію: прибрати активні/згорнути описи та почистити контент
+        resetSectionUI(dayDet);
+        const content = ensureSectionContent(dayDet);
+        content.replaceChildren();
+      }
+    });
   }
-});
-}
-
 
   // interesting — вантажимо один раз при першому відкритті
   const interDet = q('#left-panel > details#interesting');
   if (interDet && interDet.dataset.inited !== 'true') {
     interDet.dataset.inited = 'true';
     interDet.addEventListener('toggle', () => {
-  if (interDet.open) {
-    if (interDet.dataset.loaded === 'true') return;
-    handleInterestingOpen(interDet);
-  } else {
-    // Закрито: синхронізуємо UI зі станом глобуса
-    resetSectionUI(interDet);
-  }
-});
+      if (interDet.open) {
+        if (interDet.dataset.loaded === 'true') return;
+        handleInterestingOpen(interDet);
+      } else {
+        // Закрито: синхронізуємо UI зі станом глобуса
+        resetSectionUI(interDet);
+      }
+    });
 
   }
 
@@ -427,57 +489,98 @@ if (dayDet && dayDet.dataset.inited !== 'true') {
   if (allDet && allDet.dataset.inited !== 'true') {
     allDet.dataset.inited = 'true';
     allDet.addEventListener('toggle', () => {
-  if (allDet.open) {
-    if (allDet.dataset.loaded !== 'true') {
-      state.allOffset = 0; state.allDone = false; state.allBusy = false;
-      handleAllOpen(allDet);
-      allDet.dataset.loaded = 'true';
-    }
-  } else {
-    // Закрито: прибрати активні/згорнути описи
-    resetSectionUI(allDet);
-  }
-});
+      if (allDet.open) {
+        if (allDet.dataset.loaded !== 'true') {
+          state.allOffset = 0; state.allDone = false; state.allBusy = false;
+          handleAllOpen(allDet);
+          allDet.dataset.loaded = 'true';
+        }
+      } else {
+        // Закрито: прибрати активні/згорнути описи
+        resetSectionUI(allDet);
+      }
+    });
 
   }
   // Сцени: при Reset — прибрати .is-active і згорнути всі описи
-root.addEventListener('click', (e) => {
-  const resetBtn = e.target.closest('button[data-action="reset"]');
-  if (!resetBtn) return;
+  root.addEventListener('click', (e) => {
+    const resetBtn = e.target.closest('button[data-action="reset"]');
+    if (!resetBtn) return;
 
-  // Прибрати підсвітку активних
-  root.querySelectorAll('.section-content .public-scene-item.is-active')
-    .forEach(el => el.classList.remove('is-active'));
+    // Прибрати підсвітку активних
+    root.querySelectorAll('.section-content .public-scene-item.is-active')
+      .forEach(el => el.classList.remove('is-active'));
 
-  // Згорнути всі описи у списках
-  root.querySelectorAll('.section-content .public-scene-desc')
-    .forEach(d => { d.hidden = true; });
-});
-// Синхронізація лічильників між розділами (після перегляду/лайку)
-window.addEventListener('sceneCountersUpdated', (e) => {
-  const { id, views, likes } = e.detail || {};
-  if (!id) return;
-
-  document.querySelectorAll(`.public-scene-item[data-scene-id="${id}"]`).forEach(card => {
-    const v = card.querySelector('.scene-views');
-    const l = card.querySelector('.scene-like-num');
-    if (v && typeof views === 'number') v.textContent = `👁 ${views}`;
-    if (l && typeof likes === 'number') l.textContent = String(likes);
+    // Згорнути всі описи у списках
+    root.querySelectorAll('.section-content .public-scene-desc')
+      .forEach(d => { d.hidden = true; });
   });
-});
-// Синхронізація стану «сердечка» між розділами
-window.addEventListener('sceneLikeToggled', (e) => {
-  const { id, liked } = e.detail || {};
-  if (!id) return;
+  // Синхронізація лічильників між розділами (після перегляду/лайку)
+  window.addEventListener('sceneCountersUpdated', (e) => {
+    const { id, views, likes } = e.detail || {};
+    if (!id) return;
 
-  document.querySelectorAll(`.public-scene-item[data-scene-id="${id}"]`).forEach(card => {
-    const btn = card.querySelector('.scene-like-btn');
-    if (!btn) return;
-    btn.classList.toggle('is-liked', !!liked);
-    btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+    document.querySelectorAll(`.public-scene-item[data-scene-id="${id}"]`).forEach(card => {
+      const v = card.querySelector('.scene-views');
+      const l = card.querySelector('.scene-like-num');
+      if (v && typeof views === 'number') v.textContent = `👁 ${views}`;
+      if (l && typeof likes === 'number') l.textContent = String(likes);
+    });
   });
-});
+  // Синхронізація стану «сердечка» між розділами
+  window.addEventListener('sceneLikeToggled', (e) => {
+    const { id, liked } = e.detail || {};
+    if (!id) return;
+
+    document.querySelectorAll(`.public-scene-item[data-scene-id="${id}"]`).forEach(card => {
+      const btn = card.querySelector('.scene-like-btn');
+      if (!btn) return;
+      btn.classList.toggle('is-liked', !!liked);
+      btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+    });
+  });
+  
+  // Живий переклад: при зміні мови перерендеримо відкриті секції
+  window.addEventListener('orbit:lang-change', () => {
+    // Сцена дня
+    const dayDet = q('#left-panel > details#scene_day');
+    if (dayDet) {
+      // якщо відкрита — просто перерисувати
+      if (dayDet.open) {
+        handleSceneDayOpen(dayDet);
+      } else {
+        // якщо закрита — очистити контент, щоб при відкритті відмальовувалось заново
+        const content = ensureSectionContent(dayDet);
+        content.replaceChildren();
+      }
+    }
+
+    // Цікаві сцени
+    const interDet = q('#left-panel > details#interesting');
+    if (interDet) {
+      // скид прапорців, щоб handleInterestingOpen знову зробив запит
+      interDet.dataset.loaded = '';
+      interDet.dataset.loading = '';
+      if (interDet.open) {
+        handleInterestingOpen(interDet);
+      }
+    }
+
+    // Усі сцени
+    const allDet = q('#left-panel > details#all_scenes');
+    if (allDet) {
+      // скидаємо стан пагінації, щоб знову взяти першу сторінку
+      state.allOffset = 0;
+      state.allDone = false;
+      state.allBusy = false;
+      allDet.dataset.loaded = '';
+      allDet.dataset.loading = '';
+      if (allDet.open) {
+        handleAllOpen(allDet);
+        allDet.dataset.loaded = 'true';
+      }
+    }
+  });
 
 
 }
-

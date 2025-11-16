@@ -1,5 +1,5 @@
 // /cabinet/js/wire/myScenes.js
-import { t } from '/js/i18n.js';
+import { t, getCurrentLang } from '/js/i18n.js';
 import { getUserEmail } from '/cabinet/js/cloud/auth.cloud.js';
 import {
   listMine,
@@ -17,6 +17,7 @@ const EDIT_MODAL_KEY = 'edit-scene';
 let escHandlerMain = null;
 let escHandlerEdit = null;
 let currentRows = [];
+let currentEdit = null;
 
 function modeLine(mode) {
   const raw = String(mode || '').toLowerCase();
@@ -94,6 +95,53 @@ function showCabToast(msgKey = 'scenes.link_copied') {
 function tStrict(key) {
   const val = t(key);
   return val && val !== key ? val : '';
+}
+
+// --- мови сцен: ua/en/es, вибір поточної та fallback ---
+const SCENE_LANGS = ['ua', 'en', 'es'];
+
+function validateSceneLang(l) {
+  const v = (l || '').toString().toLowerCase();
+  return SCENE_LANGS.includes(v) ? v : 'ua';
+}
+
+function currSceneLang() {
+  try {
+    if (typeof getCurrentLang === 'function') {
+      return validateSceneLang(getCurrentLang());
+    }
+  } catch {}
+  return 'ua';
+}
+
+// порядок мов: спочатку поточна, потім інші
+function sceneLangsOrder(L) {
+  const base = validateSceneLang(L || currSceneLang());
+  return [base, ...SCENE_LANGS.filter((x) => x !== base)];
+}
+
+const trim = (v) => (v == null ? '' : String(v).trim());
+
+function pickSceneI18n(row, base, L = currSceneLang()) {
+  const order = sceneLangsOrder(L);
+
+  const direct = trim(row && row[`${base}_${order[0]}`]);
+  if (direct) return direct;
+
+  for (let i = 1; i < order.length; i++) {
+    const via = trim(row && row[`${base}_${order[i]}`]);
+    if (via) return via;
+  }
+
+  return trim(row && row[base]) || '';
+}
+
+function titleOf(row, L = currSceneLang()) {
+  return pickSceneI18n(row, 'title', L) || tStrict('scenes.untitled');
+}
+
+function descOf(row, L = currSceneLang()) {
+  return pickSceneI18n(row, 'description', L);
 }
 
 // --- DOM helpers (без innerHTML) ---
@@ -227,14 +275,15 @@ const rowsSorted = [...rows].sort((a, b) => {
 const topModeEl = createEl('div','cab-scene-meta',{ text: modeLine(getSceneMode(row)) });
 
 
-    const titleText = (row.title && row.title.trim()) || tStrict('scenes.untitled');
+    const titleText = titleOf(row);
 const title = createEl('div', 'cab-scene-title', {
   text: `${idx + 1}. ${titleText}`,
 });
 
 
+    const descText = descOf(row);
     const desc = createEl('div', 'cab-scene-desc', {
-      text: (row.description && row.description.trim()) || '',
+      text: descText,
     });
 
     const dateIso = row.created_at || row.updated_at;
@@ -280,7 +329,7 @@ const createdDate = formatDateOnly(dateIso);
   onClick: async () => {
     const ok = await openDeleteModal({
       messageKey: 'confirm.delete.scene',
-      displayName: (row.title && row.title.trim()) || tStrict('scenes.untitled'),
+      displayName: titleOf(row),
     });
     if (!ok) return;
 
@@ -376,13 +425,20 @@ function closeEditModal() {
     `.cab-modal-overlay[data-modal="${EDIT_MODAL_KEY}"]`,
   );
   if (!overlay) return;
+
   if (escHandlerEdit) document.removeEventListener('keydown', escHandlerEdit);
+
   escHandlerEdit = null;
+
+  currentEdit = null;
+
   overlay.remove();
+
 }
 
 function openEditModal(row) {
   closeEditModal();
+  currentEdit = row;
 
   const overlay = createEl('div', 'cab-modal-overlay', {
     'data-modal': EDIT_MODAL_KEY,
@@ -404,23 +460,53 @@ function openEditModal(row) {
   const body = createEl('div', 'cab-modal-body');
   const form = createEl('form', 'cab-form', {});
 
+  // Мова перекладу
+  const rowLang = createEl('div', 'cab-form-row');
+  const labelLang = createEl('label', '', {
+    for: 'sc-edit-lang',
+    text: tStrict('scenes.field_lang') || 'Мова',
+  });
+  const selectLang = createEl('select', '', { id: 'sc-edit-lang' });
+  SCENE_LANGS.forEach((code) => {
+    const opt = createEl('option', '', {
+      value: code,
+      text: code.toUpperCase(),
+    });
+    selectLang.appendChild(opt);
+  });
+  rowLang.append(labelLang, selectLang);
+
   // Title
   const rowTitle = createEl('div', 'cab-form-row');
-  const labelTitle = createEl('label', '', { for: 'sc-edit-title', text: tStrict('scenes.field_title') });
-  const inputTitle = createEl('input', '', { id: 'sc-edit-title', type: 'text', value: row.title || '' });
+  const labelTitle = createEl('label', '', {
+    for: 'sc-edit-title',
+    text: tStrict('scenes.field_title'),
+  });
+  const inputTitle = createEl('input', '', {
+    id: 'sc-edit-title',
+    type: 'text',
+  });
   rowTitle.append(labelTitle, inputTitle);
 
   // Description
   const rowDesc = createEl('div', 'cab-form-row');
-  const labelDesc = createEl('label', '', { for: 'sc-edit-desc', text: tStrict('scenes.field_description') });
+  const labelDesc = createEl('label', '', {
+    for: 'sc-edit-desc',
+    text: tStrict('scenes.field_description'),
+  });
   const inputDesc = createEl('textarea', '', { id: 'sc-edit-desc' });
-  inputDesc.value = row.description || '';
   rowDesc.append(labelDesc, inputDesc);
 
   // Public
   const rowPublic = createEl('div', 'cab-form-row');
-  const labelPub = createEl('label', '', { for: 'sc-edit-public', text: tStrict('scenes.field_public') });
-  const inputPub = createEl('input', '', { id: 'sc-edit-public', type: 'checkbox' });
+  const labelPub = createEl('label', '', {
+    for: 'sc-edit-public',
+    text: tStrict('scenes.field_public'),
+  });
+  const inputPub = createEl('input', '', {
+    id: 'sc-edit-public',
+    type: 'checkbox',
+  });
   inputPub.checked = !!row.is_public;
   rowPublic.append(labelPub, inputPub);
 
@@ -436,7 +522,7 @@ function openEditModal(row) {
   });
   actions.append(btnCancel, btnSave);
 
-  form.append(rowTitle, rowDesc, rowPublic, actions);
+  form.append(rowLang, rowTitle, rowDesc, rowPublic, actions);
   body.append(form);
 
   modal.append(header, body);
@@ -445,36 +531,92 @@ function openEditModal(row) {
 
   const onClose = () => closeEditModal();
   closeBtn.addEventListener('click', onClose);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) onClose(); });
-  escHandlerEdit = (e) => { if (e.key === 'Escape') onClose(); };
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) onClose();
+  });
+  escHandlerEdit = (e) => {
+    if (e.key === 'Escape') onClose();
+  };
   document.addEventListener('keydown', escHandlerEdit);
 
   btnCancel.addEventListener('click', onClose);
+
+  // Локальний стан перекладів
+  const baseLang = validateSceneLang(row.lang || '');
+  const fields = {};
+  SCENE_LANGS.forEach((code) => {
+    const titleKey = `title_${code}`;
+    const descKey = `description_${code}`;
+    const baseTitle = trim(row && row.title);
+    const baseDesc = trim(row && row.description);
+    const perTitle = trim(row && row[titleKey]);
+    const perDesc = trim(row && row[descKey]);
+    const title = perTitle || (baseLang === code ? baseTitle : '');
+    const description = perDesc || (baseLang === code ? baseDesc : '');
+    fields[code] = { title, description };
+  });
+
+  let activeLang = currSceneLang();
+  if (!SCENE_LANGS.includes(activeLang)) activeLang = 'ua';
+
+  function applyActiveLang() {
+    const f = fields[activeLang] || { title: '', description: '' };
+    selectLang.value = activeLang;
+    inputTitle.value = f.title || '';
+    inputDesc.value = f.description || '';
+  }
+
+  function syncFromInputs() {
+    const f = fields[activeLang];
+    if (!f) return;
+    f.title = (inputTitle.value || '').trim();
+    f.description = (inputDesc.value || '').trim();
+  }
+
+  applyActiveLang();
+
+  selectLang.addEventListener('change', () => {
+    syncFromInputs();
+    activeLang = validateSceneLang(selectLang.value);
+    applyActiveLang();
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     btnSave.disabled = true;
 
     try {
+      syncFromInputs();
+
       const patch = {
-        title: (inputTitle.value || '').trim(),
-        description: (inputDesc.value || '').trim(),
         is_public: !!inputPub.checked,
+        title_ua: fields.ua?.title || null,
+        description_ua: fields.ua?.description || null,
+        title_en: fields.en?.title || null,
+        description_en: fields.en?.description || null,
+        title_es: fields.es?.title || null,
+        description_es: fields.es?.description || null,
       };
+
       await updateScene(row.id, patch);
 
       // Оновлюємо локальний об'єкт
-      row.title = patch.title;
-      row.description = patch.description;
       row.is_public = patch.is_public;
+      row.title_ua = patch.title_ua;
+      row.description_ua = patch.description_ua;
+      row.title_en = patch.title_en;
+      row.description_en = patch.description_en;
+      row.title_es = patch.title_es;
+      row.description_es = patch.description_es;
 
       // Перемальовуємо список
       if (currentRows && currentRows.length) renderList(currentRows);
-      setStatus(''); // без зайвих текстів у статусі
+
+      setStatus('');
+      showCabToast('scenes.saved');
       onClose();
     } catch (err) {
       console.error(err);
-      // Можна показати локальне попередження у формі, але поки обмежимось статусом у головній модалці
       setStatus(tStrict('errors.generic'));
       btnSave.disabled = false;
     }
