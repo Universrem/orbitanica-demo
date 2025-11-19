@@ -1066,7 +1066,11 @@
   "confirm.delete.object": { "ua":"Видалити об’єкт: {name}?", "en":"Delete object: {name}?", "es":"¿Eliminar el objeto: {name}?" },
   "confirm.delete.scene": { "ua":"Видалити сцену: {name}?", "en":"Delete scene: {name}?", "es":"¿Eliminar la escena: {name}?" },
   "btn_play":         { "ua": "Відтворити", "en": "Play",        "es": "Reproducir" }, 
-
+"btn_load_more": {
+  "ua": "Завантажити ще",
+  "en": "Load more",
+  "es": "Cargar más"
+},
   "field_value_start": {
   "ua": "Рік початку події",
   "en": "Start year",

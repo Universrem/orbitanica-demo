@@ -226,14 +226,17 @@ export async function listInteresting({ limit = 20 } = {}) {
   return data || [];
 }
 
-// 3) All public scenes (newest first) with pagination
-export async function listAllPublic({ limit = 30, offset = 0 } = {}) {
+/**
+ * 3) All public scenes (newest first) with pagination + optional mode filter
+ * @param {{limit?:number, offset?:number, mode?:string}} opts
+ */
+export async function listAllPublic({ limit = 30, offset = 0, mode = null } = {}) {
   const sb = await getSupabase();
   const start = offset;
   const end = offset + limit - 1;
 
-  // Беремо дані з view: scenes_public_feed (вже відфільтровано is_public=TRUE)
-  const { data, error } = await sb
+  // Базовий запит до view: scenes_public_feed (вже is_public=TRUE)
+  let q = sb
     .from('scenes_public_feed')
     .select(`
       id, owner_id, created_at, updated_at,
@@ -246,11 +249,15 @@ export async function listAllPublic({ limit = 30, offset = 0 } = {}) {
     .order('created_at', { ascending: false })
     .range(start, end);
 
+  // Додатковий фільтр за режимом (якщо передано)
+  if (mode) {
+    q = q.eq('mode', mode);
+  }
+
+  const { data, error } = await q;
   if (error) throw new Error(error.message);
   return data || [];
 }
-
-
 
 export async function incrementSceneView(sceneId) {
   const sb = await getSupabase();

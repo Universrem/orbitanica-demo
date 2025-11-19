@@ -8,10 +8,12 @@ import { resetAllUI } from '/js/events/reset.js';
 
 const state = {
   allOffset: 0,
-  allLimit: 30,
+  allLimit: 3,
   allBusy: false,
   allDone: false,
+  allMode: null, // фільтр за режимом у "Усі сцени"
 };
+let isUiResetInProgress = false;
 
 function q(sel, root = document) { return root.querySelector(sel); }
 function el(tag, cls, attrs = {}) {
@@ -46,6 +48,36 @@ function tStrict(key) {
 
 // === Мови сцен (UA / EN / ES) ===
 const SCENE_LANGS = ['ua', 'en', 'es'];
+
+const ALL_SCENES_MODES = [
+  { value: '',                  familyKey: null,                 labelKey: 'panel_title_all_scenes' },
+
+  { value: 'univers_distance',  familyKey: 'panel_title_univers', labelKey: 'panel_title_univers_distance' },
+  { value: 'univers_diameter',  familyKey: 'panel_title_univers', labelKey: 'panel_title_univers_diameter' },
+  { value: 'univers_mass',      familyKey: 'panel_title_univers', labelKey: 'panel_title_univers_mass' },
+  { value: 'univers_luminosity',familyKey: 'panel_title_univers', labelKey: 'panel_title_univers_luminosity' },
+
+  { value: 'geo_population',    familyKey: 'panel_title_geo',     labelKey: 'panel_title_geo_population' },
+  { value: 'geo_area',          familyKey: 'panel_title_geo',     labelKey: 'panel_title_geo_area' },
+  { value: 'geo_objects',       familyKey: 'panel_title_geo',     labelKey: 'panel_title_geo_objects' },
+
+  { value: 'money',             familyKey: null,                 labelKey: 'panel_title_money' },
+  { value: 'math',              familyKey: null,                 labelKey: 'panel_title_math' },
+  { value: 'history',           familyKey: null,                 labelKey: 'panel_title_history' },
+];
+
+const MODE_SECTION_IDS = [
+  'univers_distance',
+  'univers_diameter',
+  'univers_mass',
+  'univers_luminosity',
+  'geo_population',
+  'geo_area',
+  'geo_objects',
+  'money',
+  'math',
+  'history',
+];
 
 const trim = (v) => (v == null ? '' : String(v).trim());
 
@@ -123,7 +155,78 @@ function setActiveSceneButton(btn) {
   btn.classList.add('is-active');
 }
 
-// Єдиний шлях застосувати публічну сцену: спочатку м'який reset, потім apply
+// Відкрити тільки потрібний режим у лівій панелі, інші режими закрити
+// "Сцена дня", "Цікаві сцени" та "Усі сцени" не чіпаємо.
+function ensureModeSectionOpen(scene) {
+  const modeId = scene && scene.mode ? String(scene.mode).trim() : '';
+  if (!modeId) return;
+
+  const root = document.getElementById('left-panel');
+  if (!root) return;
+
+  MODE_SECTION_IDS.forEach((id) => {
+    const det = root.querySelector(`#left-panel > details#${id}`);
+    if (!det) return;
+    det.open = (id === modeId);
+  });
+}
+
+// Визначити сімейство режиму за scene.mode
+function getModeFamilyIdForScene(scene) {
+  const mode = (scene && scene.mode ? String(scene.mode) : '').trim();
+  if (!mode) return null;
+
+  if (mode === 'univers' || mode.startsWith('univers_')) return 'univers';
+  if (mode === 'geo'     || mode.startsWith('geo_'))      return 'geo';
+  if (mode === 'money')   return 'money';
+  if (mode === 'math')    return 'math';
+  if (mode === 'history') return 'history';
+
+  return null;
+}
+
+// Відкрити потрібне сімейство + конкретний режим, інші закрити (без скролу, без кліку по summary)
+function ensureModeFamilyOpen(scene) {
+  const familyId = getModeFamilyIdForScene(scene);
+  const modeId = scene && scene.mode ? String(scene.mode).trim() : '';
+
+  const root = document.getElementById('left-panel');
+  if (!root) return;
+
+  const FAMILY_IDS = ['univers', 'geo', 'money', 'math', 'history'];
+
+  // 1) Сімейства (Всесвіт / Географія / Гроші / Математика / Історія)
+  if (familyId) {
+    FAMILY_IDS.forEach((id) => {
+      const det = root.querySelector(`#left-panel > details#${id}`);
+      if (!det) return;
+      det.open = (id === familyId);
+    });
+  }
+
+  // 2) Конкретний режим усередині сімейства (univers_distance, geo_population тощо)
+  if (!modeId) return;
+
+  // шукаємо <details id="modeId">
+  const modeDetails = root.querySelector(`details#${modeId}`);
+  if (!modeDetails) return;
+
+  // шукаємо батьківське сімейство (top-level details)
+  const familyDet = modeDetails.closest('#left-panel > details');
+
+  if (familyDet) {
+    // закрити всі інші підрежими всередині цього сімейства
+    familyDet.querySelectorAll('details').forEach((d) => {
+      if (d === modeDetails) return;
+      d.open = false;
+    });
+  }
+
+  // відкрити потрібний режим
+  modeDetails.open = true;
+}
+
+// Єдиний шлях застосувати публічну сцену: повний reset, відкрити потрібний режим, потім apply
 function applyPublicScene(scene) {
   try {
     if (!scene?.query || !window.orbit?.applyScene) return;
@@ -131,13 +234,16 @@ function applyPublicScene(scene) {
     // Повний скидання (той самий, що по кнопці Reset)
     resetAllUI();
 
+    // Відкрити тільки той режим, який відповідає scene.mode
+    // (інші режими закриваються, "Усі сцени" залишається відкритою)
+    ensureModeSectionOpen(scene);
+
     // Застосувати сцену начисто
     window.orbit.applyScene(scene.query);
   } catch (e) {
     console.error('[publicScenes] applyPublicScene failed:', e);
   }
 }
-
 
 function renderList(cardsContainer, rows, { append = false, seen = null } = {}) {
   if (!append) {
@@ -380,12 +486,79 @@ async function handleInterestingOpen(detailsEl) {
     detailsEl.dataset.loading = '';
   }
 }
+// Фільтр режимів для секції "Усі сцени"
+function ensureAllScenesFilter(detailsEl, content, cards) {
+  let bar = content.querySelector(':scope > .all-scenes-filter');
+  let select;
 
+  if (!bar) {
+    bar = el('div', 'all-scenes-filter');
+    select = el('select', 'all-scenes-filter-select');
+    select.name = 'allScenesMode';
+    bar.append(select);
+    content.insertBefore(bar, cards);
+
+    // реакція на зміну фільтра
+        // реакція на зміну фільтра
+    select.addEventListener('change', () => {
+      state.allMode = select.value || null;
+
+      // якщо це зміна через глобальний reset (orbit:ui-reset) — список не чіпаємо
+      if (isUiResetInProgress) {
+        return;
+      }
+
+      state.allOffset = 0;
+      state.allDone = false;
+      state.allBusy = false;
+      seenAllIds.clear();
+
+      const { cards, footer } = ensureListAreas(detailsEl);
+      cards.replaceChildren();
+      footer.replaceChildren();
+
+      // заново тягнемо першу сторінку з новим фільтром
+      handleAllOpen(detailsEl);
+    });
+
+  } else {
+    select = bar.querySelector('select.all-scenes-filter-select');
+  }
+
+  if (!select) return;
+
+  const prev = state.allMode || '';
+
+  // перебудувати опції (і тексти, і вибраний пункт) — корисно і для зміни мови
+    select.replaceChildren();
+  ALL_SCENES_MODES.forEach((m) => {
+    const modeLabel = tStrict(m.labelKey) || '';
+    if (!modeLabel) return;
+
+    let text = modeLabel;
+
+    if (m.familyKey) {
+      const familyLabel = tStrict(m.familyKey) || '';
+      if (familyLabel) {
+        text = `${familyLabel}: ${modeLabel}`;
+      }
+    }
+
+    const opt = el('option', null, { value: m.value, text });
+    select.append(opt);
+  });
+  select.value = prev;
+
+}
 
 async function handleAllOpen(detailsEl) {
   if (state.allBusy || state.allDone) return;
 
   const { content, cards, footer } = ensureListAreas(detailsEl);
+
+  // Поставити/оновити фільтр над списком
+  ensureAllScenesFilter(detailsEl, content, cards);
+
   const first = state.allOffset === 0;
 
   if (first) {
@@ -396,7 +569,12 @@ async function handleAllOpen(detailsEl) {
 
   state.allBusy = true;
   try {
-    const rows = await listAllPublic({ limit: state.allLimit, offset: state.allOffset });
+    const rows = await listAllPublic({
+      limit: state.allLimit,
+      offset: state.allOffset,
+      mode: state.allMode || undefined,
+    });
+
     // мої лайки між сесіями
     try {
       const ids = rows.map(r => r.id).filter(Boolean);
@@ -420,7 +598,10 @@ async function handleAllOpen(detailsEl) {
     // Кнопка "More" — лише у footer, окремо від карток
     let more = footer.querySelector(':scope > button.public-all-more');
     if (!more) {
-      more = el('button', 'public-all-more cab-btn', { type: 'button', text: (t('btn_load_more') || 'Load more') });
+      more = el('button', 'public-all-more cab-btn', {
+        type: 'button',
+        text: (t('btn_load_more') || 'Load more'),
+      });
       more.addEventListener('click', () => handleAllOpen(detailsEl));
       footer.append(more);
     }
@@ -438,6 +619,7 @@ async function handleAllOpen(detailsEl) {
     state.allBusy = false;
   }
 }
+
 // Згорнути всі описи і зняти .is-active всередині конкретної секції
 function resetSectionUI(detailsEl) {
   if (!detailsEl) return;
@@ -545,11 +727,9 @@ export function initPublicScenesPanel() {
     // Сцена дня
     const dayDet = q('#left-panel > details#scene_day');
     if (dayDet) {
-      // якщо відкрита — просто перерисувати
       if (dayDet.open) {
         handleSceneDayOpen(dayDet);
       } else {
-        // якщо закрита — очистити контент, щоб при відкритті відмальовувалось заново
         const content = ensureSectionContent(dayDet);
         content.replaceChildren();
       }
@@ -558,7 +738,6 @@ export function initPublicScenesPanel() {
     // Цікаві сцени
     const interDet = q('#left-panel > details#interesting');
     if (interDet) {
-      // скид прапорців, щоб handleInterestingOpen знову зробив запит
       interDet.dataset.loaded = '';
       interDet.dataset.loading = '';
       if (interDet.open) {
@@ -569,7 +748,6 @@ export function initPublicScenesPanel() {
     // Усі сцени
     const allDet = q('#left-panel > details#all_scenes');
     if (allDet) {
-      // скидаємо стан пагінації, щоб знову взяти першу сторінку
       state.allOffset = 0;
       state.allDone = false;
       state.allBusy = false;
@@ -582,5 +760,13 @@ export function initPublicScenesPanel() {
     }
   });
 
-
+  // Глобальний reset: не перезавантажуємо список "Усі сцени" штучними change
+  window.addEventListener('orbit:ui-reset', () => {
+    isUiResetInProgress = true;
+    // скинемо прапорець після того, як resetFormControls відправить свої change/input
+    setTimeout(() => {
+      isUiResetInProgress = false;
+    }, 0);
+  });
 }
+
