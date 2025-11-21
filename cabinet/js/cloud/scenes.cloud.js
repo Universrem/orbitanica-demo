@@ -2,21 +2,67 @@
 // CRUD для scenes/shortlinks під RLS
 import { getSupabase } from '/cabinet/js/cloud/config.js';
 
-/** Повертає userId або null (401 ≠ помилка) */
+/** Повертає userId або null (401/400 ≠ помилка, просто немає сесії) */
 async function getUserIdOrNull() {
   const sb = await getSupabase();
   const { data, error } = await sb.auth.getUser();
+
   if (error) {
-    if (error.status === 401) return null; // не увійшов
-    if (String(error.message || '').toLowerCase().includes('not authenticated')) return null;
+    const msg = String(error.message || '').toLowerCase();
+
+    // Випадки «просто немає сесії»:
+    //  - 401 not authenticated
+    //  - 400 "Auth session missing!"
+    if (
+      error.status === 401 ||
+      (error.status === 400 && msg.includes('auth session missing')) ||
+      msg.includes('not authenticated')
+    ) {
+      return null; // гість, без помилки
+    }
+
     throw new Error(error.message);
   }
+
   return data?.user?.id ?? null;
 }
+
 async function getUserIdRequired() {
   const uid = await getUserIdOrNull();
   if (!uid) throw new Error('Not authenticated');
   return uid;
+}
+
+/**
+ * Стабільний ідентифікатор пристрою для гостей (з localStorage).
+ * Повертає рядок або null, якщо сховище недоступне.
+ */
+function getDeviceId() {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return null;
+    }
+  } catch (_) {
+    return null;
+  }
+
+  const STORAGE_KEY = 'orbit.device.id';
+
+  try {
+    let id = window.localStorage.getItem(STORAGE_KEY);
+    if (id && typeof id === 'string' && id.trim()) {
+      return id;
+    }
+
+    const random = Math.random().toString(36).slice(2);
+    const ts = Date.now().toString(36);
+    id = `dev_${ts}_${random}`;
+
+    window.localStorage.setItem(STORAGE_KEY, id);
+    return id;
+  } catch (_) {
+    return null;
+  }
 }
 
 /**
@@ -271,50 +317,128 @@ export async function incrementSceneView(sceneId) {
 
 export async function toggleLike(sceneId) {
   const sb = await getSupabase();
-  const userId = await getUserIdRequired();
+  const userId = await getUserIdOrNull();
 
-  // перевіряємо стан
-  const exists = await sb
-    .from('scene_likes')
-    .select('scene_id', { count: 'exact', head: false })
-    .eq('scene_id', sceneId)
-    .eq('user_id', userId)
-    .maybeSingle();
+  let existingRow = null;
 
-  if (exists.error && exists.error.code !== 'PGRST116') {
-    throw new Error(exists.error.message);
-  }
+  if (userId) {
+    // Авторизований користувач: лайк по user_id
+    const exists = await sb
+      .from('scene_likes')
+      .select('scene_id')
+      .eq('scene_id', sceneId)
+      .eq('user_id', userId)
+      .is('device_id', null)
+      .maybeSingle();
 
-  if (exists.data) {
-    const del = await sb.from('scene_likes').delete()
-      .eq('scene_id', sceneId).eq('user_id', userId);
-    if (del.error) throw new Error(del.error.message);
+    if (exists.error && exists.error.code !== 'PGRST116') {
+      throw new Error(exists.error.message);
+    }
+
+    existingRow = exists.data || null;
+
+    if (existingRow) {
+      const del = await sb
+        .from('scene_likes')
+        .delete()
+        .eq('scene_id', sceneId)
+        .eq('user_id', userId)
+        .is('device_id', null);
+
+      if (del.error) throw new Error(del.error.message);
+    } else {
+      const ins = await sb
+        .from('scene_likes')
+        .insert({
+          scene_id: sceneId,
+          user_id: userId,
+          device_id: null,
+        });
+
+      if (ins.error) throw new Error(ins.error.message);
+    }
   } else {
-    const ins = await sb.from('scene_likes').insert({ scene_id: sceneId, user_id: userId });
-    if (ins.error) throw new Error(ins.error.message);
+    // Гість: лайк по device_id
+    const deviceId = getDeviceId();
+    if (!deviceId) {
+      throw new Error('Device storage unavailable');
+    }
+
+    const exists = await sb
+      .from('scene_likes')
+      .select('scene_id')
+      .eq('scene_id', sceneId)
+      .is('user_id', null)
+      .eq('device_id', deviceId)
+      .maybeSingle();
+
+    if (exists.error && exists.error.code !== 'PGRST116') {
+      throw new Error(exists.error.message);
+    }
+
+    existingRow = exists.data || null;
+
+    if (existingRow) {
+      const del = await sb
+        .from('scene_likes')
+        .delete()
+        .eq('scene_id', sceneId)
+        .is('user_id', null)
+        .eq('device_id', deviceId);
+
+      if (del.error) throw new Error(del.error.message);
+    } else {
+      const ins = await sb
+        .from('scene_likes')
+        .insert({
+          scene_id: sceneId,
+          user_id: null,
+          device_id: deviceId,
+        });
+
+      if (ins.error) throw new Error(ins.error.message);
+    }
   }
 
   // читаємо фактичні лічильники з БД
   const counters = await fetchSceneCounters(sceneId);
-  const liked = !exists.data;
+  const liked = !existingRow;
 
   emitCountersUpdate(counters);
   return { liked, likes: counters.likes, views: counters.views };
 }
 
-// === Моє: набір scene_id, які лайкнув поточний користувач серед переданих ===
+// === Моє: набір scene_id, які лайкнув поточний користувач/пристрій серед переданих ===
 export async function getMyLikedSceneIds(sceneIds = []) {
   try {
     if (!Array.isArray(sceneIds) || sceneIds.length === 0) return new Set();
 
     const sb = await getSupabase();
     const uid = await getUserIdOrNull();
-    if (!uid) return new Set(); // гість — нічого не підсвічуємо
+
+    // Авторизований користувач
+    if (uid) {
+      const { data, error } = await sb
+        .from('scene_likes')
+        .select('scene_id')
+        .eq('user_id', uid)
+        .in('scene_id', sceneIds);
+
+      if (error) throw new Error(error.message);
+      return new Set((data || []).map(r => r.scene_id));
+    }
+
+    // Гість: ідентифікатор пристрою
+    const deviceId = getDeviceId();
+    if (!deviceId) {
+      return new Set();
+    }
 
     const { data, error } = await sb
-      .from('scene_likes')      // таблиця лайків
+      .from('scene_likes')
       .select('scene_id')
-      .eq('user_id', uid)
+      .is('user_id', null)
+      .eq('device_id', deviceId)
       .in('scene_id', sceneIds);
 
     if (error) throw new Error(error.message);
@@ -324,3 +448,4 @@ export async function getMyLikedSceneIds(sceneIds = []) {
     return new Set();
   }
 }
+

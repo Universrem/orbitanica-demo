@@ -722,6 +722,55 @@ export function initPublicScenesPanel() {
     });
   });
   
+    // Зміна авторизації (гість ↔ користувач): заново підтягуємо відкриті секції,
+  // щоб getMyLikedSceneIds працював для нового "я"
+  window.addEventListener('orbit:auth-change', () => {
+    // Сцена дня
+    const dayDet = q('#left-panel > details#scene_day');
+    if (dayDet) {
+      const content = ensureSectionContent(dayDet);
+      content.replaceChildren();
+      dayDet.dataset.loaded = '';
+      if (dayDet.open) {
+        handleSceneDayOpen(dayDet);
+      }
+    }
+
+    // Цікаві сцени
+    const interDet = q('#left-panel > details#interesting');
+    if (interDet) {
+      seenInterestingIds.clear();
+      const { cards, footer } = ensureListAreas(interDet);
+      cards.replaceChildren();
+      footer.replaceChildren();
+      interDet.dataset.loaded = '';
+      interDet.dataset.loading = '';
+      if (interDet.open) {
+        handleInterestingOpen(interDet);
+      }
+    }
+
+    // Усі сцени
+    const allDet = q('#left-panel > details#all_scenes');
+    if (allDet) {
+      state.allOffset = 0;
+      state.allDone = false;
+      state.allBusy = false;
+      allDet.dataset.loaded = '';
+      allDet.dataset.loading = '';
+      seenAllIds.clear();
+
+      const { cards, footer } = ensureListAreas(allDet);
+      cards.replaceChildren();
+      footer.replaceChildren();
+
+      if (allDet.open) {
+        handleAllOpen(allDet);
+        allDet.dataset.loaded = 'true';
+      }
+    }
+  });
+
   // Живий переклад: при зміні мови перерендеримо відкриті секції
   window.addEventListener('orbit:lang-change', () => {
     // Сцена дня

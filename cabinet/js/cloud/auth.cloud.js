@@ -87,17 +87,40 @@ export async function getUserEmail() {
   const session = await getSession();
   return session?.user?.email ?? null;
 }
-
 /**
  * Підписатися на зміни аутентифікації.
  * callback({ event, session })
  * Повертає: функцію unsubscribe().
+ *
+ * Додатково шле глобальну подію:
+ *   window.dispatchEvent(new CustomEvent('orbit:auth-change', {
+ *     detail: { event, isAuth, userId, session }
+ *   }));
  */
 export async function watchAuth(callback) {
   const supabase = await getSupabase();
   const { data: { subscription } } =
     supabase.auth.onAuthStateChange((event, session) => {
-      try { callback?.({ event, session }); } catch { /* no-op */ }
+      const isAuth = !!session?.user;
+      const userId = session?.user?.id ?? null;
+
+      // 1) викликаємо локальний callback для існуючого UI
+      try {
+        callback?.({ event, session });
+      } catch {
+        /* no-op */
+      }
+
+      // 2) шлемо глобальну подію для всього застосунку (в т.ч. панелі сцен)
+      try {
+        window.dispatchEvent(new CustomEvent('orbit:auth-change', {
+          detail: { event, isAuth, userId, session }
+        }));
+      } catch {
+        /* no-op (SSR / відсутній window) */
+      }
     });
+
   return () => subscription.unsubscribe();
 }
+
