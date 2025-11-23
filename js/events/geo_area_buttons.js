@@ -240,7 +240,7 @@ export function onGeoAreaCalculate({ scope }) {
     ? 2 * Number(res.scaledRadiusMeters)
     : 0;
 
-  const groupId = `geo_area_o2_${geoAreaResultSeq}`;
+    const groupId = `geo_area_o2_${geoAreaResultSeq}`;
   if (!__isRepaint) {
     addGroup({
       id: groupId,
@@ -248,16 +248,16 @@ export function onGeoAreaCalculate({ scope }) {
       color: color2,
       groupType: 'item',
       uiLeftLabelKey:  'ui.geo.area.o1.left',
-      uiRightLabelKey: 'ui.geo.area.o1.right',
-      invisibleReason: res?.tooLarge ? 'tooLarge' : null,
-      requiredBaselineMeters: res?.requiredBaselineMeters ?? null
+      uiRightLabelKey: 'ui.geo.area.o1.right'
     });
     appendVariant({
       id: groupId,
       variant: 'single',
       realValue: o2RealOk ? a2 : null,
       realUnit:  o2RealOk ? u2 : null,
-      scaledMeters: scaledDiameterMeters
+      scaledMeters: scaledDiameterMeters,
+      invisibleReason: res?.tooLarge ? 'tooLarge' : null,
+      requiredBaselineMeters: res?.requiredBaselineMeters ?? null
     });
     if (String(data?.object2?.description || '').trim()) {
       setGroupDescription({ id: groupId, description: data.object2.description });

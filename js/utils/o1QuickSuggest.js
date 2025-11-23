@@ -2,9 +2,21 @@
 'use strict';
 
 import { t } from '../i18n.js';
-import { O1_EXAMPLES } from './o1_examples.js';
+import { getO1ExamplesForMode } from './o1_examples.js';
 
-const fmt = n => (+n).toFixed(6).replace(/\.?0+$/,'');
+const fmt = (n) => {
+  const x = Number(n);
+  if (!Number.isFinite(x)) return '';
+  if (x === 0) return '0';
+
+  // усе, що >= 1 м, лишаємо як є (без експоненти)
+  if (Math.abs(x) >= 1) {
+    return x.toString().replace(/\.?0+$/, '');
+  }
+
+  // дуже малі значення — до 15 знаків після коми, без зайвих нулів
+  return x.toFixed(15).replace(/\.?0+$/, '');
+};
 
 function buildPopover() {
   const pop = document.createElement('div');
@@ -15,13 +27,13 @@ function buildPopover() {
   return pop;
 }
 
-function fillItems(pop, onPick) {
+function fillItems(pop, examples, onPick) {
   pop.innerHTML = '';
   const list = document.createElement('div');
   list.className = 'o1qs-list';
 
   // БЕЗ заголовка — просто опції:
-  O1_EXAMPLES.forEach(e => {
+  examples.forEach(e => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'o1qs-item';
@@ -55,10 +67,10 @@ function placePopover(pop, inputEl) {
 
 /**
  * Підключити popover-підказки до поля O1 (без зміни DOM поля)
- * @param {{inputEl: HTMLElement}} param0
+ * @param {{inputEl: HTMLElement, modeId?: string}} param0
  * @returns {{destroy: Function}|null}
  */
-export function attachO1QuickSuggest({ inputEl } = {}) {
+export function attachO1QuickSuggest({ inputEl, modeId } = {}) {
   if (!inputEl || !(inputEl instanceof HTMLElement)) return null;
   if (inputEl.dataset.o1qsAttached === '1') return null;
 
@@ -66,7 +78,8 @@ export function attachO1QuickSuggest({ inputEl } = {}) {
 
   const hide = () => { pop.style.display = 'none'; };
   const show = () => {
-    fillItems(pop, val => {
+    const examples = getO1ExamplesForMode(modeId);
+    fillItems(pop, examples, val => {
       if (!Number.isNaN(val)) {
         inputEl.value = fmt(val);
         inputEl.dispatchEvent(new Event('input', { bubbles: true }));
@@ -116,7 +129,8 @@ export function attachO1QuickSuggest({ inputEl } = {}) {
   // Зміна мови — перебудувати, залишивши поповер на місці
   const onLang = () => {
     if (pop.style.display === 'block') {
-      fillItems(pop, val => {
+      const examples = getO1ExamplesForMode(modeId);
+      fillItems(pop, examples, val => {
         if (!Number.isNaN(val)) {
           inputEl.value = fmt(val);
           inputEl.dispatchEvent(new Event('input', { bubbles: true }));

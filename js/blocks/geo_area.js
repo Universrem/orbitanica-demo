@@ -290,7 +290,7 @@ export async function initGeoAreaBlock() {
   const base = scope.querySelector('#geoAreaBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
     base.placeholder = t('panel_placeholder_input_diameter');
-    try { attachO1QuickSuggest({ inputEl: base }); } catch {}
+        try { attachO1QuickSuggest({ inputEl: base, modeId: 'geo_area' }); } catch {}
   }
 
   // зміна категорій → оновити список об'єктів у відповідній групі

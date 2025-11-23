@@ -50,7 +50,7 @@ function readBaselineDiameterMeters(scope) {
   const a = (scope || document)?.querySelector('#geoObjBaselineDiameter, [data-field="baseline-diameter"]');
   if (a) {
     const v = Number(a.value);
-    if (Number.isFinite(v) && v >= 0) return v;
+    if (Number.isFinite(v) && v >= 0) return v * 2;
   }
   return 0;
 }

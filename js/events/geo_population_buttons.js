@@ -240,7 +240,7 @@ export function onGeoPopulationCalculate({ scope }) {
     ? 2 * Number(res.scaledRadiusMeters)
     : 0;
 
-  const groupId = `geo_population_o2_${geoPopulationResultSeq}`;
+    const groupId = `geo_population_o2_${geoPopulationResultSeq}`;
   if (!__isRepaint) {
     addGroup({
       id: groupId,
@@ -248,16 +248,16 @@ export function onGeoPopulationCalculate({ scope }) {
       color: color2,
       groupType: 'item',
       uiLeftLabelKey:  'ui.geo.population.o1.left',
-      uiRightLabelKey: 'ui.geo.population.o1.right',
-      invisibleReason: res?.tooLarge ? 'tooLarge' : null,
-      requiredBaselineMeters: res?.requiredBaselineMeters ?? null
+      uiRightLabelKey: 'ui.geo.population.o1.right'
     });
     appendVariant({
       id: groupId,
       variant: 'single',
       realValue: o2RealOk ? n2 : null,
       realUnit:  o2RealOk ? u2 : null,
-      scaledMeters: scaledDiameterMeters
+      scaledMeters: scaledDiameterMeters,
+      invisibleReason: res?.tooLarge ? 'tooLarge' : null,
+      requiredBaselineMeters: res?.requiredBaselineMeters ?? null
     });
     if (String(data?.object2?.description || '').trim()) {
       setGroupDescription({ id: groupId, description: data.object2.description });

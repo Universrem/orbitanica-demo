@@ -1,10 +1,10 @@
-// full/js/ui/infoPanel.js
+// js/ui/infoPanel.js
 'use strict';
 
 import { t, getCurrentLang } from '../i18n.js';
 import { getUniverseLibrary } from '../data/universe.js';
 import { formatHistoryVariantPrefix } from './ip_text_history.js';
-
+import { getO1ExamplesForMode } from '../utils/o1_examples.js';
 
 let panelEl = null;
 let titleEl = null;
@@ -19,6 +19,32 @@ let hoverTimer = null;
 let baselineSubtitleShown = false;
 let itemSubtitleShown = false;
 
+function currentModeId() {
+  const modeKey = modeLabelState.modeKey || '';
+  const subKey  = modeLabelState.subKey  || '';
+
+  // Всесвіт
+  if (modeKey === 'panel_title_univers') {
+    if (subKey === 'panel_title_univers_distance')   return 'univers_distance';
+    if (subKey === 'panel_title_univers_diameter')   return 'univers_diameter';
+    if (subKey === 'panel_title_univers_mass')       return 'univers_mass';
+    if (subKey === 'panel_title_univers_luminosity') return 'univers_luminosity';
+  }
+
+  // Географія
+  if (modeKey === 'panel_title_geo') {
+    if (subKey === 'panel_title_geo_population') return 'geo_population';
+    if (subKey === 'panel_title_geo_area')       return 'geo_area';
+    if (subKey === 'panel_title_geo_objects')    return 'geo_objects';
+  }
+
+  // Інші режими
+  if (modeKey === 'panel_title_history') return 'history';
+  if (modeKey === 'panel_title_math')    return 'math';
+  if (modeKey === 'panel_title_money')   return 'money';
+
+  return null;
+}
 
 const items = []; // { type:'baseline'|'item', libIndex?, realValue?, realUnit?, scaledMeters?, name?, description?, thumbUrl?, color, uiLeftLabelKey?, uiRightLabelKey?, invisibleReason?, requiredBaselineMeters? }
 
@@ -26,11 +52,111 @@ const LOCALES = { ua: 'uk-UA', en: 'en-US', es: 'es-ES' };
 const locale = () => LOCALES[getCurrentLang?.()] || 'uk-UA';
 
 const fmtNumber = v => (typeof v === 'number' ? v : Number(v)).toLocaleString(locale());
+
 function fmtMeters(m) {
   if (m == null || !isFinite(m)) return '';
-  if (m >= 1000) return `${(m / 1000).toLocaleString(locale(), { maximumFractionDigits: 2 })} ${t('unit.km')}`;
-  return `${m.toLocaleString(locale(), { maximumFractionDigits: 2 })} ${t('unit.m')}`;
+  const value = Number(m);
+  if (!Number.isFinite(value)) return '';
+
+  // великі значення — км
+  if (value >= 1000) {
+    const km = value / 1000;
+    return `${km.toLocaleString(locale(), { maximumFractionDigits: 2 })} ${t('unit.km')}`;
+  }
+
+  // від 1 м і вище — метри
+  if (value >= 1) {
+    return `${value.toLocaleString(locale(), { maximumFractionDigits: 2 })} ${t('unit.m')}`;
+  }
+
+  // від 1 см до 1 м — сантиметри
+  if (value >= 0.01) {
+    const cm = value * 100;
+    return `${cm.toLocaleString(locale(), { maximumFractionDigits: 2 })} ${t('unit.cm')}`;
+  }
+
+  // менше 1 см — міліметри, але з багатьма знаками, щоб не було «0 мм»
+  const mm = value * 1000;
+  return `${mm.toLocaleString(locale(), { maximumFractionDigits: 10 })} ${t('unit.mm')}`;
 }
+
+// точне число в метрах (для підказки, що ввести в О1)
+function fmtMetersExact(m) {
+  if (m == null || !isFinite(m)) return '';
+  const value = Number(m);
+  if (!isFinite(value)) return '';
+  return value.toLocaleString(locale(), { maximumFractionDigits: 10 });
+}
+
+// Пошук відповідного прикладу O1 за значенням у метрах (з урахуванням режиму)
+function findO1ExampleByMeters(m) {
+  if (m == null || !isFinite(m)) return null;
+  const target = Number(m);
+  if (!isFinite(target)) return null;
+
+  const modeId   = currentModeId();
+  const examples = getO1ExamplesForMode(modeId);
+
+  for (const ex of examples || []) {
+    const val = Number(ex?.value_m);
+    if (!isFinite(val)) continue;
+    const eps = Math.max(1e-12, Math.abs(val) * 1e-6);
+    if (Math.abs(val - target) <= eps) return ex;
+  }
+  return null;
+}
+// Формат масштабованого діаметра для О1:
+// - якщо це значення з O1_EXAMPLES для поточного режиму → тільки Назва прикладу
+// - якщо користувач ввів своє число → просто число з одиницею
+function formatBaselineScaled(m) {
+  const ex = findO1ExampleByMeters(m);
+  if (ex) {
+    const label = t('o1_example_' + ex.key) || ex.key || '';
+    if (label) return label; // у тексті вже є число (наприклад, "Міст Золоті Ворота (1280 м)")
+  }
+  return fmtMeters(m);
+}
+// Людяний формат для "потрібної базової відстані" САМЕ В МЕТРАХ.
+// Це число користувач має ввести в полі О1.
+// - |m| >= 1 м  -> цілі метри, без дробу (3958 м)
+// - 0 < |m| < 1 -> десятковий запис з такою кількістю знаків після коми,
+//                  щоб показати першу ненульову цифру (наприклад 0,0000000000006 м)
+function fmtRequiredBaselineMeters(m) {
+  if (m == null || !isFinite(m)) return '';
+  const value = Number(m);
+  if (!Number.isFinite(value)) return '';
+
+  const abs = Math.abs(value);
+
+  if (abs === 0) {
+    return `0 ${t('unit.m')}`;
+  }
+
+  // 1 м і більше — цілі метри
+  if (abs >= 1) {
+    const rounded = Math.round(value);
+    const num = rounded.toLocaleString(locale(), { maximumFractionDigits: 0 });
+    return `${num} ${t('unit.m')}`;
+  }
+
+  // 0 < м < 1 — десятковий запис:
+  // кількість знаків після коми = позиція першої ненульової цифри
+  // (щоб 5,796×10^-13 стало 0,0000000000006 м)
+  const decimals = Math.min(15, -Math.floor(Math.log10(abs)));
+  const num = value.toLocaleString(locale(), {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+  return `${num} ${t('unit.m')}`;
+}
+
+// Формат підказки «потрібна базова відстань для відображення».
+// ТУТ БЕЗ O1_EXAMPLES — тільки чисте число в метрах.
+function formatRequiredBaseline(m) {
+  if (m == null || !isFinite(m)) return '';
+  return fmtRequiredBaselineMeters(m);
+}
+
 const UNIT_KEY = { mm: 'unit.mm', cm: 'unit.cm', m: 'unit.m', km: 'unit.km' };
 const fmtUnit = code => (UNIT_KEY[code] ? t(UNIT_KEY[code]) : (code || ''));
 
@@ -244,9 +370,6 @@ if (!itemSubtitleShown) {
     });
   }
 }
-
-
-
       // Заголовок групи
       const row = document.createElement('div');
       row.className = 'info-panel__row ip-history-group';
@@ -291,33 +414,41 @@ if (!itemSubtitleShown) {
         pref.textContent = formatHistoryVariantPrefix(v.variant);
         sub.appendChild(pref);
 
-const hasReal = (v.realValue != null && isFinite(v.realValue));
-const real = hasReal
-  ? (v.realUnit ? `${fmtNumber(v.realValue)} ${fmtUnit(v.realUnit)}` : `${fmtNumber(v.realValue)}`)
-  : '';
-const scaled = (v.scaledMeters != null) ? fmtMeters(v.scaledMeters) : '';
-if (real || scaled) {
-  const sep = document.createTextNode(` ${real}${(real && scaled) ? ' \u2192 ' : ''}${scaled}`);
-  sub.appendChild(sep);
+      const hasReal = (v.realValue != null && isFinite(v.realValue));
+      const real = hasReal
+        ? (v.realUnit ? `${fmtNumber(v.realValue)} ${fmtUnit(v.realUnit)}` : `${fmtNumber(v.realValue)}`)
+        : '';
+
+      let scaled = '';
+      if (v.scaledMeters != null && isFinite(v.scaledMeters)) {
+        // для групи-baseline (О1) додаємо приклад із O1_EXAMPLES
+        scaled = (it.groupType === 'baseline')
+          ? formatBaselineScaled(v.scaledMeters)
+          : fmtMeters(v.scaledMeters);
+      }
+
+      if (real || scaled) {
+        const sep = document.createTextNode(` ${real}${(real && scaled) ? ' \u2192 ' : ''}${scaled}`);
+        sub.appendChild(sep);
+      }
+
+
+if (v.invisibleReason === 'tooLarge') {
+  const badge = document.createElement('span');
+  badge.className = 'ip-note ip-note--warn';
+  badge.textContent = ' • ' + t('ui.info_panel.too_large_badge');
+  sub.appendChild(badge);
+
+  if (typeof v.requiredBaselineMeters === 'number' && isFinite(v.requiredBaselineMeters)) {
+    const hint = document.createElement('span');
+    hint.className = 'ip-note';
+    const baseText = formatRequiredBaseline(v.requiredBaselineMeters);
+    if (baseText) {
+      hint.textContent = ' — ' + t('ui.info_panel.required_baseline') + ': ' + baseText;
+      sub.appendChild(hint);
+    }
+  }
 }
-
-
-        if (v.invisibleReason === 'tooLarge') {
-          const badge = document.createElement('span');
-          badge.className = 'ip-note ip-note--warn';
-          badge.textContent = ' • ' + t('ui.info_panel.too_large_badge');
-          sub.appendChild(badge);
-
-          if (typeof v.requiredBaselineMeters === 'number' && isFinite(v.requiredBaselineMeters)) {
-            const hint = document.createElement('span');
-            hint.className = 'ip-note';
-            const kmText = fmtMeters(v.requiredBaselineMeters);
-            const mText  = `${Math.round(v.requiredBaselineMeters).toLocaleString(locale())} ${t('unit.m')}`;
-            hint.textContent = ' — ' + t('ui.info_panel.required_baseline') + ': ' + kmText + ' (' + mText + ')';
-            sub.appendChild(hint);
-          }
-        }
-
         subwrap.appendChild(sub);
       });
 
@@ -380,12 +511,19 @@ listEl.appendChild(row);
       nameSpan.addEventListener('mouseleave', hideHover);
     }
 
-    const hasReal = (it.realValue != null && isFinite(it.realValue));
+const hasReal = (it.realValue != null && isFinite(it.realValue));
 const real = hasReal
   ? (it.realUnit ? `${fmtNumber(it.realValue)} ${fmtUnit(it.realUnit)}` : `${fmtNumber(it.realValue)}`)
   : '';
 
-    const scaled = (it.scaledMeters != null) ? fmtMeters(it.scaledMeters) : '';
+let scaled = '';
+if (it.scaledMeters != null && isFinite(it.scaledMeters)) {
+  // для baseline додаємо приклад O1 (Волосина (70 мкм)), для O2 — тільки число
+  scaled = (it.type === 'baseline')
+    ? formatBaselineScaled(it.scaledMeters)
+    : fmtMeters(it.scaledMeters);
+}
+
 
     row.appendChild(dot);
     row.appendChild(nameSpan);
@@ -402,14 +540,15 @@ const real = hasReal
       row.appendChild(badge);
 
       if (typeof it.requiredBaselineMeters === 'number' && isFinite(it.requiredBaselineMeters)) {
-        const hint = document.createElement('span');
-        hint.className = 'ip-note';
-        const kmText = fmtMeters(it.requiredBaselineMeters); // автоматично км
-const mText  = `${Math.round(it.requiredBaselineMeters).toLocaleString(locale())} ${t('unit.m')}`;
-hint.textContent = ' — ' + t('ui.info_panel.required_baseline') + ': ' + kmText + ' (' + mText + ')';
+  const hint = document.createElement('span');
+  hint.className = 'ip-note';
+  const baseText = formatRequiredBaseline(it.requiredBaselineMeters);
+  if (baseText) {
+    hint.textContent = ' — ' + t('ui.info_panel.required_baseline') + ': ' + baseText;
+    row.appendChild(hint);
+  }
+}
 
-        row.appendChild(hint);
-      }
     }
 
     if (showDescriptions && descText) {
