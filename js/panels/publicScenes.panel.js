@@ -255,6 +255,8 @@ function renderList(cardsContainer, rows, { append = false, seen = null } = {}) 
 
     const btn   = el('button', 'public-scene-item', { type: 'button' });
     btn.dataset.sceneId = row.id;
+    // зберігаємо рядок сцени для подальшого перекладу заголовків/описів
+    btn._sceneRow = row;
 
     const titleText = titleOf(row);
     const descText  = descOf(row);
@@ -284,7 +286,7 @@ function renderList(cardsContainer, rows, { append = false, seen = null } = {}) 
     // У списках опис прихований до кліку по назві
     desc.hidden = true;
 
-    // Клік по НАЗВІ: 1) показ/приховати опис, 2) інкремент через бек і взяти «правду», 3) застосувати сцену, 4) підсвітити картку
+    // Клік по НАЗВІ
     title.addEventListener('click', async (ev) => {
       ev.stopPropagation();
 
@@ -320,7 +322,7 @@ function renderList(cardsContainer, rows, { append = false, seen = null } = {}) 
       ev.preventDefault();
     });
 
-    // Клік по сердечку: toggle лайк (беремо «правду» з бекенду)
+    // Клік по сердечку
     likeBtn.addEventListener('click', async (ev) => {
       ev.stopPropagation();
       try {
@@ -352,7 +354,6 @@ function renderList(cardsContainer, rows, { append = false, seen = null } = {}) 
   });
 }
 
-
 /* ---------- handlers ---------- */
 
 async function handleSceneDayOpen(detailsEl) {
@@ -370,8 +371,11 @@ async function handleSceneDayOpen(detailsEl) {
     const descText  = descOf(scene);
 
     // Використовуємо ті самі класи, що й у списках (щоб стилі лишилися незмінні)
-    const btn   = el('button', 'public-scene-item', { type: 'button' });
+        const btn   = el('button', 'public-scene-item', { type: 'button' });
     btn.dataset.sceneId = scene.id;
+    // зберігаємо рядок "Сцени дня" (для синхронізації лічильників; переклад по мові не робимо)
+    btn._sceneRow = scene;
+
     const title = el('div', 'public-scene-title', { text: titleText });
     const desc  = el('div',  'public-scene-desc',  { text: descText });
 
@@ -628,6 +632,27 @@ function resetSectionUI(detailsEl) {
   detailsEl.querySelectorAll('.public-scene-desc')
     .forEach(d => { d.hidden = true; });
 }
+// Переклад заголовків/описів карток у "Цікавих" та "Усіх сценах" під поточну мову
+function refreshPublicSceneTexts() {
+  const root = document.getElementById('left-panel');
+  if (!root) return;
+
+  const L = currSceneLang();
+
+  root.querySelectorAll('.section-content .public-scene-item').forEach((card) => {
+    // "Сцену дня" не перекладаємо — вона перезавантажиться при наступному відкритті
+    if (card.closest('#scene_day')) return;
+
+    const row = card._sceneRow;
+    if (!row) return;
+
+    const titleEl = card.querySelector('.public-scene-title');
+    const descEl  = card.querySelector('.public-scene-desc');
+
+    if (titleEl) titleEl.textContent = titleOf(row, L);
+    if (descEl)  descEl.textContent  = descOf(row, L);
+  });
+}
 
 /* ---------- init ---------- */
 export function initPublicScenesPanel() {
@@ -721,93 +746,6 @@ export function initPublicScenesPanel() {
       btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
     });
   });
-  
-    // Зміна авторизації (гість ↔ користувач): заново підтягуємо відкриті секції,
-  // щоб getMyLikedSceneIds працював для нового "я"
-  window.addEventListener('orbit:auth-change', () => {
-    // Сцена дня
-    const dayDet = q('#left-panel > details#scene_day');
-    if (dayDet) {
-      const content = ensureSectionContent(dayDet);
-      content.replaceChildren();
-      dayDet.dataset.loaded = '';
-      if (dayDet.open) {
-        handleSceneDayOpen(dayDet);
-      }
-    }
-
-    // Цікаві сцени
-    const interDet = q('#left-panel > details#interesting');
-    if (interDet) {
-      seenInterestingIds.clear();
-      const { cards, footer } = ensureListAreas(interDet);
-      cards.replaceChildren();
-      footer.replaceChildren();
-      interDet.dataset.loaded = '';
-      interDet.dataset.loading = '';
-      if (interDet.open) {
-        handleInterestingOpen(interDet);
-      }
-    }
-
-    // Усі сцени
-    const allDet = q('#left-panel > details#all_scenes');
-    if (allDet) {
-      state.allOffset = 0;
-      state.allDone = false;
-      state.allBusy = false;
-      allDet.dataset.loaded = '';
-      allDet.dataset.loading = '';
-      seenAllIds.clear();
-
-      const { cards, footer } = ensureListAreas(allDet);
-      cards.replaceChildren();
-      footer.replaceChildren();
-
-      if (allDet.open) {
-        handleAllOpen(allDet);
-        allDet.dataset.loaded = 'true';
-      }
-    }
-  });
-
-  // Живий переклад: при зміні мови перерендеримо відкриті секції
-  window.addEventListener('orbit:lang-change', () => {
-    // Сцена дня
-    const dayDet = q('#left-panel > details#scene_day');
-    if (dayDet) {
-      if (dayDet.open) {
-        handleSceneDayOpen(dayDet);
-      } else {
-        const content = ensureSectionContent(dayDet);
-        content.replaceChildren();
-      }
-    }
-
-    // Цікаві сцени
-    const interDet = q('#left-panel > details#interesting');
-    if (interDet) {
-      interDet.dataset.loaded = '';
-      interDet.dataset.loading = '';
-      if (interDet.open) {
-        handleInterestingOpen(interDet);
-      }
-    }
-
-    // Усі сцени
-    const allDet = q('#left-panel > details#all_scenes');
-    if (allDet) {
-      state.allOffset = 0;
-      state.allDone = false;
-      state.allBusy = false;
-      allDet.dataset.loaded = '';
-      allDet.dataset.loading = '';
-      if (allDet.open) {
-        handleAllOpen(allDet);
-        allDet.dataset.loaded = 'true';
-      }
-    }
-  });
 
   // Глобальний reset: не перезавантажуємо список "Усі сцени" штучними change
   window.addEventListener('orbit:ui-reset', () => {
@@ -817,5 +755,37 @@ export function initPublicScenesPanel() {
       isUiResetInProgress = false;
     }, 0);
   });
+    // Глобальна зміна мови:
+  // 1) прибрати .is-active та сховати описи;
+  // 2) "Сцену дня" просто згорнути (залишається лише заголовок секції);
+  // 3) оновити фільтр "Усі сцени" під нову мову;
+  // 4) перекласти заголовки/описи карток у списках.
+  window.addEventListener('orbit:lang-change', () => {
+    const root = document.getElementById('left-panel');
+    if (!root) return;
+
+    // 1) прибрати активні та сховати всі описи
+    root.querySelectorAll('.section-content .public-scene-item.is-active')
+      .forEach(el => el.classList.remove('is-active'));
+    root.querySelectorAll('.section-content .public-scene-desc')
+      .forEach(d => { d.hidden = true; });
+
+    // 2) "Сцена дня" — просто згорнути секцію, щоб залишилась тільки назва
+    const dayDet = q('#left-panel > details#scene_day');
+    if (dayDet) {
+      dayDet.open = false;
+    }
+
+    // 3) оновити фільтр "Усі сцени" (підписи опцій під нову мову)
+    const allDet = q('#left-panel > details#all_scenes');
+    if (allDet && allDet.dataset.inited === 'true') {
+      const { content, cards } = ensureListAreas(allDet);
+      ensureAllScenesFilter(allDet, content, cards);
+    }
+
+    // 4) перекласти заголовки й описи карток у "Цікавих" та "Усіх сценах"
+    refreshPublicSceneTexts();
+  });
+
 }
 
