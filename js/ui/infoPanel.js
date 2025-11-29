@@ -156,9 +156,64 @@ function formatRequiredBaseline(m) {
   if (m == null || !isFinite(m)) return '';
   return fmtRequiredBaselineMeters(m);
 }
+// Мовозалежна форма для "людина / людини / людей" тощо
+function formatPeopleUnit(value) {
+  const lang = getCurrentLang?.() || 'ua';
+  const n = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(n)) return '';
+
+  const abs = Math.abs(n);
+  const intVal = Math.floor(abs);
+
+  if (!Number.isFinite(intVal)) {
+    return t('unit.people.many');
+  }
+
+  // Українська: 1 людина, 2–4 людини, 5+ людей, 11–14 теж "людей"
+  if (lang === 'ua') {
+    const lastTwo = intVal % 100;
+    if (lastTwo >= 11 && lastTwo <= 14) return t('unit.people.many');
+
+    const last = intVal % 10;
+    if (last === 1) return t('unit.people.one');
+    if (last >= 2 && last <= 4) return t('unit.people.few');
+    return t('unit.people.many');
+  }
+
+  // Англійська / іспанська: 1 -> однина, інакше множина
+  if (lang === 'en' || lang === 'es') {
+    return intVal === 1 ? t('unit.people.one') : t('unit.people.many');
+  }
+
+  // запасний варіант
+  return intVal === 1 ? t('unit.people.one') : t('unit.people.many');
+}
 
 const UNIT_KEY = { mm: 'unit.mm', cm: 'unit.cm', m: 'unit.m', km: 'unit.km' };
 const fmtUnit = code => (UNIT_KEY[code] ? t(UNIT_KEY[code]) : (code || ''));
+// Формат "реального" значення з урахуванням одиниці.
+// Тут вирішуємо, як саме писати людей, метри тощо.
+function fmtRealValue(value, unitCode) {
+  if (value == null || !isFinite(value)) return '';
+
+  const n = (typeof value === 'number') ? value : Number(value);
+  if (!Number.isFinite(n)) return '';
+
+  // без одиниці — просто число
+  if (!unitCode) {
+    return fmtNumber(n);
+  }
+
+  // Спеціальний випадок: населення
+  if (unitCode === 'people') {
+    const unit = formatPeopleUnit(n);
+    if (!unit) return fmtNumber(n);
+    return `${fmtNumber(n)} ${unit}`;
+  }
+
+  // Усі інші одиниці через словник
+  return `${fmtNumber(n)} ${fmtUnit(unitCode)}`;
+}
 
 function updateDescSwitch() {
   if (!toggleBtn) return;
@@ -414,10 +469,7 @@ if (!itemSubtitleShown) {
         pref.textContent = formatHistoryVariantPrefix(v.variant);
         sub.appendChild(pref);
 
-      const hasReal = (v.realValue != null && isFinite(v.realValue));
-      const real = hasReal
-        ? (v.realUnit ? `${fmtNumber(v.realValue)} ${fmtUnit(v.realUnit)}` : `${fmtNumber(v.realValue)}`)
-        : '';
+        const real = fmtRealValue(v.realValue, v.realUnit);
 
       let scaled = '';
       if (v.scaledMeters != null && isFinite(v.scaledMeters)) {
@@ -511,10 +563,7 @@ listEl.appendChild(row);
       nameSpan.addEventListener('mouseleave', hideHover);
     }
 
-const hasReal = (it.realValue != null && isFinite(it.realValue));
-const real = hasReal
-  ? (it.realUnit ? `${fmtNumber(it.realValue)} ${fmtUnit(it.realUnit)}` : `${fmtNumber(it.realValue)}`)
-  : '';
+const real = fmtRealValue(it.realValue, it.realUnit);
 
 let scaled = '';
 if (it.scaledMeters != null && isFinite(it.scaledMeters)) {

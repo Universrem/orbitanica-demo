@@ -77,10 +77,24 @@ const UNIT_LABEL_MAP = {
   UAH:  'unit.UAH',
 
   // Площа
-  m2:   'unit.m2',
-  km2:  'unit.km2',
-  ha:   'unit.ha',
-  acre: 'unit.acre',
+  // Площа — всі коди з base_units.geo_area
+  m2:     'unit.m2',
+  cm2:    'unit.cm2',
+  mm2:    'unit.mm2',
+  km2:    'unit.km2',
+  ha:     'unit.ha',
+  are:    'unit.are',
+  acre:   'unit.acre',
+  sq_ft:  'unit.sq_ft',
+  sq_yd:  'unit.sq_yd',
+  sq_mi:  'unit.sq_mi',
+  sq_in:  'unit.sq_in',
+  decare: 'unit.decare',
+  dunam:  'unit.dunam',
+  rai:    'unit.rai',
+  tsubo:  'unit.tsubo',
+  pyeong: 'unit.pyeong',
+  mu:     'unit.mu',
 
   // Населення / кількість
   person:   'unit.person',

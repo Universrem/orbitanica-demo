@@ -1290,6 +1290,21 @@
   "ua": "Одна людина у комфортному розміщенні — 1.183 м",
   "en": "One person in comfortable spacing — 1.183 m",
   "es": "Una persona con espacio cómodo — 1.183 m"
+},
+"unit.people.one": {
+  "ua": "людина",
+  "en": "person",
+  "es": "persona"
+},
+"unit.people.few": {
+  "ua": "людини",
+  "en": "people",
+  "es": "personas"
+},
+"unit.people.many": {
+  "ua": "людей",
+  "en": "people",
+  "es": "personas"
 }
 
 }
