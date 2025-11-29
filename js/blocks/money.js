@@ -275,7 +275,7 @@ export async function initMoneyBlock() {
   const base = scope.querySelector('#moneyBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
     base.placeholder = t('panel_placeholder_input_diameter');
-    try { attachO1QuickSuggest({ inputEl: base }); } catch {}
+        try { attachO1QuickSuggest({ inputEl: base, modeId: 'money' }); } catch {}
   }
 
   // зміна категорії → оновити об’єкти

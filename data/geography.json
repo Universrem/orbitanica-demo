@@ -325,6 +325,18 @@
     "area": { "value": 360000000, "unit": "km²" }
   },
   {
+  "category_en": "Recommended baseline object",
+  "category_ua": "Рекомендований базовий об’єкт",
+  "category_es": "Objeto base recomendado",
+  "name_en": "Square meter",
+  "name_ua": "Квадратний метр",
+  "name_es": "Metro cuadrado",
+  "description_ua": "Один квадратний метр — це площа квадрата зі стороною один метр. Коло діаметром 1,1284 м має точно таку саму площу.",
+  "description_en": "One square meter is the area of a square with a side of one meter. A circle with a diameter of 1.1284 m has exactly the same area.",
+  "description_es": "Un metro cuadrado es el área de un cuadrado de un metro de lado. Un círculo con un diámetro de 1,1284 m tiene exactamente la misma área.",
+  "area": { "value": 0.000001, "unit": "km²" }
+},
+  {
     "category_en": "Objects",
     "category_ua": "Об’єкти",
     "category_es": "Objetos",
@@ -816,18 +828,30 @@
     "description_es": "Población total de Tailandia a partir de 2024.",
     "population": { "value": 71801279, "unit": "people" }
   },
-  {
-    "category_en": "People",
-    "category_ua": "Люди",
-    "category_es": "Personas",
-    "name_en": "One Person",
-    "name_ua": "Одна людина",
-    "name_es": "Una Persona",
-    "description_en": "Area occupied by one person",
-    "description_ua": "Площа на якій розміщується одна людина",
-    "description_es": "Área ocupada por una persona",
-    "population": { "value": 1, "unit": "people" }
-  },
+{
+  "category_en": "Recommended baseline object",
+  "category_ua": "Рекомендований базовий об’єкт",
+  "category_es": "Objeto base recomendado",
+  "name_en": "One Person",
+  "name_ua": "Одна людина",
+  "name_es": "Una Persona",
+  "description_ua": "Базовий об’єкт для візуалізації площі однієї людини що стоїть. Три типові варіанти розміщення: у щільному натовпі ≈0,5 м²/люд, у вільному розміщенні ≈0,7 м²/люд, у комфортному розміщенні ≈1,1 м²/люд.",
+  "description_en": "Baseline object for visualizing the area of one standing person. Three typical layout options: in a dense crowd ≈0.5 m²/person, in free standing space ≈0.7 m²/person, in comfortable spacing ≈1.1 m²/person.",
+  "description_es": "Objeto base para visualizar la superficie de una persona de pie. Tres opciones típicas de distribución: en una multitud densa ≈0,5 m²/persona, en un espacio libre de pie ≈0,7 m²/persona, en un espacio cómodo ≈1,1 m²/persona.",
+  "population": { "value": 1, "unit": "people" }
+},
+{
+  "category_en": "Recommended baseline object",
+  "category_ua": "Рекомендований базовий об’єкт",
+  "category_es": "Objeto base recomendado",
+  "name_en": "One meter",
+  "name_ua": "Один метр",
+  "name_es": "Un metro",
+  "description_ua": "Метр — одиниця вимірювання довжини. У 1791 році Французька академія наук ухвалила визначення метра як «одна десятимільйонна частина відстані від Північного полюса до екватора по меридіану, що пролягає через Париж». Головною причиною появи метра як величини була саме географія: розміри Землі завжди «під рукою.",
+  "description_en": "The meter is a unit of length. In 1791 the French Academy of Sciences defined the meter as “one ten-millionth of the distance from the North Pole to the equator along the meridian passing through Paris.” Geography was the key reason for choosing this definition: the size of the Earth is always “right under our feet.”",
+  "description_es": "El metro es una unidad de longitud. En 1791 la Academia Francesa de Ciencias definió el metro como «una diez millonésima parte de la distancia desde el Polo Norte hasta el ecuador a lo largo del meridiano que pasa por París». La geografía fue la razón principal de esta elección: el tamaño de la Tierra está siempre “bajo nuestros pies”.",
+  "length": { "value": 1, "unit": "m" }
+},
   {
     "category_en": "People",
     "category_ua": "Люди",
@@ -936,6 +960,4 @@
     "description_es": "Área ocupada por toda la población mundial",
     "population": { "value": 8000000000, "unit": "people" }
   }
-
-
 ]

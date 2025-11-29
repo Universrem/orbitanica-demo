@@ -292,7 +292,7 @@ export async function initMathBlock() {
   const base = scope.querySelector('#mathBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
     base.placeholder = t('panel_placeholder_input_diameter');
-    try { attachO1QuickSuggest({ inputEl: base }); } catch {}
+        try { attachO1QuickSuggest({ inputEl: base, modeId: 'math' }); } catch {}
   }
 
   // зміна категорій → оновити список об'єктів у відповідній групі

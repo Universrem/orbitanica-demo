@@ -890,78 +890,133 @@
 },
 "o1_quick_examples": { "ua": "Приклади", "en": "Examples", "es": "Ejemplos" },
 
-"o1_example_h2_molecule_0_1nm":     { "ua": "Молекула H₂ (0.1 нм)",            "en": "H₂ molecule (0.1 nm)",            "es": "Molécula H₂ (0.1 nm)" },
-"o1_example_virus_100nm":           { "ua": "Вірус (100 нм)",                  "en": "Virus (100 nm)",                  "es": "Virus (100 nm)" },
-"o1_example_bacterium_1um":         { "ua": "Бактерія (1 мкм)",                "en": "Bacterium (1 µm)",                "es": "Bacteria (1 µm)" },
-"o1_example_cell_30um":             { "ua": "Клітина (30 мкм)",                "en": "Cell (30 µm)",                    "es": "Célula (30 µm)" },
-"o1_example_hair_70um":             { "ua": "Волосина (70 мкм)",               "en": "Human hair (70 µm)",              "es": "Cabello humano (70 µm)" },
+"o1_example_proton_0_84fm": { 
+  "ua": "Протон — елементарна частинка атомного ядра будь-якого елемента — 0,00000000000084 мм",
+  "en": "Proton is a constituent particle of the atomic nucleus of any element — 0.00000000000084 mm",
+  "es": "El protón es una partícula constituyente del núcleo atómico de cualquier elemento — 0,00000000000084 mm"
+},
 
-"o1_example_sand_grain_0_5mm":      { "ua": "Пісчинка (0.5 мм)",               "en": "Grain of sand (0.5 mm)",          "es": "Grano de arena (0.5 mm)" },
-"o1_example_mm_1":                  { "ua": "1 мм",                            "en": "1 mm",                            "es": "1 mm" },
-"o1_example_cm_1":                  { "ua": "1 см",                            "en": "1 cm",                            "es": "1 cm" },
-"o1_example_coin_25mm":             { "ua": "Монета (25 мм)",                  "en": "Coin (25 mm)",                    "es": "Moneda (25 mm)" },
-"o1_example_tennis_ball_6_7cm":     { "ua": "Тенісний м’яч (6.70 см)",         "en": "Tennis ball (6.70 cm)",           "es": "Pelota de tenis (6.70 cm)" },
-"o1_example_cm_10":                 { "ua": "10 см",                           "en": "10 cm",                           "es": "10 cm" },
-"o1_example_soccer_ball_22cm":      { "ua": "Футбольний м’яч (22 см)",         "en": "Soccer ball (22 cm)",             "es": "Balón de fútbol (22 cm)" },
-"o1_example_basketball_24cm":       { "ua": "Баскетбольний м’яч (24 см)",      "en": "Basketball (24 cm)",              "es": "Balón de baloncesto (24 cm)" },
-"o1_example_person_footprint_75cm": { "ua": "Місце для 1 людини (~75 см)",     "en": "One person footprint (~75 cm)",   "es": "Espacio por persona (~75 cm)" },
+"o1_example_h2_molecule_0_1nm": { 
+  "ua": "Середній діаметр молекули водню — 0,0000001 мм", 
+  "en": "Average diameter of a hydrogen molecule — 0.0000001 mm", 
+  "es": "Diámetro medio de una molécula de hidrógeno — 0,0000001 mm" 
+},
 
-"o1_example_m_1":                   { "ua": "1 м",                             "en": "1 m",                             "es": "1 m" },
-"o1_example_car_length_4_5m":       { "ua": "Автомобіль (4.5 м)",              "en": "Car length (4.5 m)",              "es": "Coche (4.5 m)" },
-"o1_example_m_10":                  { "ua": "10 м",                            "en": "10 m",                            "es": "10 m" },
-"o1_example_bus_length_12m":        { "ua": "Автобус (12 м)",                  "en": "Bus length (12 m)",               "es": "Autobús (12 m)" },
-"o1_example_soccer_field_105m":     { "ua": "Футбольне поле (105 м)",          "en": "Soccer field (105 m)",            "es": "Campo de fútbol (105 m)" },
-"o1_example_proton_1_7fm":                    { "ua": "Протон (1.7 фм)", "en": "Proton (1.7 fm)", "es": "Protón (1.7 fm)" },
-"o1_example_helium_atom_62pm":                { "ua": "Атом гелію (62 пм)", "en": "Helium atom (62 pm)", "es": "Átomo de helio (62 pm)" },
-"o1_example_carbon_atom_140pm":               { "ua": "Атом вуглецю (140 пм)", "en": "Carbon atom (140 pm)", "es": "Átomo de carbono (140 pm)" },
-"o1_example_glucose_molecule_1nm":            { "ua": "Молекула глюкози (1 нм)", "en": "Glucose molecule (1 nm)", "es": "Molécula de glucosa (1 nm)" },
-"o1_example_protein_10nm":                    { "ua": "Типовий білок (10 нм)", "en": "Typical protein (10 nm)", "es": "Proteína típica (10 nm)" },
-"o1_example_dna_width_2nm":                   { "ua": "Ширина ДНК (2 нм)", "en": "DNA width (2 nm)", "es": "Ancho del ADN (2 nm)" },
-"o1_example_ribosome_25nm":                   { "ua": "Рибосома (25 нм)", "en": "Ribosome (25 nm)", "es": "Ribosoma (25 nm)" },
-"o1_example_hiv_virus_120nm":                 { "ua": "Вірус ВІЛ (120 нм)", "en": "HIV virus (120 nm)", "es": "Virus VIH (120 nm)" },
-"o1_example_red_blood_cell_7um":              { "ua": "Еритроцит (7 мкм)", "en": "Red blood cell (7 μm)", "es": "Glóbulo rojo (7 μm)" },
-"o1_example_pollen_grain_100um":              { "ua": "Пилок (100 мкм)", "en": "Pollen grain (100 μm)", "es": "Grano de polen (100 μm)" },
-"o1_example_dust_mite_300um":                 { "ua": "Пилковий кліщ (300 мкм)", "en": "Dust mite (300 μm)", "es": "Ácaro del polvo (300 μm)" },
-"o1_example_rice_grain_2mm":                  { "ua": "Зернятко рису (2 мм)", "en": "Rice grain (2 mm)", "es": "Grano de arroz (2 mm)" },
-"o1_example_ant_5mm":                         { "ua": "Мураха (5 мм)", "en": "Ant (5 mm)", "es": "Hormiga (5 mm)" },
-"o1_example_walnut_3_5cm":                    { "ua": "Волоський горіх (3.5 см)", "en": "Walnut (3.5 cm)", "es": "Nuez (3.5 cm)" },
-"o1_example_ping_pong_ball_4cm":              { "ua": "М'яч для пінг-понгу (4 см)", "en": "Ping pong ball (4 cm)", "es": "Pelota de ping pong (4 cm)" },
-"o1_example_golf_ball_4_3cm":                 { "ua": "М'яч для гольфа (4.3 см)", "en": "Golf ball (4.3 cm)", "es": "Pelota de golf (4.3 cm)" },
-"o1_example_chicken_egg_5_5cm":               { "ua": "Куряче яйце (5.5 см)", "en": "Chicken egg (5.5 cm)", "es": "Huevo de gallina (5.5 cm)" },
-"o1_example_baseball_7_4cm":                  { "ua": "Бейсбольний м'яч (7.4 см)", "en": "Baseball (7.4 cm)", "es": "Pelota de béisbol (7.4 cm)" },
-"o1_example_orange_8cm":                      { "ua": "Апельсин (8 см)", "en": "Orange (8 cm)", "es": "Naranja (8 cm)" },
-"o1_example_grapefruit_12cm":                 { "ua": "Грейпфрут (12 см)", "en": "Grapefruit (12 cm)", "es": "Pomelo (12 cm)" },
-"o1_example_volleyball_21cm":                 { "ua": "Волейбольний м'яч (21 см)", "en": "Volleyball (21 cm)", "es": "Pelota de voleibol (21 cm)" },
-"o1_example_watermelon_30cm":                 { "ua": "Кавун (30 см)", "en": "Watermelon (30 cm)", "es": "Sandía (30 cm)" },
-"o1_example_bike_wheel_55cm":                 { "ua": "Колесо велосипеда (55 см)", "en": "Bicycle wheel (55 cm)", "es": "Rueda de bicicleta (55 cm)" },
-"o1_example_car_wheel_65cm":                  { "ua": "Колесо автомобіля (65 см)", "en": "Car wheel (65 cm)", "es": "Rueda de automóvil (65 cm)" },
-"o1_example_person_height_1_75m":             { "ua": "Середній зріст людини (1.75 м)", "en": "Average human height (1.75 m)", "es": "Altura humana promedio (1.75 m)" },
-"o1_example_door_height_2m":                  { "ua": "Висота дверей (2 м)", "en": "Door height (2 m)", "es": "Altura de puerta (2 m)" },
-"o1_example_table_tennis_table_2_74m":        { "ua": "Стіл для настільного тенісу (2.74 м)", "en": "Table tennis table (2.74 m)", "es": "Mesa de tenis de mesa (2.74 m)" },
-"o1_example_parking_space_5m":                { "ua": "Паркувальне місце (5 м)", "en": "Parking space (5 m)", "es": "Plaza de aparcamiento (5 m)" },
-"o1_example_giraffe_height_5_5m":             { "ua": "Висота жирафа (5.5 м)", "en": "Giraffe height (5.5 m)", "es": "Altura de jirafa (5.5 m)" },
-"o1_example_school_bus_11m":                  { "ua": "Шкільний автобус (11 м)", "en": "School bus (11 m)", "es": "Autobús escolar (11 m)" },
-"o1_example_truck_trailer_16m":               { "ua": "Причіп вантажівки (16 м)", "en": "Truck trailer (16 m)", "es": "Remolque de camión (16 m)" },
-"o1_example_tennis_court_24m":                { "ua": "Тенісний корт (24 м)", "en": "Tennis court (24 m)", "es": "Cancha de tenis (24 m)" },
-"o1_example_swimming_pool_25m":               { "ua": "Басейн (25 м)", "en": "Swimming pool (25 m)", "es": "Piscina (25 m)" },
-"o1_example_railway_car_26m":                 { "ua": "Залізничний вагон (26 м)", "en": "Railway car (26 m)", "es": "Vagón de tren (26 m)" },
-"o1_example_basketball_court_28m":            { "ua": "Баскетбольний майданчик (28 м)", "en": "Basketball court (28 m)", "es": "Cancha de baloncesto (28 m)" },
-"o1_example_blue_whale_30m":                  { "ua": "Синій кит (30 м)", "en": "Blue whale (30 m)", "es": "Ballena azul (30 m)" },
-"o1_example_boeing_737_length_39m":           { "ua": "Boeing 737 (39 м)", "en": "Boeing 737 (39 m)", "es": "Boeing 737 (39 m)" },
-"o1_example_statue_of_liberty_46m":           { "ua": "Статуя Свободи (46 м)", "en": "Statue of Liberty (46 m)", "es": "Estatua de la Libertad (46 m)" },
-"o1_example_swimming_pool_50m":               { "ua": "Олімпійський басейн (50 м)", "en": "Olympic pool (50 m)", "es": "Piscina olímpica (50 m)" },
-"o1_example_soccer_field_width_68m":          { "ua": "Ширина футбольного поля (68 м)", "en": "Soccer field width (68 m)", "es": "Ancho del campo de fútbol (68 m)" },
-"o1_example_airbus_a380_length_73m":          { "ua": "Airbus A380 (73 м)", "en": "Airbus A380 (73 m)", "es": "Airbus A380 (73 m)" },
-"o1_example_airbus_a380_wingspan_80m":        { "ua": "Розмах крил A380 (80 м)", "en": "A380 wingspan (80 m)", "es": "Envergadura A380 (80 m)" },
-"o1_example_sprint_track_100m":               { "ua": "Спринтерська доріжка (100 м)", "en": "Sprint track (100 m)", "es": "Pista de sprint (100 m)" },
-"o1_example_stadium_field_150m":              { "ua": "Поле стадіону (150 м)", "en": "Stadium field (150 m)", "es": "Campo de estadio (150 m)" },
-"o1_example_city_block_200m":                 { "ua": "Міський квартал (200 м)", "en": "City block (200 m)", "es": "Manzana de ciudad (200 m)" },
-"o1_example_titanic_length_269m":             { "ua": "Титанік (269 м)", "en": "Titanic (269 m)", "es": "Titanic (269 m)" },
-"o1_example_eiffel_tower_height_330m":        { "ua": "Ейфелева вежа (330 м)", "en": "Eiffel Tower (330 m)", "es": "Torre Eiffel (330 m)" },
-"o1_example_cruise_ship_length_360m":         { "ua": "Круїзний лайнер (360 м)", "en": "Cruise ship (360 m)", "es": "Crucero (360 m)" },
-"o1_example_empire_state_381m":               { "ua": "Емпайр-Стейт-Білдінг (381 м)", "en": "Empire State Building (381 m)", "es": "Empire State Building (381 m)" },
-"o1_example_burj_khalifa_828m":               { "ua": "Бурдж-Халіфа (828 м)", "en": "Burj Khalifa (828 m)", "es": "Burj Khalifa (828 m)" },
-"o1_example_golden_gate_bridge_span_1280m":   { "ua": "Міст Золоті Ворота (1280 м)", "en": "Golden Gate Bridge (1280 m)", "es": "Puente Golden Gate (1280 m)" },
+"o1_example_virus_100nm": { 
+  "ua": "Середній діаметр вірусу — 0,0001 мм", 
+  "en": "Average diameter of a virus — 0.0001 mm", 
+  "es": "Diámetro medio de un virus — 0,0001 mm" 
+},
+
+"o1_example_bacterium_1um": { 
+  "ua": "Середній діаметр бактерії — 0,001 мм", 
+  "en": "Average diameter of a bacterium — 0.001 mm", 
+  "es": "Diámetro medio de una bacteria — 0,001 mm" 
+},
+
+"o1_example_cell_50um": { 
+  "ua": "Середній діаметр клітини (людина, рослина) — 0,05 мм", 
+  "en": "Average diameter of a cell (human, plant) — 0.05 mm", 
+  "es": "Diámetro medio de una célula (humana, vegetal) — 0,05 mm" 
+},
+
+"o1_example_hair_70um": { 
+  "ua": "Середня товщина людської волосини — 0,07 мм", 
+  "en": "Average thickness of a human hair — 0.07 mm", 
+  "es": "Grosor medio de un cabello humano — 0,07 mm" 
+},
+
+"o1_example_sand_grain_0_5mm": { 
+  "ua": "Діаметр типової пісчинка - 0.5 мм", 
+  "en": "Diameter of a typical grain of sand - 0.5 mm", 
+  "es": "Diámetro de un grano de arena típico - 0.5 mm" 
+},
+"o1_example_mm_1": { 
+  "ua": "1 міліметр", 
+  "en": "1 millimeter", 
+  "es": "1 milímetro" 
+},
+"o1_example_cm_1": { 
+  "ua": "1 сантиметр", 
+  "en": "1 centimeter", 
+  "es": "1 centímetro" 
+},
+"o1_example_coin_25mm": { 
+  "ua": "Діаметр типової монети - 25 мм", 
+  "en": "Diameter of a typical coin - 25 mm", 
+  "es": "Diámetro de una moneda típica - 25 mm" 
+},
+"o1_example_tennis_ball_6_7cm": { 
+  "ua": "Діаметр тенісного м’яча - 6.70 см", 
+  "en": "Diameter of a tennis ball - 6.70 cm", 
+  "es": "Diámetro de una pelota de tenis - 6.70 cm" 
+},
+"o1_example_cm_10": { 
+  "ua": "10 сантиметрів", 
+  "en": "10 centimeters", 
+  "es": "10 centímetros" 
+},
+"o1_example_soccer_ball_22cm": { 
+  "ua": "Діаметр футбольного м’яча - 22 см", 
+  "en": "Diameter of a soccer ball - 22 cm", 
+  "es": "Diámetro de un balón de fútbol - 22 cm" 
+},
+"o1_example_basketball_24cm": { 
+  "ua": "Діаметр баскетбольного м’яча - 24 см", 
+  "en": "Diameter of a basketball - 24 cm", 
+  "es": "Diámetro de un balón de baloncesto - 24 cm" 
+},
+"o1_example_m_1": { 
+  "ua": "1 метр", 
+  "en": "1 meter", 
+  "es": "1 metro" 
+},
+"o1_example_car_length_4_5m": { 
+  "ua": "Довжина типового автомобіля - 4.5 м", 
+  "en": "Length of a typical car - 4.5 m", 
+  "es": "Longitud de un coche típico - 4.5 m" 
+},
+"o1_example_m_10": { 
+  "ua": "10 метрів", 
+  "en": "10 meters", 
+  "es": "10 metros" 
+},
+"o1_example_bus_length_12m": { 
+  "ua": "Довжина автобуса - 12 м", 
+  "en": "Length of a bus - 12 m", 
+  "es": "Longitud de un autobús - 12 m" 
+},
+"o1_example_soccer_field_105m": { 
+  "ua": "Довжина футбольного поля - 105 м", 
+  "en": "Length of a soccer field - 105 m", 
+  "es": "Longitud de un campo de fútbol - 105 m" 
+},
+"o1_example_rice_grain_2mm":           { "ua": "Довжина зернятка рису - 2 мм", "en": "Length of a rice grain - 2 mm", "es": "Longitud de un grano de arroz - 2 mm" },
+"o1_example_ant_5mm":                  { "ua": "Довжина дорослої мурахи - 5 мм", "en": "Length of an adult ant - 5 mm", "es": "Longitud de una hormiga adulta - 5 mm" },
+"o1_example_walnut_3_5cm":             { "ua": "Діаметр волоського горіха - 3.5 см", "en": "Diameter of a walnut - 3.5 cm", "es": "Diámetro de una nuez - 3.5 cm" },
+"o1_example_ping_pong_ball_4cm":       { "ua": "Діаметр м'яча для пінг-понгу - 4 см", "en": "Diameter of a ping pong ball - 4 cm", "es": "Diámetro de una pelota de ping pong - 4 cm" },
+"o1_example_golf_ball_4_3cm":          { "ua": "Діаметр м'яча для гольфа - 4.3 см", "en": "Diameter of a golf ball - 4.3 cm", "es": "Diámetro de una pelota de golf - 4.3 cm" },
+"o1_example_chicken_egg_5_5cm":        { "ua": "Діаметр курячого яйця - 5.5 см", "en": "Diameter of a chicken egg - 5.5 cm", "es": "Diámetro de un huevo de gallina - 5.5 cm" },
+"o1_example_volleyball_21cm":          { "ua": "Діаметр волейбольного м'яча - 21 см", "en": "Diameter of a volleyball - 21 cm", "es": "Diámetro de un balón de voleibol - 21 cm" },
+"o1_example_parking_space_5m":         { "ua": "Довжина паркувального місця - 5 м", "en": "Length of a parking space - 5 m", "es": "Longitud de una plaza de aparcamiento - 5 m" },
+"o1_example_tennis_court_24m":         { "ua": "Довжина тенісного корту - 24 м", "en": "Length of a tennis court - 24 m", "es": "Longitud de una pista de tenis - 24 m" },
+"o1_example_basketball_court_28m":     { "ua": "Довжина баскетбольного майданчика - 28 м", "en": "Length of a basketball court - 28 m", "es": "Longitud de una cancha de baloncesto - 28 m" },
+"o1_example_boeing_737_length_39m":    { "ua": "Довжина Boeing 737 - 39 м", "en": "Length of a Boeing 737 - 39 m", "es": "Longitud de un Boeing 737 - 39 m" },
+"o1_example_statue_of_liberty_46m":    { "ua": "Висота Статуї Свободи - 46 м", "en": "Height of the Statue of Liberty - 46 m", "es": "Altura de la Estatua de la Libertad - 46 m" },
+"o1_example_swimming_pool_50m":        { "ua": "Довжина Олімпійського басейну - 50 м", "en": "Length of an Olympic swimming pool - 50 m", "es": "Longitud de una piscina olímpica - 50 m" },
+"o1_example_soccer_field_width_68m":   { "ua": "Ширина футбольного поля - 68 м", "en": "Width of a soccer field - 68 m", "es": "Anchura de un campo de fútbol - 68 м" },
+"o1_example_airbus_a380_length_73m":   { "ua": "Довжина Airbus A380 - 73 м", "en": "Length of an Airbus A380 - 73 m", "es": "Longitud de un Airbus A380 - 73 m" },
+"o1_example_airbus_a380_wingspan_80m": { "ua": "Розмах крил A380 - 80 м", "en": "Wingspan of an A380 - 80 m", "es": "Envergadura de un A380 - 80 m" },
+"o1_example_titanic_length_269m":      { "ua": "Довжина Титаніка - 269 м", "en": "Length of the Titanic - 269 m", "es": "Longitud del Titanic - 269 m" },
+"o1_example_eiffel_tower_height_330m": { "ua": "Висота Ейфелевої вежі - 330 м", "en": "Height of the Eiffel Tower - 330 m", "es": "Altura de la Torre Eiffel - 330 m" },
+"o1_example_empire_state_381m":        { "ua": "Висота Емпайр-Стейт-Білдінг - 381 м", "en": "Height of the Empire State Building - 381 m", "es": "Altura del Empire State Building - 381 m" },
+"o1_example_burj_khalifa_828m":        { "ua": "Висота Бурдж-Халіфа - 828 м", "en": "Height of the Burj Khalifa - 828 m", "es": "Altura del Burj Khalifa - 828 m" },
+
+"o1_example_usd_100_banknote": {
+  "ua": "Площа купюри 100 доларів США - 0,11 м",
+  "en": "Area of a 100 US dollar banknote - 0.11 m",
+  "es": "Área de un billete de 100 dólares estadounidenses - 0,11 m"
+},
 "blog_title": {
   "ua": "Межі уяви та рішення Orbitanica",
   "en": "Limits of Imagination and Orbitanica’s Solution",
@@ -1164,6 +1219,19 @@
   "unit.km2":     { "ua": "км²",                "en": "km²",                     "es": "km²" },
   "unit.ha":      { "ua": "га",                 "en": "ha",                      "es": "ha" },
   "unit.acre":    { "ua": "акр",                "en": "acre",                    "es": "acre" },
+  "unit.cm2":     { "ua": "см²",                "en": "cm²",                     "es": "cm²" },
+  "unit.mm2":     { "ua": "мм²",                "en": "mm²",                     "es": "mm²" },
+  "unit.are":     { "ua": "ар",                 "en": "are",                     "es": "área" },
+  "unit.sq_ft":   { "ua": "кв. фут",            "en": "sq ft",                   "es": "pie²" },
+  "unit.sq_yd":   { "ua": "кв. ярд",            "en": "sq yd",                   "es": "yarda²" },
+  "unit.sq_mi":   { "ua": "кв. миля",           "en": "sq mi",                   "es": "milla²" },
+  "unit.sq_in":   { "ua": "кв. дюйм",           "en": "sq in",                   "es": "pulg²" },
+  "unit.decare":  { "ua": "декар",              "en": "decare",                  "es": "decárea" },
+  "unit.dunam":   { "ua": "дунам",              "en": "dunam",                   "es": "dunam" },
+  "unit.rai":     { "ua": "рай",                "en": "rai",                     "es": "rai" },
+  "unit.tsubo":   { "ua": "цубо",               "en": "tsubo",                   "es": "tsubo" },
+  "unit.pyeong":  { "ua": "пхьон",              "en": "pyeong",                  "es": "pyeong" },
+  "unit.mu":      { "ua": "му",                 "en": "mu",                      "es": "mu" },
 
   "unit.person":  { "ua": "особа",              "en": "person",                  "es": "persona" },
 
@@ -1176,97 +1244,54 @@
   "unit.nmi":     { "ua": "мор. миля",          "en": "nautical mile",           "es": "milla náutica" },
 
   "unit.year":    { "ua": "рік",                "en": "year",                    "es": "año" },
-  "o1_example_pop_area_1": {
-  "ua": "Площа для 1 людини - 1,1 м",
-  "en": "Area for 1 person - 1.1 m",
-  "es": "Área para 1 persona - 1,1 m"
-},
-"o1_example_pop_area_10": {
-  "ua": "Площа для 10 людей - 3,6 м",
-  "en": "Area for 10 people - 3.6 m",
-  "es": "Área para 10 personas - 3,6 m"
-},
-"o1_example_pop_area_100": {
-  "ua": "Площа для 100 людей - 11,3 м",
-  "en": "Area for 100 people - 11.3 m",
-  "es": "Área para 100 personas - 11,3 m"
-},
-"o1_example_pop_area_1000": {
-  "ua": "Площа для 1000 людей - 35,7 м",
-  "en": "Area for 1000 people - 35.7 m",
-  "es": "Área para 1000 personas - 35,7 m"
-},
-"o1_example_area_1_sotka_100m2": {
-  "ua": "Одна сотка 100 м² - 11,28 м",
-  "en": "100 m² - 11.28 m",
-  "es": "100 m² - 11.28 m"
-},
-"o1_example_area_6_sotok_600m2": {
-  "ua": "6 соток 600 м² - 27,64 м",
-  "en": "600 m² - 27.64 m",
-  "es": "600 m² - 27.64 m"
-},
-"o1_example_area_10_sotok_1000m2": {
-  "ua": "10 соток, 1000 м² - 35,68 м",
-  "en": "1000 m² - 35.68 m",
-  "es": "1000 m² - 35.68 m"
-},
-"o1_example_area_1_hectare_10000m2": {
-  "ua": "1 гектар, 10 000 м² - 112,84 м",
-  "en": "1 hectare, 10 000 m² - 112.84 m",
-  "es": "1 hectárea, 10 000 m² - 112.84 m"
-},
-"o1_example_area_10_hectares_100000m2": {
-  "ua": "10 гектарів, 100 000 м² - 356,82 м",
-  "en": "10 hectares, 100 000 m² - 356.82 m",
-  "es": "10 hectáreas, 100 000 m² - 356.82 m"
-},
-"o1_example_area_1_acre": {
-  "ua": "1 акр, 4046.86 м² - 71,78 м",
-  "en": "1 acre, 4046.86 m² - 71.78 m",
-  "es": "1 acre, 4046.86 m² - 71.78 m"
-},
-"o1_example_area_1_square_km": {
-  "ua": "1 км² - 1128,38 м",
-  "en": "1 km² - 1128.38 m",
-  "es": "1 km² - 1128.38 m"
-},
-"o1_example_area_1_square_mile": {
-  "ua": "Квадратна миля - 1815,95 м",
-  "en": "Square mile - 1815.95 m",
-  "es": "Milla cuadrada - 1815.95 m"
-},
 "o1_example_area_1_m2": {
-  "ua": "1 квадратний метр - 1,13 м",
-  "en": "1 square meter - 1.13 m",
-  "es": "1 metro cuadrado - 1.13 m"
+  "ua": "1 квадратний метр - 1,1284 м",
+  "en": "1 square meter - 1.1284 m",
+  "es": "1 metro cuadrado - 1.1284 m"
+},
+"o1_example_one_step": {
+  "ua": "Середня довжина кроку дорослої людини - 0,70 м",
+  "en": "Average step length of an adult - 0.70 m",
+  "es": "Longitud media del paso de un adulto - 0,70 m"
 },
 "o1_example_area_10_m2": {
-  "ua": "10 квадратних метрів - 3,57 м",
-  "en": "10 square meters - 3.57 m",
-  "es": "10 metros cuadrados - 3.57 m"
+  "ua": "10 квадратних метрів - 3,5682 м",
+  "en": "10 square meters - 3.5682 m",
+  "es": "10 metros cuadrados - 3.5682 m"
+},
+"o1_example_area_20_m2": {
+  "ua": "20 квадратних метрів - 5,0463 м",
+  "en": "20 square meters - 5.0463 m",
+  "es": "20 metros cuadrados - 5.0463 m"
+},
+"o1_example_area_100_m2": {
+  "ua": "100 квадратних метрів - 11,2838 м",
+  "en": "100 square meters - 11.2838 m",
+  "es": "100 metros cuadrados - 11.2838 m"
+},
+"o1_example_area_1000_m2": {
+  "ua": "1000 квадратних метрів - 35,6825 м",
+  "en": "1000 square meters - 35.6825 m",
+  "es": "1000 metros cuadrados - 35.6825 m"
+},
+"o1_example_pop_area_dense_0_5": {
+  "ua": "Одна людина у щільному натовпі — 0.798 м",
+  "en": "One person in a dense crowd — 0.798 m",
+  "es": "Una persona en una multitud densa — 0.798 m"
 },
 
-"o1_example_area_1_sq_ft": {
-  "ua": "1 квадратний фут - 0,34 м",
-  "en": "1 square foot - 0.34 m",
-  "es": "1 pie cuadrado - 0.34 m"
+"o1_example_pop_area_standing_0_7": {
+  "ua": "Одна людина у вільному розміщенні — 0.944 м",
+  "en": "One person in free standing space — 0.944 m",
+  "es": "Una persona en un espacio libre — 0.944 m"
 },
-"o1_example_area_10_sq_ft": {
-  "ua": "10 квадратних футів - 1,09 м",
-  "en": "10 square feet - 1.09 m",
-  "es": "10 pies cuadrados - 1.09 m"
-},
-"o1_example_area_100_sq_ft": {
-  "ua": "100 квадратних футів - 3,44 м",
-  "en": "100 square feet - 3.44 m",
-  "es": "100 pies cuadrados - 3.44 m"
-},
-"o1_example_area_1000_sq_ft": {
-  "ua": "1000 квадратних футів - 10,88 м",
-  "en": "1000 square feet - 10.88 m",
-  "es": "1000 pies cuadrados - 10.88 m"
+
+"o1_example_pop_area_comfort_1_1": {
+  "ua": "Одна людина у комфортному розміщенні — 1.183 м",
+  "en": "One person in comfortable spacing — 1.183 m",
+  "es": "Una persona con espacio cómodo — 1.183 m"
 }
+
 }
 
 

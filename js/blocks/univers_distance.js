@@ -149,12 +149,12 @@ function rebuildO1(scope) {
   for (const o of opts) sel.appendChild(o);
   if (prev) sel.value = prev;
 
-  // Поле діаметра — placeholder + quick-suggest
-  const diameterInput = scope.querySelector('#distCircleObject1') ||
-                        scope.querySelector('[data-field="baseline-diameter"]');
-  if (diameterInput) {
-    diameterInput.placeholder = t('panel_placeholder_input_diameter');
-    try { attachO1QuickSuggest({ inputEl: diameterInput }); } catch {}
+  // Поле діаметра — placeholder + quick-suggest (уніфіковано як в інших режимах)
+  const base = scope.querySelector('#distCircleObject1') ||
+               scope.querySelector('[data-field="baseline-diameter"]');
+  if (base) {
+    base.placeholder = t('panel_placeholder_input_diameter');
+    try { attachO1QuickSuggest({ inputEl: base, modeId: 'univers_distance' }); } catch {}
   }
 
   // Пресети базового діаметра (опційний селектор)

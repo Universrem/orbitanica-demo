@@ -304,7 +304,7 @@ export async function initGeoObjectsBlock() {
   const base = scope.querySelector('#geoObjBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
     base.placeholder = t('panel_placeholder_input_radius');
-    try { attachO1QuickSuggest({ inputEl: base }); } catch {}
+        try { attachO1QuickSuggest({ inputEl: base, modeId: 'geo_objects' }); } catch {}
   }
 
   // зміна категорій → оновити список об'єктів у відповідній групі

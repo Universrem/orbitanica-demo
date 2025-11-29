@@ -194,5 +194,18 @@
     "description_es": "Fortuna combinada de las 1000 personas más ricas del mundo en 2024.",
 
     "money": { "value": 16000000000000, "unit": "USD" }
-  }
+  },
+  {
+  "category_en": "Recommended baseline object",
+  "category_ua": "Рекомендований базовий об’єкт",
+  "category_es": "Objeto base recomendado",
+  "name_en": "100 US dollars",
+  "name_ua": "Сто доларів США",
+  "name_es": "100 dólares EE. UU.",
+  "description_ua": "Сто доларів США — найбільший за номіналом федеральний резервний білет США з 1969 року. Перші стодоларові білети були випущені федеральним урядом 1862 року[1]. Зображення Франкліна вперше з'явилося в серії 1914 року, а Індепенденс-холу — в серії 1928 року.",
+  "description_en": "One hundred US dollars is the highest-denomination Federal Reserve note of the United States since 1969. The first one-hundred-dollar notes were issued by the federal government in 1862. Franklin’s portrait first appeared in the 1914 series, and Independence Hall in the 1928 series.",
+  "description_es": "Cien dólares estadounidenses son el billete de la Reserva Federal de mayor denominación de Estados Unidos desde 1969. Los primeros billetes de cien dólares fueron emitidos por el gobierno federal en 1862. El retrato de Franklin apareció por primera vez en la serie de 1914 y el Independence Hall en la serie de 1928.",
+  "money": { "value": 100, "unit": "USD" }
+}
+
 ]
