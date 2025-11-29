@@ -100,6 +100,7 @@
   <aside id="blog-sidebar">
     <h3 class="blog-nav-title" data-i18n-key="blog_nav_title"></h3>
     <ul class="blog-nav">
+      <li><a href="#post-3" data-i18n-key="blog_entry_3_title"></a></li>
       <li><a href="#post-2" data-i18n-key="blog_entry_2_title"></a></li>
       <li><a href="#post-1" data-i18n-key="blog_entry_1_title"></a></li>
       
@@ -109,6 +110,31 @@
 
   <!-- Права колонка: самі записи -->
   <section id="blog-entries">
+
+      <article class="blog-entry" id="post-3">
+      <h2 data-i18n-key="blog_entry_3_title"></h2>
+
+      <figure class="blog-hero">
+        <picture>
+          <source type="image/webp"
+                  srcset="/blog/img/sagan-hero-800.webp 800w,
+                          /blog/img/sagan-hero-1200.webp 1200w,
+                          /blog/img/sagan-hero-1600.webp 1600w"
+                  sizes="(max-width: 800px) 100vw, (max-width: 1200px) 100vw, 1200px">
+          <source type="image/jpeg"
+                  srcset="/blog/img/sagan-hero-800.jpg 800w,
+                          /blog/img/sagan-hero-1200.jpg 1200w,
+                          /blog/img/sagan-hero-1600.jpg 1600w"
+                  sizes="(max-width: 800px) 100vw, (max-width: 1200px) 100vw, 1200px">
+          <img src="/blog/img/sagan-hero-1200.jpg"
+               alt="Carl Sagan in a studio with a spacecraft image behind him"
+               loading="lazy" width="1200" height="800">
+        </picture>
+      </figure>
+
+      <div data-i18n-key="blog_entry_3_text" data-i18n-mode="paragraphs"></div>
+      <div class="blog-date" data-i18n-key="blog_date_3"></div>
+    </article>
 
     <article class="blog-entry" id="post-2">
       <h2 data-i18n-key="blog_entry_2_title"></h2>
