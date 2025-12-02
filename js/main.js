@@ -1,4 +1,4 @@
-// full/js/main.js
+// /js/main.js
 'use strict';
 
 import './globe/globe.js';
@@ -12,12 +12,14 @@ import './events/diameter_buttons.js';
 import './events/mass_buttons.js';
 import './userObjects/modal.js';
 import './ui/langMenu.js';
+import { initCenterGuide } from './ui/centerGuide.js'; // ← підключаємо гід
 
 (async function boot() {
   const start = async () => {
-    await initI18n();     // 1) підняти словник і встановити мову
-    initLeftPanel(t);     // 2) згенерити ліву панель, передавши t
-    initPublicScenesPanel();
+    await initI18n();      // 1) словник і мова
+    initLeftPanel(t);      // 2) ліва панель
+    initPublicScenesPanel(); // 3) публічні сцени
+    initCenterGuide();     // 4) гід над глобусом — тільки тепер, коли тексти вже є
   };
 
   if (document.readyState !== 'loading') {
@@ -26,5 +28,3 @@ import './ui/langMenu.js';
     document.addEventListener('DOMContentLoaded', start, { once: true });
   }
 })();
-
-

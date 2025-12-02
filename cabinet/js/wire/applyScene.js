@@ -2,7 +2,7 @@
 // Реєстр застосовувачів сцен (appliers). Без режимної логіки всередині.
 // Дозволяє автоматично ВІДТВОРИТИ сцену за query: { mode, ... }.
 
-(function exposeApplierRegistry(){
+(function exposeApplierRegistry() {
   'use strict';
 
   const orbit = (window.orbit = window.orbit || {});
@@ -29,7 +29,15 @@
       if (!applier) {
         throw new Error(`No applier for mode "${mode}"`);
       }
-           // Якщо мітки ще нема — ставимо дефолтну (Львів); якщо вже є — нічого не чіпаємо
+
+      // Запуск будь-якої сцени скасовує гід першого заходу (центр → Львів за замовчуванням)
+      try {
+        window.dispatchEvent(new Event('orbit:centerGuide-dismiss'));
+      } catch {
+        // мовчки ігноруємо, якщо window недоступне / подія нецікава
+      }
+
+      // Якщо мітки ще нема — ставимо дефолтну (Львів); якщо вже є — нічого не чіпаємо
       try {
         const { markerLayer, defaultCenterLon, defaultCenterLat } = await import('/js/globe/globe.js');
         const { placeMarker } = await import('/js/globe/markers.js');

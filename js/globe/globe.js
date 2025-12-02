@@ -4,8 +4,38 @@
 import { Globe, XYZ, Vector } from '../../lib/og.es.js';
 import { initCamera, getCameraAPI, updateAltimeterReadout } from "./camera.js";
 import { initCircleFocusController } from "./circle_focus.controller.js";
-import { initMarkers } from "./markers.js";
+import { initMarkers, restoreMarkerFromStorage } from "./markers.js";
 
+// ── NEW: debug + читання центру з localStorage ─────────────────
+
+function isGuideDebugMode() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('guide_debug') === '1';
+  } catch {
+    return false;
+  }
+}
+
+function readStoredCenter() {
+  if (isGuideDebugMode()) return null; // у debug не читаємо storage
+
+  try {
+    const lonStr = window.localStorage.getItem('orbit:center.lon');
+    const latStr = window.localStorage.getItem('orbit:center.lat');
+    if (lonStr == null || latStr == null) return null;
+
+    const lon = parseFloat(lonStr);
+    const lat = parseFloat(latStr);
+
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+    if (lon < -180 || lon > 180 || lat < -90 || lat > 90) return null;
+
+    return { lon, lat };
+  } catch {
+    return null;
+  }
+}
 // Базовий шар OSM
 const osm = new XYZ("OpenStreetMap", {
   isBaseLayer: true,
@@ -136,17 +166,32 @@ initCamera(globus);
     if (cancelled) return;
     removeListeners();
     // Стартовий фокус: до дефолтного центру, масштаб — за формулою в camera.js
-    try {
-      const lon = (typeof window.defaultCenterLon === 'number') ? window.defaultCenterLon : 24;
-      const lat = (typeof window.defaultCenterLat === 'number') ? window.defaultCenterLat : 49.84;
+        try {
+      // Базове значення — дефолтний центр (Львів)
+      let lon = (typeof window.defaultCenterLon === 'number')
+        ? window.defaultCenterLon
+        : defaultCenterLon;
+      let lat = (typeof window.defaultCenterLat === 'number')
+        ? window.defaultCenterLat
+        : defaultCenterLat;
+
+      // Якщо не debug і є збережений центр — летимо до нього
+      const stored = readStoredCenter();
+      if (stored) {
+        lon = stored.lon;
+        lat = stored.lat;
+      }
+
       api.flyToNadir({ lon, lat, altitudeM: 3_000_000 });
     } catch (e) {
       // мовчазно ігноруємо
     }
+
   }, 250);
 })();
 
 initMarkers(globus);
+restoreMarkerFromStorage();
 
 // Публічний адаптер камери для контролера кнопок
 const cameraAPI = getCameraAPI(globus);

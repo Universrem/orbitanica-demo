@@ -1331,6 +1331,27 @@
   "ua": "29 листопада 2025",
   "en": "November 29, 2025",
   "es": "29 de noviembre de 2025"
+},
+"center_guide.title": {
+  "ua": "Обрати центр сцен",
+  "en": "Choose the center of your scenes",
+  "es": "Elige el centro de tus escenas"
+},
+"center_guide.text": {
+  "ua": "Оберіть місце на глобусі, яке ви добре знаєте або де зараз знаходитесь, і поставте мітку. Ця мітка стане центром відтворення або створення сцен — метафор для розуміння масштабу.",
+  "en": "Pick a place on the globe that you know well, or where you are now, and drop a marker. This marker will become the center for playing and creating scenes — metaphors for understanding scale.",
+  "es": "Elige un lugar en el globo que conozcas bien o donde estés ahora y coloca un marcador. Este marcador será el centro para reproducir y crear escenas: metáforas para entender la escala."
+},
+"center_guide.ok": {
+  "ua": "Ок",
+  "en": "Ok",
+  "es": "Ok"
+},
+"center_guide.hint": {
+  "ua": "Поставте мітку на карті",
+  "en": "Place a marker on the map",
+  "es": "Coloca un marcador en el mapa"
 }
+
 
 }
