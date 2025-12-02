@@ -98,13 +98,13 @@ function readYears(source) {
   };
 }
 
-// Базовий діаметр масштабу О1-start (м)
+// Базовий радіус масштабу О1-start (м) — читаємо радіус з UI, повертаємо діаметр
 function readBaselineDiameterMeters(scope) {
   const root = scope || document;
   const a = root?.querySelector('#historyBaselineDiameter, [data-field="baseline-diameter"]');
   if (a) {
     const v = Number(a.value);
-    if (Number.isFinite(v) && v >= 0) return v;
+    if (Number.isFinite(v) && v >= 0) return v * 2;
   }
   return 0;
 }

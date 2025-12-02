@@ -1168,8 +1168,19 @@
   "cab_save_btn_copy":            { "ua": "Скопіювати", "en": "Copy", "es": "Copiar" },
   "cab_save_btn_copied":          { "ua": "Скопійовано", "en": "Copied", "es": "Copiado" },
   "cab_save_btn_close":           { "ua": "Закрити", "en": "Close", "es": "Cerrar" },
-  "cab_save_not_supported_title": { "ua": "Збереження цього режиму ще не під’єднане", "en": "Saving for this mode isn’t wired yet", "es": "Aún no conectado para este modo" },
-  "cab_save_not_supported_body":  { "ua": "Додамо серіалізатор режиму і все запрацює. Наразі підтримано «Історія».", "en": "Add a serializer for this mode and it will work. Currently ‘History’ is supported.", "es": "Añade un serializador para este modo y funcionará. Actualmente se admite «Historia»." },
+  
+"cab_save_not_supported_title": {
+  "ua": "Не вдалося зберегти сцену",
+  "en": "Could not save the scene",
+  "es": "No se pudo guardar la escena"
+},
+
+"cab_save_not_supported_body": {
+  "ua": "Щоб зберегти сцену, спочатку створіть її.",
+  "en": "To save the scene, create it first.",
+  "es": "Para guardar la escena, primero créala."
+},
+
   "modal_field_desc":          { "ua": "Опис", "en": "Description", "es": "Descripción" },
   "confirm.title": { "ua":"Підтвердження", "en":"Confirmation", "es":"Confirmación" },
   "confirm.delete.object": { "ua":"Видалити об’єкт: {name}?", "en":"Delete object: {name}?", "es":"¿Eliminar el objeto: {name}?" },

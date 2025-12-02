@@ -278,7 +278,7 @@ function resetHistoryForm(scope) {
   // інпут базового діаметра (масштаб)
   const base = scope.querySelector('#historyBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
-    base.placeholder = t('panel_placeholder_input_diameter');
+    base.placeholder = t('panel_placeholder_input_radius');
     base.value = '';
   }
 
@@ -309,7 +309,7 @@ export async function initHistoryBlock() {
   // плейсхолдер і підказки для baseline О1
   const base = scope.querySelector('#historyBaselineDiameter') || scope.querySelector('[data-field="baseline-diameter"]');
   if (base) {
-    base.placeholder = t('panel_placeholder_input_diameter');
+    base.placeholder = t('panel_placeholder_input_radius');
         try { attachO1QuickSuggest({ inputEl: base, modeId: 'history' }); } catch {}
   }
 

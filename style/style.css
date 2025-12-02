@@ -1624,6 +1624,9 @@ body.modal-open { overflow: hidden; }
   backdrop-filter: blur(6px);
   background: rgba(0,0,0,.25);
 }
+#circle-toolbar:empty {
+  display: none;
+}
 
 #circle-toolbar::-webkit-scrollbar { height: 8px; }
 #circle-toolbar::-webkit-scrollbar-thumb {
