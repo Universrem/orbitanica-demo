@@ -1040,16 +1040,90 @@
   "time_start": { "value": 1961, "unit": "year" }
 },
 {
-  "category_en": "Turning Points",
-  "category_ua": "Переломні віхи",
-  "category_es": "Puntos de Inflexión",
-  "name_en": "Creation of Internet",
-  "name_ua": "Створення Інтернету",
-  "name_es": "Creación de Internet",
-  "description_en": "Development of the global network that revolutionized communication and information.",
-  "description_ua": "Розвиток глобальної мережі, що революціонізувала зв'язок та інформацію.",
-  "description_es": "Desarrollo de la red global que revolucionó la comunicación y la información.",
-  "time_start": { "value": 1983, "unit": "year" }
+    "category_en": "Sagan Cosmic Calendar",
+    "category_ua": "Космічний календар Сагана",
+    "category_es": "Calendario Cósmico de Sagan",
+    "name_en": "Big Bang",
+    "name_ua": "Великий вибух",
+    "name_es": "Gran Explosión",
+    "description_en": "The cosmological model describing the origin and evolution of the universe. The universe began from a state of extreme density and temperature (singularity) and rapidly expanded during cosmic inflation. After cooling, quarks, gluons, protons, and neutrons formed. After 380,000 years, stable hydrogen and helium atoms formed, allowing photons to travel freely (cosmic microwave background radiation).",
+    "description_ua": "Космологічна модель, що описує початок та еволюцію Всесвіту. Всесвіт почався зі стану нескінченної густини та температури (сингулярності) і швидко розширився під час космічної інфляції. Після охолодження утворилися кварки, глюони, протони й нейтрони. Через 380 тисяч років сформувалися стабільні атоми водню та гелію, що дозволило фотонам вільно поширюватися (реліктове випромінювання).",
+    "description_es": "El modelo cosmológico que describe el origen y evolución del universo. El universo comenzó desde un estado de densidad y temperatura infinitas (singularidad) y se expandió rápidamente durante la inflación cósmica. Tras enfriarse, se formaron quarks, gluones, protones y neutrones. Después de 380.000 años, se formaron átomos estables de hidrógeno y helio, permitiendo que los fotones viajaran libremente (radiación de fondo de microondas).",
+    "time_start": {"value": -13800000000, "unit": "year"}
+},
+{
+"category_en": "Sagan Cosmic Calendar",
+"category_ua": "Космічний календар Сагана",
+"category_es": "Calendario Cósmico de Sagan",
+"name_en": "Milky Way Galaxy",
+"name_ua": "Чумацький Шлях",
+"name_es": "Vía Láctea",
+"description_en": "The Milky Way is now a fully formed barred spiral galaxy with a thin rotating disk of stars, gas and dust. Most visible stars lie in this disk, arranged in spiral arms that wind around the centre and host giant clouds where new stars are born. Outside the plane, an older thick disk and a faint stellar halo surround the system. This stage marks the transition from a chaotic early galaxy to a stable structure in which long-lived stars, planetary systems and, eventually, life can arise.",
+"description_ua": "Чумацький Шлях постає вже сформованою спіральною галактикою з тонким обертовим диском зір, газу та пилу. Більшість помітних неозброєним оком зір міститься в цьому диску, зібраному у спіральні рукави з гігантськими хмарами, де народжуються нові зорі. Поза площиною диска галактику оточує старіший товстий диск і тьмяний зоряний гало. Такий стан означає перехід від хаотичної молодої системи до відносно сталої структури, придатної для існування довгоживучих зір і планетних систем.",
+"description_es": "La Vía Láctea aparece como una galaxia espiral barrada ya consolidada, con un disco fino en rotación compuesto de estrellas, gas y polvo. La mayoría de las estrellas visibles se encuentran en este disco, organizadas en brazos espirales que rodean el centro y albergan nubes gigantes donde nacen nuevas estrellas. Fuera del plano del disco la galaxia está rodeada por un disco grueso más antiguo y un halo estelar tenue. Este estado marca el paso de una fase caótica temprana a una estructura estable donde pueden formarse sistemas planetarios y, con el tiempo, vida.",
+"time_start": { "value": -8800000000, "unit": "year" }
+},
+{
+  "category_en": "Sagan Cosmic Calendar",
+  "category_ua": "Космічний календар Сагана",
+  "category_es": "Calendario Cósmico de Sagan",
+  "name_en": "Birth of the Sun",
+  "name_ua": "Народження Сонця",
+  "name_es": "Nacimiento del Sol",
+  "description_en": "The Sun formed when a dense region inside a giant molecular cloud in the Milky Way collapsed under its own gravity. As more gas fell inward, a hot protostar grew at the centre, surrounded by a rotating disk of gas and dust. In the core, temperature and pressure eventually became high enough for hydrogen nuclei to fuse into helium, releasing energy and marking the birth of a stable star. The remaining disk provided the raw material for planets, asteroids and comets that now make up the Solar System.",
+  "description_ua": "Сонце народилося, коли щільніша ділянка у гігантській молекулярній хмарі всередині Чумацького Шляху почала стискатися під дією власної гравітації. Газ, що падав усередину, утворив гарячу протозорю, оточену обертовим диском з газу й пилу. У ядрі поступово зросли температура й тиск настільки, що ядра водню почали зливатися в гелій, виділяючи енергію — так з’явилася стабільна зоря. Залишки диска стали будівельним матеріалом для планет, астероїдів і комет Сонячної системи.",
+  "description_es": "El Sol nació cuando una región especialmente densa de una gigantesca nube molecular en la Vía Láctea comenzó a colapsar por su propia gravedad. El gas que caía hacia el centro formó una protoestrella caliente rodeada por un disco en rotación de gas y polvo. En el núcleo la temperatura y la presión aumentaron hasta que los núcleos de hidrógeno empezaron a fusionarse en helio, liberando energía y dando lugar a una estrella estable. El material restante del disco sirvió como base para los planetas, asteroides y cometas del Sistema Solar.",
+  "time_start": { "value": -4570000000, "unit": "year" }
+},
+{
+  "category_en": "Sagan Cosmic Calendar",
+  "category_ua": "Космічний календар Сагана",
+  "category_es": "Calendario Cósmico de Sagan",
+  "name_en": "Birth of Earth",
+  "name_ua": "Народження Землі",
+  "name_es": "Nace la Tierra",
+  "description_en": "Earth formed inside the young Solar System from a disk of gas and dust orbiting the newborn Sun. Countless small bodies collided and merged, releasing enough energy to melt much of the growing planet. Heavy elements such as iron sank inward to build a dense core, while lighter silicate rocks rose to form the mantle and a primitive crust. Volcanoes released gases that created an early atmosphere and oceans, turning a molten world into a solid, differentiated planet that would later host life.",
+  "description_ua": "Земля сформувалася всередині молодої Сонячної системи з диска газу й пилу, що обертався навколо щойно народженого Сонця. Безліч дрібних тіл стикалися та зливалися, виділяючи достатньо енергії, щоб розплавити значну частину зростаючої планети. Важчі елементи на кшталт заліза опускалися всередину, утворюючи щільне ядро, а легші силікатні породи піднімалися, формуючи мантію та первинну кору. Виверження вивільняли гази, з яких виникли рання атмосфера й океани, перетворюючи розпечену кулю на розшаровану тверду планету, здатну згодом стати домом для життя.",
+  "description_es": "La Tierra se formó dentro del joven Sistema Solar a partir de un disco de gas y polvo que orbitaba alrededor del Sol recién nacido. Incontables cuerpos pequeños chocaron y se fusionaron, liberando suficiente energía como para fundir gran parte del planeta en crecimiento. Los elementos más pesados, como el hierro, se hundieron hacia el centro y dieron lugar a un núcleo denso, mientras que las rocas silicatadas más ligeras ascendieron para formar el manto y una corteza primitiva. Los volcanes expulsaron gases que crearon una atmósfera temprana y océanos, transformando un mundo incandescente en un planeta sólido y diferenciado capaz de albergar vida en el futuro.",
+  "time_start": { "value": -4540000000, "unit": "year" }
+},
+{
+  "category_en": "Sagan Cosmic Calendar",
+  "category_ua": "Космічний календар Сагана",
+  "category_es": "Calendario Cósmico de Sagan",
+  "name_en": "Origin of life",
+  "name_ua": "Зародження життя",
+  "name_es": "Origen de la vida",
+  "description_en": "Life began in the ancient oceans of a still hostile Earth, where water, minerals and simple organic molecules constantly interacted. Energy from sunlight, lightning or hot volcanic springs drove chemical reactions that gradually built more complex structures able to store information and copy themselves with variation. From these primitive self-sustaining systems emerged the first cells, probably small microbes that fed on chemical gradients. Their appearance marks the transition from a purely chemical planet to a true biosphere.",
+  "description_ua": "Життя зародилося в давніх океанах молодої Землі, де вода, мінерали й прості органічні сполуки безперервно змішувалися. Енергія Сонця, блискавок і гарячих джерел запускала реакції, що поступово створювали складніші структури, здатні зберігати інформацію й відтворюватися з невеликими змінами. З таких примітивних самопідтримуваних систем постали перші клітини — крихітні мікроорганізми, які використовували хімічні перепади в середовищі. Їхня поява стала поворотом від «мервої» хімії до справжньої біосфери.",
+  "description_es": "La vida surgió en los antiguos océanos de una Tierra aún poco amable, donde agua, minerales y moléculas orgánicas sencillas interactuaban sin descanso. La energía de la luz solar, de los rayos y de fuentes hidrotermales impulsó reacciones químicas que fueron generando estructuras más complejas capaces de almacenar información y copiarse con ligeras variaciones. De estos sistemas primitivos autosuficientes aparecieron las primeras células, pequeños microbios que aprovechaban gradientes químicos. Su existencia marca el paso de un planeta puramente químico a una auténtica biosfera.",
+  "time_start": { "value": -3800000000, "unit": "year" }
+},
+{
+  "category_en": "Sagan Cosmic Calendar",
+  "category_ua": "Космічний календар Сагана",
+  "category_es": "Calendario Cósmico de Sagan",
+  "name_en": "O2 photosynthesis",
+  "name_ua": "Кисневий фотосинтез",
+  "name_es": "Fotosíntesis O2",
+  "description_en": "Oxygenic photosynthesis emerged when some bacteria, ancestors of modern cyanobacteria, evolved molecular machinery able to split water using light and release oxygen as a by-product. In shallow sunlit seas their microbial mats used pigments and protein complexes to capture energy and drive the construction of organic matter from dissolved carbon. At first, nearly all released oxygen reacted with dissolved iron and other reduced substances, but this new metabolism steadily increased the global production of free O2 and set the stage for the later oxygenation of the oceans and atmosphere.",
+  "description_ua": "Кисневий фотосинтез з’явився тоді, коли частина бактерій, предки сучасних ціанобактерій, набула здатності за допомогою світла розщеплювати воду й виділяти кисень як побічний продукт. У мілких освітлених морях їхні мікробні мати з пігментами та білковими комплексами вловлювали енергію й будували органічну речовину з розчиненого вуглецю. Спочатку майже весь кисень одразу витрачався на окиснення заліза та інших відновлених сполук, але такий тип живлення поступово збільшував загальне виробництво вільного O₂ й підготував ґрунт для подальшого насичення океанів і атмосфери киснем.",
+  "description_es": "La fotosíntesis oxigénica apareció cuando ciertos microbios, antepasados de las cianobacterias, desarrollaron un sistema capaz de usar la luz para dividir agua y liberar oxígeno como subproducto. En mares poco profundos bañados por el Sol, sus tapetes microbianos empleaban pigmentos y complejos proteicos para capturar energía y fabricar materia orgánica a partir de carbono disuelto. Al principio casi todo el oxígeno reaccionaba con hierro disuelto y otras sustancias reducidas, pero este metabolismo aumentó de forma constante la producción global de O₂ y preparó el camino para la posterior oxigenación de océanos y atmósfera.",
+  "time_start": { "value": -2800000000, "unit": "year" }
+},
+{
+  "category_en": "Sagan Cosmic Calendar",
+  "category_ua": "Космічний календар Сагана",
+  "category_es": "Calendario Cósmico de Sagan",
+  "name_en": "Oxygen in air",
+  "name_ua": "Кисень в атмосфері",
+  "name_es": "Oxígeno en aire",
+  "description_en": "The first long-lasting rise of oxygen in Earth’s atmosphere, known as the Great Oxidation Event, happened after oxygen-producing microbes had been active in the oceans for a very long time. At first almost all released O₂ reacted with dissolved iron and volcanic gases, but gradually these chemical sinks became saturated and free oxygen started to build up in the air. This change altered surface chemistry, enabled the formation of a protective ozone layer and opened the way for efficient oxygen-based respiration in later life forms.",
+  "description_ua": "Перший тривалий підйом вмісту кисню в атмосфері Землі, відомий як Велика киснева подія, стався після того, як мікроорганізми з кисневим фотосинтезом дуже довго працювали в океанах. Спочатку майже весь виділений O₂ одразу зв’язувався з розчиненим залізом та газами вулканічного походження, але з часом ці хімічні «пастки» наситилися, і вільний кисень почав накопичуватися в повітрі. Це докорінно змінило хімію поверхні, дозволило сформувати захисний озоновий шар і відкрило шлях до ефективного дихання, що використовує кисень.",
+  "description_es": "El primer aumento duradero de oxígeno en la atmósfera terrestre, conocido como Gran Evento de Oxidación, ocurrió después de que microbios fotosintéticos productores de oxígeno actuaran durante mucho tiempo en los océanos. Al principio casi todo el O₂ liberado reaccionaba con hierro disuelto y gases volcánicos, pero con el tiempo estos sumideros químicos se saturaron y el oxígeno libre empezó a acumularse en el aire. Este cambio transformó la química superficial, permitió la formación de una capa de ozono protectora y abrió la posibilidad de una respiración eficiente basada en oxígeno para formas de vida posteriores.",
+  "time_start": { "value": -2400000000, "unit": "year" }
 }
+
+
 ]
 

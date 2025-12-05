@@ -32,7 +32,7 @@ export async function getSupabase() {
 
   // Підтягуємо SDK v2 як ESM з CDN (той самий шлях скрізь)
   const { createClient } = await import(
-    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.0/+esm'
   );
 
   g[SB_GLOBAL_KEY] = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, authOptions());
