@@ -78,6 +78,17 @@ body {
   gap: 8px;
   flex-wrap: nowrap;
 }
+/* Мобільні елементи управління — за замовчуванням сховані (показуємо в mobile.css) */
+/* info-іконка в шапці — прихована на десктопі */
+#top-bar #right-rail #btn-mobile-info {
+  display: none;
+}
+
+/* хендли над глобусом — за замовчуванням сховані */
+#mobile-handle-scenes,
+#mobile-handle-info {
+  display: none;
+}
 
 /* іконки-кнопки у шапці */
 #top-bar .top-icon-button {

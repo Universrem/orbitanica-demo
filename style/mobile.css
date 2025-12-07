@@ -1,0 +1,156 @@
+/* ===== Мобільні стилі Orbitanica ===== */
+
+/* За замовчуванням (усі ширини): мобільні елементи сховані */
+#btn-mobile-info,
+#mobile-handle-scenes,
+#mobile-handle-info {
+  display: none;
+}
+
+/* ================== ГОЛОВНА: мобільний макет ================== */
+@media (max-width: 768px) {
+
+  /* Ліва панель — сховати, лишається один глобус */
+  #left-panel {
+    display: none;
+  }
+
+  /* Глобус на всю ширину */
+  #globe-container {
+    width: 100%;
+  }
+
+  /* Верхня панель: бренд зліва, іконки+мова справа */
+  #top-bar {
+    justify-content: flex-start;
+    padding: 0 8px;
+    gap: 8px;
+  }
+
+  /* Центральний блок (WIP-плашка) на мобільному не потрібен */
+  #top-actions,
+  #top-bar .wip-pill {
+    display: none;
+  }
+  /* Ховаємо блог і кабінет у шапці на мобільному */
+  #top-bar #right-rail #btn-blog,
+  #top-bar #right-rail #btn-user {
+    display: none;
+  }
+
+  /* Мобільна іконка info показується тільки на мобільних */
+  #top-bar #right-rail #btn-mobile-info {
+    display: inline-flex;
+  }
+
+  /* Правий блок (мова + info) притискаємо вправо */
+  #right-rail {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Головний контент: одна колонка, без horizontal scroll */
+  #main-content {
+    display: block;
+    height: calc(100vh - 50px);
+    overflow: hidden;
+  }
+
+  /* Глобус займає всю висоту під шапкою */
+  #globe-container {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 50px);
+  }
+
+  #globe-container > .og-inner {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Лічильник висоти (altimeter) трохи ближче до кутка */
+  #altimeter {
+    top: 10px;
+    left: 12px;
+    font-size: 13px;
+  }
+
+  /* Панель кіл — залишається внизу, по всій ширині */
+  #circle-toolbar {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 6px 8px;
+  }
+
+  /* ===== Мобільні ручки/хендли над глобусом ===== */
+
+  /* Хендл "СЦЕНИ" — зверху по центру над глобусом */
+#mobile-handle-scenes {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 6px 14px;
+  padding-top: 20px; /* більше відступу зверху */
+  padding-bottom:2px; /* менше відступу знизу */
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  text-align: center;
+  z-index: 900;
+  pointer-events: auto;
+  display: inline-block;
+}
+
+  /* Хендл "ІНФОБЛОК" — вертикально справа по центру */
+  #mobile-handle-info {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+
+    padding: 10px 4px;
+    border-radius: 12px 0 0 12px;
+
+    background: rgba(0, 0, 0, 0.35);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+
+    z-index: 900;
+    pointer-events: auto;
+    display: inline-block; /* показати на мобільному */
+  }
+
+  /* Стрічка-гід над глобусом — трохи вужча на мобільному */
+  .center-guide-hint {
+    top: 8px;
+    max-width: min(520px, 92vw);
+  }
+}
+
+/* ================== Дуже вузькі екрани ================== */
+@media (max-width: 480px) {
+  /* Назва бренду менша, щоб не ламалась */
+  #top-bar .brand-title {
+    font-size: 14px;
+  }
+
+  /* Кнопка "наверх" ближче до краю */
+  #back-to-top {
+    right: 14px;
+    bottom: 14px;
+  }
+}

@@ -730,6 +730,16 @@
     "en": "Enter object name",
     "es": "Ingrese el nombre del objeto"
   },
+    "ui.mobile.tab_scenes": {
+    "ua": "Сцени",
+    "en": "Scenes",
+    "es": "Escenas"
+  },
+  "ui.mobile.tab_info": {
+    "ua": "Інфоблок",
+    "en": "Info panel",
+    "es": "Panel de información"
+  },
 "wip_notice_short": {
   "ua": "Обмежений функціонал.\nТестуємо й налаштовуємо роботу.\nДодаємо нові функції.",
   "en": "Limited functionality.\nWe’re testing and fine-tuning.\nNew features are being added.",
