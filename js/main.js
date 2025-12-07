@@ -12,6 +12,7 @@ import './events/diameter_buttons.js';
 import './events/mass_buttons.js';
 import './userObjects/modal.js';
 import './ui/langMenu.js';
+import './mobile/gestures.js';
 import { initCenterGuide } from './ui/centerGuide.js'; // ← підключаємо гід
 
 (async function boot() {

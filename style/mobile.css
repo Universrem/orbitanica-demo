@@ -10,10 +10,29 @@
 /* ================== ГОЛОВНА: мобільний макет ================== */
 @media (max-width: 768px) {
 
-  /* Ліва панель — сховати, лишається один глобус */
+  /* Ліва панель — листок, що виїжджає ЗЛІВА на мобільному */
   #left-panel {
-    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(420px, 100vw);
+
+    z-index: 800;
+    background: rgba(255, 255, 255, 0.8);
+
+    transform: translateX(-100%);
+    transition: transform 0.25s ease-out;
+
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
+
+  /* Коли користувач витягнув сцени (клас ставить JS) */
+  body.mobile-scenes-open #left-panel {
+    transform: translateX(0);
+  }
+
 
   /* Глобус на всю ширину */
   #globe-container {
@@ -87,27 +106,35 @@
 
   /* ===== Мобільні ручки/хендли над глобусом ===== */
 
-  /* Хендл "СЦЕНИ" — зверху по центру над глобусом */
-#mobile-handle-scenes {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 6px 14px;
-  padding-top: 20px; /* більше відступу зверху */
-  padding-bottom:2px; /* менше відступу знизу */
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.35);
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  text-align: center;
-  z-index: 900;
-  pointer-events: auto;
-  display: inline-block;
-}
+  /* Хендл "СЦЕНИ" — вертикальний бургер зліва по центру */
+  #mobile-handle-scenes {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+
+    padding: 10px 4px;
+    border-radius: 0 12px 12px 0;
+
+    background: rgba(0, 0, 0, 0.35);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+
+    z-index: 900;
+    pointer-events: auto;
+    display: inline-block;
+
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+  }
 
   /* Хендл "ІНФОБЛОК" — вертикально справа по центру */
   #mobile-handle-info {
@@ -133,6 +160,28 @@
     pointer-events: auto;
     display: inline-block; /* показати на мобільному */
   }
+  /* Інфоблок як листок справа на мобільному */
+  #info-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: min(420px, 100vw);
+
+    z-index: 800;
+    background: rgba(255, 255, 255, 0.8);
+
+    transform: translateX(100%);
+    transition: transform 0.25s ease-out;
+
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Коли користувач витягнув інфоблок (клас ставить JS) */
+  body.mobile-info-open #info-panel {
+    transform: translateX(0);
+  }
 
   /* Стрічка-гід над глобусом — трохи вужча на мобільному */
   .center-guide-hint {
@@ -145,7 +194,7 @@
 @media (max-width: 480px) {
   /* Назва бренду менша, щоб не ламалась */
   #top-bar .brand-title {
-    font-size: 14px;
+    font-size: 16px;
   }
 
   /* Кнопка "наверх" ближче до краю */
