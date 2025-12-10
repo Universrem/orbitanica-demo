@@ -1764,3 +1764,16 @@ html { scroll-behavior: smooth; }
   white-space: nowrap;
 }
 
+.osm-attribution {
+  position: absolute;
+  right: 8px;
+  bottom: 40px;
+  font-size: 8px;
+  line-height: 1.2;
+  background: transparent;
+  padding: 2px 4px;
+  border-radius: 4px;
+  z-index: 1000;
+  text-decoration: none;
+  color: inherit;
+}

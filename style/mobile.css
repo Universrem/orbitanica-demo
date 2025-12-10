@@ -58,7 +58,20 @@
 
   /* Глобус на всю ширину */
   #globe-container {
+    position: relative;
     width: 100%;
+    height: calc(100vh - 50px);
+    padding-bottom: 48px; /* запас під панель кіл / камеру */
+  }
+
+  /* Сучасні браузери: правильна висота видимої області */
+  @supports (height: 100dvh) {
+    #globe-container {
+      height: calc(100dvh - 50px);
+    }
+    #main-content {
+      height: calc(100dvh - 50px);
+    }
   }
 
   /* Верхня панель: бренд зліва, іконки+мова справа */
@@ -93,18 +106,11 @@
     gap: 6px;
   }
 
-  /* Головний контент: одна колонка, без horizontal scroll */
+  /* Головний контент: одна колонка */
   #main-content {
     display: block;
     height: calc(100vh - 50px);
     overflow: hidden;
-  }
-
-  /* Глобус займає всю висоту під шапкою */
-  #globe-container {
-    position: relative;
-    width: 100%;
-    height: calc(100vh - 50px);
   }
 
   #globe-container > .og-inner {
@@ -119,7 +125,7 @@
     font-size: 13px;
   }
 
-  /* Панель кіл — залишається внизу, по всій ширині */
+  /* Панель кіл — внизу, по всій ширині */
   #circle-toolbar {
     left: 0;
     right: 0;
@@ -149,7 +155,7 @@
     writing-mode: vertical-rl;
     text-orientation: mixed;
 
-    z-index: 900; /* завжди над лівою панеллю */
+    z-index: 900;
     pointer-events: auto;
     display: inline-block;
 
@@ -184,7 +190,7 @@
     writing-mode: vertical-rl;
     text-orientation: mixed;
 
-    z-index: 700; /* завжди над правою панеллю */
+    z-index: 700; /* під інфопанеллю, коли вона відкрита */
     pointer-events: auto;
     display: inline-block;
   }
@@ -200,7 +206,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.35);
-    z-index: 750; /* нижче, ніж панелі (800) і ручки (900) */
+    z-index: 750;
   }
 
   /* Оверлей показується, коли відкрита будь-яка панель */
@@ -214,7 +220,15 @@
     top: 8px;
     max-width: min(520px, 92vw);
   }
+
+  /* Менший і трохи піднятий "© OpenStreetMap contributors" */
+  .osm-attribution {
+    font-size: 8px;
+    bottom: 38px;
+    right: 4px;
+  }
 }
+
 
 /* ================== Дуже вузькі екрани ================== */
 @media (max-width: 480px) {
