@@ -254,8 +254,6 @@ function computeModeLabel() {
   if (a && b) return `${a}: ${b}`;
   return a || b || '';
 }
-
-
 function ensureDom() {
   if (panelEl) return;
 
@@ -311,7 +309,6 @@ function ensureDom() {
   modeEl.textContent = computeModeLabel();
   header.appendChild(modeEl);
 
-
   const scroll = document.createElement('div');
   scroll.className = 'info-scroll';
   scroll.appendChild(listEl);
@@ -319,6 +316,11 @@ function ensureDom() {
   panelEl.append(header, scroll);
 
   (document.getElementById('globe-container') || document.body).appendChild(panelEl);
+
+  // 🔔 нове: сигнал, що інфопанель створена і готова для мобільних жестів
+  window.dispatchEvent(new CustomEvent('orbitanica:info-panel-ready', {
+    detail: panelEl
+  }));
 
   ipHover = document.createElement('div');
   ipHover.id = 'ip-hover';

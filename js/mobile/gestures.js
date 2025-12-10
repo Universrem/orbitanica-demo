@@ -1,286 +1,275 @@
 // /js/mobile/gestures.js
 'use strict';
 
-const MOBILE_MEDIA_QUERY = '(max-width: 768px)';
+/**
+ * Мобільна логіка для висувних панелей:
+ * - scenes (ліва панель)
+ * - info (права панель / інфоблок)
+ *
+ * Керує:
+ * - #mobile-handle-scenes
+ * - #mobile-handle-info
+ * - #mobile-overlay
+ * - #left-panel
+ * - #info-panel (підʼєднується, коли зʼявляється в DOM)
+ */
 
-function isMobile() {
-  return window.matchMedia && window.matchMedia(MOBILE_MEDIA_QUERY).matches;
-}
+const leftPanel = document.getElementById('left-panel');
 
-/* ================== СЦЕНИ (листок зліва) ================== */
+const handleScenes = document.getElementById('mobile-handle-scenes');
+const handleInfo = document.getElementById('mobile-handle-info');
+const mobileOverlay = document.getElementById('mobile-overlay');
 
-function initScenesHandle() {
-  const handle = document.getElementById('mobile-handle-scenes');
-  if (!handle) return;
+if (handleScenes && handleInfo && mobileOverlay) {
+  let openPanel = null; // 'scenes' | 'info' | null
 
-  const body = document.body;
-  let startX = 0;
-  let dragging = false;
-  let openedAtStart = false;
-
-  const THRESHOLD = 40;      // мінімальний свайп (px)
-  const TAP_THRESHOLD = 5;   // майже без руху → тап
-
-  function isOpen() {
-    return body.classList.contains('mobile-scenes-open');
+  function isMobile() {
+    // Підлаштування під мобільну версію — тільки там працюють свайпи та ручки
+    return window.matchMedia('(max-width: 768px)').matches;
   }
 
-  function open() {
-    body.classList.add('mobile-scenes-open');
-    body.classList.remove('mobile-info-open');
+  function applyState() {
+    // Класи на body — в /style/mobile.css привʼязана анімація та позиціювання
+    document.body.classList.toggle('mobile-scenes-open', openPanel === 'scenes');
+    document.body.classList.toggle('mobile-info-open', openPanel === 'info');
+
+    const hasOpen = openPanel !== null;
+    document.body.classList.toggle('mobile-panel-open', hasOpen);
+
+    // ARIA для ручок
+    handleScenes.setAttribute('aria-pressed', openPanel === 'scenes' ? 'true' : 'false');
+    handleInfo.setAttribute('aria-pressed', openPanel === 'info' ? 'true' : 'false');
+
+    // Оверлей: показ/приховування віддаємо на CSS, але додаємо стан
+    mobileOverlay.setAttribute('data-open', hasOpen ? 'true' : 'false');
   }
 
-  function close() {
-    body.classList.remove('mobile-scenes-open');
-  }
-
-  function onPointerDown(e) {
+  function openScenes() {
     if (!isMobile()) return;
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-
-    dragging = true;
-    startX = e.clientX;
-    openedAtStart = isOpen();
-
-    try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+    openPanel = 'scenes';
+    applyState();
   }
 
-  function onPointerMove(_e) {
-    if (!dragging) return;
-    // Якщо захочеш живий рух панелі під пальцем — додамо тут
-  }
-
-  function onPointerUp(e) {
-    if (!dragging) return;
-    dragging = false;
-
-    try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
-
-    const delta = e.clientX - startX;
-    const absDelta = Math.abs(delta);
-
-    // ТАП: просто тумблер
-    if (absDelta < TAP_THRESHOLD) {
-      if (openedAtStart) close();
-      else open();
-      return;
-    }
-
-    // Свайп ВПРАВО → відкриваємо
-    if (delta > THRESHOLD) {
-      open();
-      return;
-    }
-
-    // Свайп ВЛІВО → закриваємо
-    if (delta < -THRESHOLD) {
-      close();
-      return;
-    }
-  }
-
-  handle.addEventListener('pointerdown', onPointerDown);
-  handle.addEventListener('pointermove', onPointerMove);
-  handle.addEventListener('pointerup', onPointerUp);
-  handle.addEventListener('pointercancel', onPointerUp);
-}
-
-function initScenesPanelSwipe() {
-  const panel = document.getElementById('left-panel');
-  if (!panel) return;
-
-  const body = document.body;
-  let startX = 0;
-  let dragging = false;
-  const THRESHOLD = 40;
-
-  function isOpen() {
-    return body.classList.contains('mobile-scenes-open');
-  }
-
-  function close() {
-    body.classList.remove('mobile-scenes-open');
-  }
-
-  function onPointerDown(e) {
+  function openInfo() {
     if (!isMobile()) return;
-    if (!isOpen()) return;
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-
-    dragging = true;
-    startX = e.clientX;
-
-    try { panel.setPointerCapture(e.pointerId); } catch (_) {}
+    openPanel = 'info';
+    applyState();
   }
 
-  function onPointerMove(_e) {
-    if (!dragging) return;
+  function closePanels() {
+    openPanel = null;
+    applyState();
   }
 
-  function onPointerUp(e) {
-    if (!dragging) return;
-    dragging = false;
-
-    try { panel.releasePointerCapture(e.pointerId); } catch (_) {}
-
-    const delta = e.clientX - startX;
-
-    // Свайп ВЛІВО → закриваємо
-    if (delta < -THRESHOLD) {
-      close();
-    }
-  }
-
-  panel.addEventListener('pointerdown', onPointerDown);
-  panel.addEventListener('pointermove', onPointerMove);
-  panel.addEventListener('pointerup', onPointerUp);
-  panel.addEventListener('pointercancel', onPointerUp);
-}
-
-/* ================== ІНФО (листок справа) ================== */
-
-function initInfoHandle() {
-  const handle = document.getElementById('mobile-handle-info');
-  if (!handle) return;
-
-  const body = document.body;
-  let startX = 0;
-  let dragging = false;
-  let openedAtStart = false;
-
-  const THRESHOLD = 40;
-  const TAP_THRESHOLD = 5;
-
-  function isOpen() {
-    return body.classList.contains('mobile-info-open');
-  }
-
-  function open() {
-    body.classList.add('mobile-info-open');
-    body.classList.remove('mobile-scenes-open');
-  }
-
-  function close() {
-    body.classList.remove('mobile-info-open');
-  }
-
-  function onPointerDown(e) {
+  // Клік по ручці "Сцени"
+  handleScenes.addEventListener('click', () => {
     if (!isMobile()) return;
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    openPanel = openPanel === 'scenes' ? null : 'scenes';
+    applyState();
+  });
 
-    dragging = true;
-    startX = e.clientX;
-    openedAtStart = isOpen();
-
-    try { handle.setPointerCapture(e.pointerId); } catch (_) {}
-  }
-
-  function onPointerMove(_e) {
-    if (!dragging) return;
-  }
-
-  function onPointerUp(e) {
-    if (!dragging) return;
-    dragging = false;
-
-    try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
-
-    const delta = e.clientX - startX;
-    const absDelta = Math.abs(delta);
-
-    // ТАП → тумблер
-    if (absDelta < TAP_THRESHOLD) {
-      if (openedAtStart) close();
-      else open();
-      return;
-    }
-
-    // Для інфо все дзеркально:
-    // Свайп ВЛІВО → відкриваємо
-    if (delta < -THRESHOLD) {
-      open();
-      return;
-    }
-
-    // Свайп ВПРАВО → закриваємо
-    if (delta > THRESHOLD) {
-      close();
-      return;
-    }
-  }
-
-  handle.addEventListener('pointerdown', onPointerDown);
-  handle.addEventListener('pointermove', onPointerMove);
-  handle.addEventListener('pointerup', onPointerUp);
-  handle.addEventListener('pointercancel', onPointerUp);
-}
-
-function initInfoPanelSwipe() {
-  const panel = document.getElementById('info-panel');
-  if (!panel) return;
-
-  const body = document.body;
-  let startX = 0;
-  let dragging = false;
-  const THRESHOLD = 40;
-
-  function isOpen() {
-    return body.classList.contains('mobile-info-open');
-  }
-
-  function close() {
-    body.classList.remove('mobile-info-open');
-  }
-
-  function onPointerDown(e) {
+  // Клік по ручці "Інфо"
+  handleInfo.addEventListener('click', () => {
     if (!isMobile()) return;
-    if (!isOpen()) return;
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    openPanel = openPanel === 'info' ? null : 'info';
+    applyState();
+  });
 
-    dragging = true;
-    startX = e.clientX;
-
-    try { panel.setPointerCapture(e.pointerId); } catch (_) {}
-  }
-
-  function onPointerMove(_e) {
-    if (!dragging) return;
-  }
-
-  function onPointerUp(e) {
-    if (!dragging) return;
-    dragging = false;
-
-    try { panel.releasePointerCapture(e.pointerId); } catch (_) {}
-
-    const delta = e.clientX - startX;
-
-    // Свайп ВПРАВО → закриваємо
-    if (delta > THRESHOLD) {
-      close();
+  // Клік по затемненню — закриває будь-яку панель
+  mobileOverlay.addEventListener('click', () => {
+    if (!isMobile()) return;
+    if (openPanel !== null) {
+      closePanels();
     }
+  });
+
+  // Закривати мобільні панелі, коли екран розтягується до десктопу
+  window.addEventListener('resize', () => {
+    if (!isMobile() && openPanel !== null) {
+      closePanels();
+    }
+  });
+
+  // --- Свайпи для закриття панелей ---
+
+  const SWIPE_THRESHOLD = 50; // px
+
+  function attachSwipeToPanel(panelEl, side) {
+    if (!panelEl) return;
+
+    let startX = 0;
+    let startY = 0;
+    let isDragging = false;
+    let active = false;
+
+    panelEl.addEventListener(
+      'touchstart',
+      (e) => {
+        if (!isMobile()) return;
+        if (!openPanel) return; // закриваємо тільки вже відкриту панель
+
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        isDragging = false;
+        active = true;
+      },
+      { passive: true }
+    );
+
+    panelEl.addEventListener(
+      'touchmove',
+      (e) => {
+        if (!active || !isMobile()) return;
+        const touch = e.touches[0];
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+
+        // Визначаємо, що це саме горизонтальний жест
+        if (!isDragging) {
+          if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+            isDragging = true;
+          } else if (Math.abs(dy) > 10) {
+            // Пальцем пішли по вертикалі — даємо сторінці скролитись
+            active = false;
+          }
+        }
+      },
+      { passive: true }
+    );
+
+    panelEl.addEventListener(
+      'touchend',
+      (e) => {
+        if (!active || !isMobile()) return;
+        active = false;
+
+        if (!isDragging) return;
+
+        const touch = e.changedTouches[0];
+        const dx = touch.clientX - startX;
+
+        if (side === 'left') {
+          // Ліва панель закривається свайпом ЛІВОРУЧ
+          if (dx < -SWIPE_THRESHOLD && openPanel === 'scenes') {
+            closePanels();
+          }
+        } else if (side === 'right') {
+          // Права панель закривається свайпом ПРАВОРУЧ
+          if (dx > SWIPE_THRESHOLD && openPanel === 'info') {
+            closePanels();
+          }
+        }
+      },
+      { passive: true }
+    );
   }
 
-  panel.addEventListener('pointerdown', onPointerDown);
-  panel.addEventListener('pointermove', onPointerMove);
-  panel.addEventListener('pointerup', onPointerUp);
-  panel.addEventListener('pointercancel', onPointerUp);
-}
+  // Свайп для лівої панелі: жест назовні (вліво) — закриття
+  attachSwipeToPanel(leftPanel, 'left');
 
-/* ================== Старт ================== */
+  // Свайп для правої панелі (інфоблок) підключаємо, коли вона реально створена infoPanel.js
+  let infoSwipeAttached = false;
 
-function initMobileGestures() {
-  if (!isMobile()) return;
+  window.addEventListener('orbitanica:info-panel-ready', (e) => {
+    if (infoSwipeAttached) return;
+    const panel = e && e.detail;
+    if (!panel) return;
 
-  initScenesHandle();
-  initScenesPanelSwipe();
+    attachSwipeToPanel(panel, 'right');
+    infoSwipeAttached = true;
+  });
 
-  initInfoHandle();
-  initInfoPanelSwipe();
-}
+  // --- Edge-свайпи для ВІДКРИТТЯ панелей ---
 
-if (document.readyState !== 'loading') {
-  initMobileGestures();
-} else {
-  document.addEventListener('DOMContentLoaded', initMobileGestures, { once: true });
+  const EDGE_ZONE = 30; // px від краю екрана
+
+  let edgeStartX = 0;
+  let edgeStartY = 0;
+  let edgeDragging = false;
+  let edgeActive = false;
+  let edgeSide = null; // 'left' | 'right'
+
+  window.addEventListener(
+    'touchstart',
+    (e) => {
+      if (!isMobile()) return;
+      if (openPanel) return; // edge-свайп на відкриття працює лише коли нічого не відкрито
+
+      const touch = e.touches[0];
+      const x = touch.clientX;
+      const y = touch.clientY;
+      const vw = window.innerWidth;
+
+      if (x <= EDGE_ZONE) {
+        edgeSide = 'left';
+      } else if (x >= vw - EDGE_ZONE) {
+        edgeSide = 'right';
+      } else {
+        edgeSide = null;
+        return;
+      }
+
+      edgeStartX = x;
+      edgeStartY = y;
+      edgeDragging = false;
+      edgeActive = true;
+    },
+    { passive: true }
+  );
+
+  window.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!edgeActive || !isMobile()) return;
+
+      const touch = e.touches[0];
+      const dx = touch.clientX - edgeStartX;
+      const dy = touch.clientY - edgeStartY;
+
+      if (!edgeDragging) {
+        if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+          edgeDragging = true;
+        } else if (Math.abs(dy) > 10) {
+          // пішли скролити вертикально — не вважаємо це edge-свайпом
+          edgeActive = false;
+        }
+      }
+    },
+    { passive: true }
+  );
+
+  window.addEventListener(
+    'touchend',
+    (e) => {
+      if (!edgeActive || !isMobile()) return;
+      edgeActive = false;
+
+      if (!edgeDragging) {
+        edgeSide = null;
+        return;
+      }
+
+      const touch = e.changedTouches[0];
+      const dx = touch.clientX - edgeStartX;
+
+      if (edgeSide === 'left') {
+        // Від лівого краю вправо — відкриваємо ліву панель (сцени)
+        if (dx > SWIPE_THRESHOLD && !openPanel) {
+          openScenes();
+        }
+      } else if (edgeSide === 'right') {
+        // Від правого краю вліво — відкриваємо праву панель (інфо)
+        if (dx < -SWIPE_THRESHOLD && !openPanel) {
+          openInfo();
+        }
+      }
+
+      edgeSide = null;
+    },
+    { passive: true }
+  );
+
+  // Початкове приведення стану до порядку
+  applyState();
 }
