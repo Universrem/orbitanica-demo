@@ -13,11 +13,14 @@ import './events/mass_buttons.js';
 import './userObjects/modal.js';
 import './ui/langMenu.js';
 import './mobile/gestures.js';
+import './mobile/globe.touch.js';
+import './mobile/infoModal.js';
 import { initCenterGuide } from './ui/centerGuide.js'; // ← підключаємо гід
 
 (async function boot() {
   const start = async () => {
     await initI18n();      // 1) словник і мова
+    document.body.classList.add('i18n-ready');
     initLeftPanel(t);      // 2) ліва панель
     initPublicScenesPanel(); // 3) публічні сцени
     initCenterGuide();     // 4) гід над глобусом — тільки тепер, коли тексти вже є

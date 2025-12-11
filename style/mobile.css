@@ -16,7 +16,7 @@
     top: 0;
     bottom: 0;
     left: 0;
-    width: min(420px, 100vw);
+    width: 75vw;
 
     z-index: 800;
     background: #ffffff;
@@ -39,7 +39,7 @@
     top: 0;
     bottom: 0;
     right: 0;
-    width: min(420px, 100vw);
+    width: 75vw;
 
     z-index: 800;
     background: #ffffff;
@@ -135,7 +135,7 @@
 
   /* ===== Мобільні ручки/хендли над глобусом ===== */
 
-  /* Хендл "СЦЕНИ" — вертикальний бургер зліва по центру */
+    /* Хендл "СЦЕНИ" — вертикальний бургер зліва по центру */
   #mobile-handle-scenes {
     position: absolute;
     top: 50%;
@@ -153,7 +153,7 @@
     text-transform: uppercase;
 
     writing-mode: vertical-rl;
-    text-orientation: mixed;
+    text-orientation: upright;
 
     z-index: 900;
     pointer-events: auto;
@@ -163,6 +163,8 @@
     user-select: none;
     -webkit-user-select: none;
     cursor: grab;
+
+    visibility: hidden; /* хендлер є в DOM, але не видно до i18n */
   }
 
   /* Активний стан, коли ліва панель відкрита */
@@ -170,7 +172,12 @@
     background: rgba(0, 0, 0, 0.55);
   }
 
-  /* Хендл "ІНФОБЛОК" — вертикально справа по центру */
+  /* Показати хендл "СЦЕНИ" лише коли i18n готовий */
+  body.i18n-ready #mobile-handle-scenes {
+    visibility: visible;
+  }
+
+    /* Хендл "ІНФОБЛОК" — вертикально справа по центру */
   #mobile-handle-info {
     position: absolute;
     top: 50%;
@@ -188,16 +195,23 @@
     text-transform: uppercase;
 
     writing-mode: vertical-rl;
-    text-orientation: mixed;
+    text-orientation: upright;
 
     z-index: 700; /* під інфопанеллю, коли вона відкрита */
     pointer-events: auto;
     display: inline-block;
+
+    visibility: hidden; /* хендлер є в DOM, але не видно до i18n */
   }
 
   /* Активний стан, коли права панель відкрита */
   body.mobile-info-open #mobile-handle-info {
     background: rgba(0, 0, 0, 0.55);
+  }
+
+  /* Показати хендл "ІНФОБЛОК" лише коли i18n готовий */
+  body.i18n-ready #mobile-handle-info {
+    visibility: visible;
   }
 
   /* Затемнення під панелями */
@@ -227,6 +241,45 @@
     bottom: 38px;
     right: 4px;
   }
+    /* Мобільна модалка для іконки info у топбарі */
+  .mobile-info-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 1300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-info-modal {
+    max-width: min(360px, 90vw);
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .mobile-info-modal p {
+    margin: 0 0 12px;
+  }
+
+  .mobile-info-modal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    background: #111827;
+    color: #ffffff;
+    cursor: pointer;
+  }
+
 }
 
 

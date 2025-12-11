@@ -1361,7 +1361,13 @@
   "ua": "Поставте мітку на карті",
   "en": "Place a marker on the map",
   "es": "Coloca un marcador en el mapa"
-}
+},
+  "mobile.info_modal.text": {
+    "ua": "Щоб створювати власні об'єкти й сцени, користуватися всіма можливостями Орбітаніки, зайдіть на сайт з комп'ютера.",
+    "en": "To create your own objects and scenes and use all Orbitanica features, please visit the site from a computer.",
+    "es": "Para crear tus propios objetos y escenas y usar todas las funciones de Orbitanica, entra al sitio desde una computadora."
+  }
+
 
 
 }
