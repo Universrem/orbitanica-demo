@@ -1,6 +1,8 @@
 // /js/mobile/gestures.js
 'use strict';
 
+import { showEmptyInfoPanelMessage } from '../ui/infoPanel.js';
+
 /**
  * Мобільна логіка для висувних панелей:
  * - scenes (ліва панель)
@@ -50,11 +52,23 @@ if (handleScenes && handleInfo && mobileOverlay) {
     applyState();
   }
 
-  function openInfo() {
+    function openInfo() {
     if (!isMobile()) return;
+
+    const hasSession = !!window.__orbitSessionActive;
+
+    if (!hasSession) {
+      try {
+        showEmptyInfoPanelMessage();
+      } catch (e) {
+        console.warn('[mobile/gestures] Failed to show empty info panel message:', e);
+      }
+    }
+
     openPanel = 'info';
     applyState();
   }
+
 
   function closePanels() {
     openPanel = null;
@@ -68,11 +82,18 @@ if (handleScenes && handleInfo && mobileOverlay) {
     applyState();
   });
 
-  // Клік по ручці "Інфо"
+    // Клік по ручці "Інфо"
   handleInfo.addEventListener('click', () => {
     if (!isMobile()) return;
-    openPanel = openPanel === 'info' ? null : 'info';
-    applyState();
+
+    if (openPanel === 'info') {
+      // якщо вже відкрита — просто закриваємо
+      openPanel = null;
+      applyState();
+    } else {
+      // якщо була закрита — відкриваємо з урахуванням стану сесії
+      openInfo();
+    }
   });
 
   // Клік по затемненню — закриває будь-яку панель

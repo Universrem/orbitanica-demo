@@ -14,6 +14,7 @@ let toggleBtn = null;
 let modeEl = null;
 let modeLabelState = { modeKey: '', subKey: '' };
 let showDescriptions = false;
+let showEmptyState = false;
 let ipHover = null;
 let hoverTimer = null;
 let baselineSubtitleShown = false;
@@ -362,6 +363,25 @@ function render() {
   itemSubtitleShown = false;
   let lastBaselineSubtitle = '';
 
+    if (items.length === 0) {
+    if (showEmptyState) {
+      const row = document.createElement('div');
+      row.className = 'info-panel__row info-panel__row--empty';
+      const text = document.createElement('div');
+      text.className = 'info-panel__empty-text';
+      text.textContent = t('ui.info_panel.empty');
+      row.appendChild(text);
+
+listEl.appendChild(row);
+
+      panelEl.classList.remove('hidden');
+    } else {
+      panelEl.classList.add('hidden');
+    }
+    return;
+  }
+
+  showEmptyState = false;
 
 
   const lib = getUniverseLibrary();
@@ -615,7 +635,7 @@ if (it.scaledMeters != null && isFinite(it.scaledMeters)) {
     listEl.appendChild(row);
   });
 
-  panelEl.classList.toggle('hidden', items.length === 0);
+    panelEl.classList.remove('hidden');
 }
 
 export function initInfoPanel() { ensureDom(); }
@@ -628,6 +648,7 @@ export function clearInfoPanel(opts = {}) {
     updateDescSwitch();
     hideHover();
     if (listEl) listEl.innerHTML = '';
+    showEmptyState = false;
     return;
   }
   items.length = 0;
@@ -637,8 +658,29 @@ export function clearInfoPanel(opts = {}) {
   showDescriptions = false;
   updateDescSwitch();
   hideHover();
+  showEmptyState = false;
   render();
 }
+
+export function showEmptyInfoPanelMessage() {
+  ensureDom();
+
+  if (items.length > 0) {
+    panelEl.classList.remove('hidden');
+    return;
+  }
+
+  modeLabelState = { modeKey: '', subKey: '' };
+  if (modeEl) modeEl.textContent = '';
+
+  showDescriptions = false;
+  updateDescSwitch();
+  hideHover();
+
+  showEmptyState = true;
+  render();
+}
+
 
 export function setBaselineResult({ libIndex, realValue, realUnit, scaledMeters, name, description, color, uiLeftLabelKey, uiRightLabelKey }) {
 

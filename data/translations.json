@@ -755,6 +755,11 @@
   "en": "Maximum Object 1 circle diameter to display",
   "es": "Diámetro máximo del Objeto 1 para visualizar"
 },
+  "ui.info_panel.empty": {
+    "ua": "Створіть або відтворіть сцену.",
+    "en": "Create or play a scene.",
+    "es": "Crea o reproduce una escena."
+  },
 
   "diameter.labels.o1.left": {
     "ua": "Діаметр",
