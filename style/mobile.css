@@ -32,6 +32,11 @@
   body.mobile-scenes-open #left-panel {
     transform: translateX(0);
   }
+  /* Активна сцена: опис більшим шрифтом для читабельності */
+  #left-panel .section-content .public-scene-item.is-active .public-scene-desc {
+    font-size: clamp(14px, 3.8vw, 16px);
+    line-height: 1.45;
+  }
 
   /* Інфоблок як листок справа на мобільному */
   #info-panel {

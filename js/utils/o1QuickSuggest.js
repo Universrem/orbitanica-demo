@@ -39,11 +39,11 @@ function fillItems(pop, examples, onPick) {
     btn.className = 'o1qs-item';
     btn.dataset.value = String(e.value_m);
     btn.textContent = t('o1_example_' + e.key) || e.key;
-    // pointerdown, щоб не втратити фокус і не зловити blur перед вибором
-    btn.addEventListener('pointerdown', ev => {
-      ev.preventDefault();
+        // click: дає нормально прокручувати список пальцем, а вибирати — тапом
+    btn.addEventListener('click', () => {
       onPick(parseFloat(btn.dataset.value));
     });
+
     list.appendChild(btn);
   });
 
@@ -102,19 +102,15 @@ export function attachO1QuickSuggest({ inputEl, modeId } = {}) {
   const onType = () => hide();
   inputEl.addEventListener('input', onType);
 
-  // Клік/тап ПОЗА поповером — ховаємо.
-  // Використовуємо pointerdown і перевіряємо координати, щоб скролбар всередині поповера НЕ закривав його.
-  const onDocPointerDown = (e) => {
-    const r = pop.getBoundingClientRect();
-    const x = e.clientX, y = e.clientY;
-    const inside =
-      x >= r.left && x <= r.right &&
-      y >= r.top  && y <= r.bottom;
-    if (inside) return;                 // клік у межах поповера — не ховаємо
-    if (e.target === inputEl) return;   // клік по самому полі — не ховаємо (show() вже зробить)
+    // Тап/клік ПОЗА поповером — ховаємо.
+  // ВАЖЛИВО: click не спрацьовує під час прокрутки, тож скрол не буде закривати поповер.
+  const onDocClick = (e) => {
+    if (pop.contains(e.target)) return; // клік у поповері — не ховаємо
+    if (e.target === inputEl) return;   // клік по полю — не ховаємо
     hide();
   };
-  document.addEventListener('pointerdown', onDocPointerDown);
+  document.addEventListener('click', onDocClick);
+
 
   // Escape — ховаємо
   const onKey = (e) => { if (e.key === 'Escape') hide(); };
@@ -152,7 +148,8 @@ export function attachO1QuickSuggest({ inputEl, modeId } = {}) {
         inputEl.removeEventListener('focus', onFocus);
         inputEl.removeEventListener('click', onClick);
         inputEl.removeEventListener('input', onType);
-        document.removeEventListener('pointerdown', onDocPointerDown);
+                document.removeEventListener('click', onDocClick);
+
         document.removeEventListener('keydown', onKey);
         window.removeEventListener('scroll', onScroll, { capture: true });
         window.removeEventListener('resize', onResize);
