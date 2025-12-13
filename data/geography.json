@@ -959,5 +959,30 @@
     "description_ua": "Площа на якій розміщується усе населення Землі",
     "description_es": "Área ocupada por toda la población mundial",
     "population": { "value": 8000000000, "unit": "people" }
+  },
+  
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "People Dec 13, 2025",
+    "name_ua": "Людей 13 грудня 2025",
+    "name_es": "Personas 13 dic 2025",
+    "description_en": "World population per Worldometer: 8,263,785,000 people (as of Dec 13, 2025).",
+    "description_ua": "Населення Землі за Worldometer: 8 263 785 000 людей. Станом на 13 грудня 2025.",
+    "description_es": "Población mundial según Worldometer: 8.263.785.000 personas (13 dic 2025).",
+    "population": { "value": 8263785000, "unit": "people" }
+  },
+  {
+    "category_en": "People",
+    "category_ua": "Люди",
+    "category_es": "Personas",
+    "name_en": "All humans",
+    "name_ua": "Усі люди",
+    "name_es": "Toda la gente",
+    "description_en": "Demographers estimate ~117B humans have ever been born. In 2022, ~8B living then were ~7% of all births, implying the dead outnumber the living by about 14×.",
+    "description_ua": "За оцінками демографів, за всю історію людства народилося близько 117 млрд людей. У 2022 році живі ~8 млрд — лише ~7% від усіх. Отже, померлих приблизно у 14 разів більше, ніж живих.",
+    "description_es": "Se estima que han nacido ~117 mil millones de personas. En 2022, ~8 mil millones vivos eran ~7% del total; por eso, los fallecidos superan a los vivos en ~14×.",
+    "population": { "value": 117000000000, "unit": "people" }
   }
 ]
