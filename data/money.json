@@ -206,6 +206,69 @@
   "description_en": "One hundred US dollars is the highest-denomination Federal Reserve note of the United States since 1969. The first one-hundred-dollar notes were issued by the federal government in 1862. Franklin’s portrait first appeared in the 1914 series, and Independence Hall in the 1928 series.",
   "description_es": "Cien dólares estadounidenses son el billete de la Reserva Federal de mayor denominación de Estados Unidos desde 1969. Los primeros billetes de cien dólares fueron emitidos por el gobierno federal en 1862. El retrato de Franklin apareció por primera vez en la serie de 1914 y el Independence Hall en la serie de 1928.",
   "money": { "value": 100, "unit": "USD" }
-}
+},
+{
+  "category_en": "Company",
+  "category_ua": "Компанія",
+  "category_es": "Compañía",
+
+  "name_en": "Apple Inc. 16/12/25",
+  "name_ua": "Apple Inc. 16/12/25",
+  "name_es": "Apple Inc. 16/12/25",
+
+  "description_en": "Apple Inc. (NASDAQ: AAPL) market capitalization is $3.006T. Snapshot as of Dec 16, 2025 (01:15 UTC). Market cap is the total value of all outstanding shares.",
+  "description_ua": "Ринкова капіталізація Apple Inc. (NASDAQ: AAPL) — $3,006 трлн. Знімок станом на 16 грудня 2025 (01:15 UTC). Ринкова капіталізація — це вартість усіх акцій компанії.",
+  "description_es": "La capitalización bursátil de Apple Inc. (NASDAQ: AAPL) es US$3,006 billones. Dato al 16 de diciembre de 2025 (01:15 UTC). La capitalización es el valor total de las acciones en circulación.",
+
+  "money": { "value": 3005779833320, "unit": "USD" }
+},
+  {
+    "category_en": "Net worth",
+    "category_ua": "Статки",
+    "category_es": "Patrimonio neto",
+
+    "name_en": "Elon Musk 16/12/25",
+    "name_ua": "Ілон Маск 16/12/25",
+    "name_es": "Elon Musk 16/12/25",
+
+    "description_en": "Elon Musk net worth is $638B. Rank #1 on the Bloomberg Billionaires Index as of Dec 16, 2025.",
+    "description_ua": "Статки Ілона Маска — $638 млрд. №1 за даними Bloomberg Billionaires Index станом на 16 грудня 2025.",
+    "description_es": "Patrimonio de Elon Musk: US$638 mil millones. Puesto #1 en el Bloomberg Billionaires Index al 16 de diciembre de 2025.",
+
+    "money": { "value": 638000000000, "unit": "USD" }
+  },
+  {
+    "category_en": "Net worth",
+    "category_ua": "Статки",
+    "category_es": "Patrimonio neto",
+
+    "name_en": "Adam Foroughi 16/12/25",
+    "name_ua": "Адам Фороугі 16/12/25",
+    "name_es": "Adam Foroughi 16/12/25",
+
+    "description_en": "Adam Foroughi net worth is $25.2B. Rank #100 on the Bloomberg Billionaires Index as of Dec 16, 2025. He is the co-founder and CEO of AppLovin.",
+    "description_ua": "Статки Адама Фороугі — $25,2 млрд. №100 за даними Bloomberg Billionaires Index станом на 16 грудня 2025. Він співзасновник і CEO AppLovin.",
+    "description_es": "Patrimonio de Adam Foroughi: US$25,2 mil millones. Puesto #100 en el Bloomberg Billionaires Index al 16 de diciembre de 2025. Es cofundador y CEO de AppLovin.",
+
+    "money": { "value": 25200000000, "unit": "USD" }
+  },
+  {
+    "category_en": "Net worth",
+    "category_ua": "Статки",
+    "category_es": "Patrimonio neto",
+
+    "name_en": "Wu Shaoxun 16/12/25",
+    "name_ua": "У Шаосюнь 16/12/25",
+    "name_es": "Wu Shaoxun 16/12/25",
+
+    "description_en": "Wu Shaoxun net worth is $7.28B. Rank #500 on the Bloomberg Billionaires Index as of Dec 16, 2025. He is chairman of Hubei Jing Brand (Jing Brand), a producer of herbal spirits and traditional Chinese medicine products.",
+    "description_ua": "Статки У Шаосюня — $7,28 млрд. №500 за даними Bloomberg Billionaires Index станом на 16 грудня 2025. Він голова Hubei Jing Brand (Jing Brand) — виробника трав’яних спиртових напоїв і продуктів традиційної китайської медицини.",
+    "description_es": "Patrimonio de Wu Shaoxun: US$7,28 mil millones. Puesto #500 en el Bloomberg Billionaires Index al 16 de diciembre de 2025. Es presidente de Hubei Jing Brand (Jing Brand), productor de bebidas espirituosas herbales y productos de medicina tradicional china.",
+
+    "money": { "value": 7280000000, "unit": "USD" }
+  }
+
+
+
 
 ]
