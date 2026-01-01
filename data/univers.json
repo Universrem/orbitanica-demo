@@ -401,7 +401,96 @@
   "mass": null,
   "luminosity": null,
   "distance_to_earth": null
-}
+},
+  {
+    "category_en": "Electricity",
+    "category_ua": "Електроенергія",
+    "category_es": "Electricidad",
 
+    "name_en": "40 W Bulb",
+    "name_ua": "Лампочка 40 Вт",
+    "name_es": "Bombilla 40 W",
+
+    "description_en": "One ordinary light bulb with a power of 40 watts. Lights one typical room.",
+    "description_ua": "Одна звичайна лампочка потужністю 40 ват. Освітлює типову одну кімнату.",
+    "description_es": "Una bombilla común con una potencia de 40 vatios. Ilumina una habitación típica.",
+
+    "diameter": null,
+    "mass": null,
+    "luminosity": { "value": 40, "unit": "W" },
+    "distance_to_earth": null
+  },
+  {
+    "category_en": "Electricity",
+    "category_ua": "Електроенергія",
+    "category_es": "Electricidad",
+
+    "name_en": "World Use 2024",
+    "name_ua": "Світ спожив 2024",
+    "name_es": "Uso Mundo 2024",
+
+    "description_en": "All electricity used by the world in 2024. 3.52 terawatts or 3.52 trillion watts.",
+    "description_ua": "Уся електроенергія, яку весь світ споживав у 2024 році. 3,52 теравата або 3,52 трильйона ват.",
+    "description_es": "Toda la electricidad consumida por el mundo en 2024. 3,52 teravatios o 3,52 billones de vatios.",
+
+    "diameter": null,
+    "mass": null,
+    "luminosity": { "value": 3.52, "unit": "TW" },
+    "distance_to_earth": null
+  },
+  {
+    "category_en": "Electricity",
+    "category_ua": "Електроенергія",
+    "category_es": "Electricidad",
+
+    "name_en": "Green 2024",
+    "name_ua": "Зелена 2024",
+    "name_es": "Verde 2024",
+
+    "description_en": "Renewable electricity generated in 2024. 1.13 terawatts or 1.13 trillion watts.",
+    "description_ua": "Згенерована зелена електроенергія у 2024 році. 1,13 теравата або 1,13 трильйона ват.",
+    "description_es": "Electricidad renovable generada en 2024. 1,13 teravatios o 1,13 billones de vatios.",
+
+    "diameter": null,
+    "mass": null,
+    "luminosity": { "value": 1.13, "unit": "TW" },
+    "distance_to_earth": null
+  },
+  {
+    "category_en": "Electricity",
+    "category_ua": "Електроенергія",
+    "category_es": "Electricidad",
+
+    "name_en": "Green 2020",
+    "name_ua": "Зелена 2020",
+    "name_es": "Verde 2020",
+
+    "description_en": "Renewable electricity generated in 2020. 0.85 terawatts or 0.85 trillion watts.",
+    "description_ua": "Згенерована зелена електроенергія у 2020 році. 0,85 теравата або 0,85 трильйона ват.",
+    "description_es": "Electricidad renovable generada en 2020. 0,85 teravatios o 0,85 billones de vatios.",
+
+    "diameter": null,
+    "mass": null,
+    "luminosity": { "value": 0.85, "unit": "TW" },
+    "distance_to_earth": null
+  },
+  {
+    "category_en": "Electricity",
+    "category_ua": "Електроенергія",
+    "category_es": "Electricidad",
+
+    "name_en": "Green 2025",
+    "name_ua": "Зелена 2025",
+    "name_es": "Verde 2025",
+
+    "description_en": "Expected renewable electricity in 2025. 1.15 terawatts or 1.15 trillion watts.",
+    "description_ua": "Згенерована зелена електроенергія у 2025 році. Очікувано 1,15 теравата або 1,15 трильйона ват.",
+    "description_es": "Electricidad renovable esperada en 2025. 1,15 teravatios o 1,15 billones de vatios.",
+
+    "diameter": null,
+    "mass": null,
+    "luminosity": { "value": 1.15, "unit": "TW" },
+    "distance_to_earth": null
+  }
 
 ]
