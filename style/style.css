@@ -1623,6 +1623,61 @@ body.modal-open { overflow: hidden; }
   text-shadow: 0 1px 2px rgba(0,0,0,.6);
   pointer-events: none;
 }
+/* === Zoom controls (under altimeter) === */
+/* === Zoom controls (under altimeter, LEFT side) === */
+#zoom-controls {
+  position: absolute;
+  top: calc(var(--altimeter-top, 12px) + 42px);
+  left: 12px;
+  right: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  pointer-events: auto;
+  z-index: 20;
+}
+
+#zoom-controls .zoom-btn {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+  line-height: 1;
+
+  background: #ffffff;
+  color: #000000;
+
+  border: none;
+  border-radius: 8px;
+
+  cursor: pointer;
+  user-select: none;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+#zoom-controls .zoom-btn:active {
+  background: #f0f0f0;
+}
+
+/* прихований текст для доступності */
+#zoom-controls .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 #circle-toolbar {
   position: absolute;

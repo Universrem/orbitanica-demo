@@ -12,6 +12,7 @@ import './events/diameter_buttons.js';
 import './events/mass_buttons.js';
 import './userObjects/modal.js';
 import './ui/langMenu.js';
+import './ui/zoomButtons.js';
 import './mobile/gestures.js';
 import './mobile/globe.touch.js';
 import './mobile/infoModal.js';

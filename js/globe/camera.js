@@ -11,11 +11,40 @@ import { LonLat } from '../../lib/og.es.js';
 const DEFAULT_FLY_MS = 1200;
 const MIN_FRAMES = 60;
 
+// Кнопковий зум: тільки висота, без зміни кута
+const ZOOM_TAP_MS = 340;
+// Безперервний зум під утриманням: швидкість росте з часом
+const ZOOM_HOLD_V0 = 0.9;     // стартова швидкість (множник)
+const ZOOM_HOLD_VMAX = 7.0;   // максимальна швидкість (множник)
+const ZOOM_HOLD_ACCEL = 3.2;  // прискорення (за секунду)
+const ZOOM_HOLD_BASE = 0.085; // базова швидкість від висоти (частка висоти за секунду)
+const ZOOM_HOLD_MIN_STEP_M = 2.0; // мінімум метрів за кадр, щоб не "залипати"
+
+
+// Нижня межа, щоб не "пірнати" в землю
+const MIN_ALTITUDE_M = 120;
+
+// Крок: частка від поточної висоти, але не менше мінімуму
+const ZOOM_STEP_FRACTION = 0.10;
+const ZOOM_STEP_MIN_M = 60;
+
 let __cam = null;
 let __isFlying = false;
 let __flightToken = 0;
 let __endTimer = null;
 let __currentGlobus = null;
+
+let __holdZoomActive = false;
+let __holdZoomDir = 0;          // +1 наблизити, -1 віддалити
+let __holdZoomVel = 0;          // поточна швидкість (множник)
+let __holdZoomLastTs = 0;
+let __holdZoomRaf = 0;
+let __holdZoomToken = 0;
+let __holdZoomGlobus = null;
+
+
+let __zoomToken = 0;
+let __zoomRaf = 0;
 
 /** Повертає OG-камеру. */
 function getCam(globus) {
@@ -152,6 +181,242 @@ function flyToSinglePoint(cam, target, durationMs) {
     cam.setLonLat(target);
   }
 }
+function setHeightOnly(cam, h) {
+  try {
+    if (typeof cam.setHeight === 'function') {
+      cam.setHeight(h);
+      return true;
+    }
+  } catch {}
+
+  try {
+    if (typeof cam.setAltitude === 'function') {
+      cam.setAltitude(h);
+      return true;
+    }
+  } catch {}
+
+  // запасний варіант: якщо немає прямого сетера висоти
+  try {
+    if (typeof cam.getLonLat === 'function' && typeof cam.setLonLat === 'function') {
+      const ll = cam.getLonLat();
+      if (ll) {
+        cam.setLonLat(new LonLat(ll.lon, ll.lat, h));
+        return true;
+      }
+    }
+  } catch {}
+
+  return false;
+}
+function stopHoldZoomInternal() {
+  __holdZoomActive = false;
+  __holdZoomDir = 0;
+  __holdZoomVel = 0;
+  __holdZoomLastTs = 0;
+  __holdZoomGlobus = null;
+
+  if (__holdZoomRaf) {
+    try { cancelAnimationFrame(__holdZoomRaf); } catch {}
+    __holdZoomRaf = 0;
+  }
+}
+
+function holdZoomTick(token) {
+  if (token !== __holdZoomToken) return;
+  if (!__holdZoomActive || !__holdZoomGlobus || __holdZoomDir === 0) return;
+
+  const globus = __holdZoomGlobus;
+  const cam = getCam(globus);
+  if (!cam) return;
+
+  const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  const last = __holdZoomLastTs || now;
+  let dt = (now - last) / 1000;
+  __holdZoomLastTs = now;
+
+  // захист від стрибків (наприклад після лагу вкладки)
+  if (dt < 0) dt = 0;
+  if (dt > 0.05) dt = 0.05;
+
+  // нарощую швидкість (прискорення)
+  __holdZoomVel = __holdZoomVel + ZOOM_HOLD_ACCEL * dt;
+  if (__holdZoomVel > ZOOM_HOLD_VMAX) __holdZoomVel = ZOOM_HOLD_VMAX;
+
+  // поточна висота
+  const curH = readCurrentHeight(cam);
+  if (!curH) {
+    stopHoldZoomInternal();
+    return;
+  }
+
+  const maxH = (typeof cam.maxAltitude === 'number' && Number.isFinite(cam.maxAltitude) && cam.maxAltitude > 0)
+    ? cam.maxAltitude
+    : 15_000_000;
+  const speedPerSec = Math.max(1, curH * ZOOM_HOLD_BASE) * __holdZoomVel;
+
+  // крок за кадр
+  let delta = speedPerSec * dt;
+
+  // захист від квантування висоти в движку
+  if (delta < ZOOM_HOLD_MIN_STEP_M) delta = ZOOM_HOLD_MIN_STEP_M;
+
+  // напрям: +1 => наблизити (зменшити висоту), -1 => віддалити (збільшити)
+  const nextHRaw = curH + (-__holdZoomDir) * delta;
+  const nextH = clampNumber(nextHRaw, MIN_ALTITUDE_M, maxH);
+
+  // якщо вперлись у межі — зупиняю
+  const stuck = (nextH <= MIN_ALTITUDE_M + 0.0001) || (nextH >= maxH - 0.0001);
+
+  const applied = setHeightOnly(cam, nextH);
+  if (!applied) {
+    stopHoldZoomInternal();
+    __isFlying = false;
+    return;
+  }
+
+
+  try { if (typeof cam.update === 'function') cam.update(); } catch {}
+
+  if (stuck) {
+    stopHoldZoomInternal();
+    __isFlying = false;
+    return;
+  }
+
+  __holdZoomRaf = requestAnimationFrame(() => holdZoomTick(token));
+}
+
+function startHoldZoom(globus, direction) {
+  const cam = getCam(globus);
+  if (!cam) return;
+
+  // зум під кнопками — окремий режим, але я перехоплюю контроль, щоб не мішалось
+  abort();
+  stopCameraInertia(globus);
+
+  // скасувати попередній hold-цикл
+  __holdZoomToken++;
+  stopHoldZoomInternal();
+
+  __holdZoomGlobus = globus;
+  __holdZoomDir = direction > 0 ? 1 : -1;
+  __holdZoomVel = ZOOM_HOLD_V0;
+  __holdZoomLastTs = 0;
+  __holdZoomActive = true;
+
+  __isFlying = true;
+
+  const token = ++__holdZoomToken;
+  __holdZoomRaf = requestAnimationFrame(() => holdZoomTick(token));
+}
+
+function stopHoldZoom() {
+  __holdZoomToken++;
+  stopHoldZoomInternal();
+  __isFlying = false;
+}
+
+function clampNumber(x, min, max) {
+  if (typeof x !== 'number' || !Number.isFinite(x)) return min;
+  if (x < min) return min;
+  if (x > max) return max;
+  return x;
+}
+
+function readCurrentLonLat(cam) {
+  try {
+    if (typeof cam.getLonLat === 'function') return cam.getLonLat();
+  } catch {}
+  return null;
+}
+
+function readCurrentHeight(cam) {
+  try {
+    const h = cam.getHeight ? cam.getHeight() : (cam.getAltitude ? cam.getAltitude() : null);
+    return (typeof h === 'number' && Number.isFinite(h) && h > 0) ? h : null;
+  } catch {}
+  return null;
+}
+
+function zoomStep({ globus, direction }) {
+  const cam = getCam(globus);
+  if (!cam) return;
+
+  // Перехоплюю контроль, але НЕ змінюю логіку польотів — це окремий режим
+  abort();
+  stopCameraInertia(globus);
+
+  const ll = readCurrentLonLat(cam);
+  if (!ll) return;
+
+  const curH = readCurrentHeight(cam);
+  if (!curH) return;
+
+  const maxH = (typeof cam.maxAltitude === 'number' && Number.isFinite(cam.maxAltitude) && cam.maxAltitude > 0)
+    ? cam.maxAltitude
+    : 15_000_000;
+
+  const step = Math.max(ZOOM_STEP_MIN_M, Math.round(curH * ZOOM_STEP_FRACTION));
+  const nextHRaw = (direction > 0) ? (curH - step) : (curH + step);
+  const nextH = clampNumber(nextHRaw, MIN_ALTITUDE_M, maxH);
+
+  // Скасувати попередню мікроанімацію кнопкового зуму (якщо була)
+  __zoomToken++;
+  if (__zoomRaf) {
+    try { cancelAnimationFrame(__zoomRaf); } catch {}
+    __zoomRaf = 0;
+  }
+
+  // Встановлюю висоту без зміни lon/lat
+  const setHeightOnly = (h) => {
+    try {
+      if (typeof cam.setHeight === 'function') {
+        cam.setHeight(h);
+      } else if (typeof cam.setAltitude === 'function') {
+        cam.setAltitude(h);
+      } else if (typeof cam.setLonLat === 'function') {
+        cam.setLonLat(new LonLat(ll.lon, ll.lat, h));
+      } else if (typeof cam.flyLonLat === 'function') {
+        // як крайній випадок: без кадрів і без "польоту"
+        cam.flyLonLat(new LonLat(ll.lon, ll.lat, h));
+      }
+      if (typeof cam.update === 'function') cam.update();
+    } catch {}
+  };
+
+  // Швидка плавна анімація (окремо від "польотів")
+  const myZoomToken = __zoomToken;
+  __isFlying = true;
+  const startH = curH;
+  const endH = nextH;
+  const dur = Math.max(90, Math.min(220, ZOOM_TAP_MS)); // коротко і швидко
+
+  const t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+
+  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+  const tick = () => {
+    if (myZoomToken !== __zoomToken) return;
+
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const k = Math.min(1, Math.max(0, (now - t0) / dur));
+    const e = easeOutCubic(k);
+    const h = startH + (endH - startH) * e;
+
+    setHeightOnly(h);
+
+    if (k < 1) {
+      __zoomRaf = requestAnimationFrame(tick);
+    } else {
+      __zoomRaf = 0;
+      __isFlying = false;
+    }
+  };
+
+  __zoomRaf = requestAnimationFrame(tick);
+}
+
 
 /** Публічний політ «у надір» над точкою (lon,lat) з висотою під коло. */
 function flyToNadir({ globus, lon, lat, radiusM, altitudeM, durationMs = DEFAULT_FLY_MS }) {
@@ -241,6 +506,14 @@ const cameraAPI = {
   flyToNadir: (opts) => flyToNadir(opts),
   isBusy: () => __isFlying,
   abort: () => abort(),
+
+  zoomIn: (globus) => zoomStep({ globus, direction: +1 }),
+  zoomOut: (globus) => zoomStep({ globus, direction: -1 }),
+    startZoomIn: (globus) => startHoldZoom(globus, +1),
+  startZoomOut: (globus) => startHoldZoom(globus, -1),
+  stopZoom: () => stopHoldZoom(),
+
+
   stopInertia: () => {
     if (__currentGlobus) {
       stopCameraInertia(__currentGlobus);
@@ -248,9 +521,13 @@ const cameraAPI = {
   }
 };
 
+
 /** Скасувати поточний політ. */
 function abort() {
   __flightToken++;
+    // якщо користувач тримав зум — зупиняю
+  stopHoldZoomInternal();
+
   __isFlying = false;
   if (__endTimer) {
     clearTimeout(__endTimer);

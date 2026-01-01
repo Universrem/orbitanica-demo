@@ -1371,8 +1371,11 @@
     "ua": "Щоб створювати власні об'єкти й сцени, користуватися всіма можливостями Орбітаніки, зайдіть на сайт з комп'ютера.",
     "en": "To create your own objects and scenes and use all Orbitanica features, please visit the site from a computer.",
     "es": "Para crear tus propios objetos y escenas y usar todas las funciones de Orbitanica, entra al sitio desde una computadora."
-  }
-
-
+  },
+  "blog_toc": {
+  "ua": "Зміст",
+  "en": "Contents",
+  "es": "Contenido"
+}
 
 }

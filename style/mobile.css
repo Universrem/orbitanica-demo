@@ -284,6 +284,17 @@
     color: #ffffff;
     cursor: pointer;
   }
+/* Mobile zoom controls */
+#zoom-controls {
+  left: 10px;
+}
+
+#zoom-controls .zoom-btn {
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  border-radius: 6px;
+}
 
 }
 

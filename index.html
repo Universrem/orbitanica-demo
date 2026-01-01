@@ -112,6 +112,19 @@
   
       <!-- Лічильник висоти камери -->
       <div id="altimeter" aria-live="polite">0.0 km</div>
+      
+<!-- Кнопки зумування (під лічильником висоти) -->
+<div id="zoom-controls" role="group" aria-label="Zoom controls">
+  <button type="button" id="zoom-in" class="zoom-btn" aria-label="">
+    <span aria-hidden="true">+</span>
+    <span class="sr-only" data-i18n-key="ui.zoom_in"></span>
+  </button>
+
+  <button type="button" id="zoom-out" class="zoom-btn" aria-label="">
+    <span aria-hidden="true">−</span>
+    <span class="sr-only" data-i18n-key="ui.zoom_out"></span>
+  </button>
+</div>
 
       <!-- Горизонтальна панель кнопок кіл -->
       <div id="circle-toolbar" role="toolbar" aria-label="Circles"></div>
