@@ -148,6 +148,10 @@ export function onLuminosityCalculate({ scope }) {
   const l1 = Number(data?.object1?.valueReal);                         // реальна світність (Вт)
   const u1 = data?.object1?.unit || 'W';
 
+    const l1d = Number(data?.object1?.valueDisplay);
+  const u1d = String(data?.object1?.unitDisplay || u1 || '').trim();
+
+
   resetLuminosityScale();
   setLuminosityBaseline({
     valueReal: l1,
@@ -168,7 +172,8 @@ export function onLuminosityCalculate({ scope }) {
   }
 
   // 2b) Інфопанель: baseline
-  const o1RealOk = Number.isFinite(l1) && l1 > 0;
+    const o1RealOk = Number.isFinite(l1d) && l1d > 0;
+
   if (!__isRepaint) {
     addGroup({
       id: 'luminosity_o1',
@@ -181,8 +186,9 @@ export function onLuminosityCalculate({ scope }) {
     appendVariant({
       id: 'luminosity_o1',
       variant: 'single',
-      realValue: o1RealOk ? l1 : null,
-      realUnit:  o1RealOk ? u1 : null,
+            realValue: o1RealOk ? l1d : null,
+      realUnit:  o1RealOk ? u1d : null,
+
       // у світності також показуємо масштабований ДІАМЕТР (м)
       scaledMeters: baselineDiameter
     });
@@ -220,9 +226,13 @@ export function onLuminosityCalculate({ scope }) {
     })();
   }
 
-  // 3) О2 через калькулятор
-  const l2 = Number(data?.object2?.valueReal);
-  const u2 = data?.object2?.unit || 'W';
+    // 3) О2 через калькулятор
+  const l2  = Number(data?.object2?.valueReal);          // реальна світність (у базовій одиниці режиму)
+  const u2  = String(data?.object2?.unit || 'W').trim(); // базова одиниця режиму
+
+  const l2d = Number(data?.object2?.valueDisplay);       // значення як у бібліотеці (W/TW/L☉ тощо)
+  const u2d = String(data?.object2?.unitDisplay || u2 || '').trim();
+
   const res = addLuminosityCircle({
     valueReal: l2,
     unit: u2,
@@ -239,7 +249,8 @@ export function onLuminosityCalculate({ scope }) {
   }
 
   // 3b) Інфопанель для О2
-  const o2RealOk = Number.isFinite(l2) && l2 > 0;
+    const o2RealOk = Number.isFinite(l2d) && l2d > 0;
+
   const scaledDiameterMeters = res && Number(res.scaledRadiusMeters) > 0
     ? 2 * Number(res.scaledRadiusMeters)
     : 0;
@@ -247,22 +258,24 @@ export function onLuminosityCalculate({ scope }) {
   const groupId = `luminosity_o2_${luminosityResultSeq}`;
   if (!__isRepaint) {
     addGroup({
-      id: groupId,
-      title: data?.object2?.name || '',
-      color: color2,
-      groupType: 'item',
-      uiLeftLabelKey:  'luminosity.labels.o1.left',
-      uiRightLabelKey: 'luminosity.labels.o1.right',
-      invisibleReason: res?.tooLarge ? 'tooLarge' : null,
-      requiredBaselineMeters: res?.requiredBaselineMeters ?? null
-    });
-    appendVariant({
-      id: groupId,
-      variant: 'single',
-      realValue: o2RealOk ? l2 : null,
-      realUnit:  o2RealOk ? u2 : null,
-      scaledMeters: scaledDiameterMeters
-    });
+  id: groupId,
+  title: data?.object2?.name || '',
+  color: color2,
+  groupType: 'item',
+  uiLeftLabelKey:  'luminosity.labels.o1.left',
+  uiRightLabelKey: 'luminosity.labels.o1.right'
+});
+
+appendVariant({
+  id: groupId,
+  variant: 'single',
+  realValue: o2RealOk ? l2d : null,
+  realUnit:  o2RealOk ? u2d : null,
+  scaledMeters: scaledDiameterMeters,
+  invisibleReason: res?.tooLarge ? 'tooLarge' : null,
+  requiredBaselineMeters: res?.requiredBaselineMeters ?? null
+});
+
     if (String(data?.object2?.description || '').trim()) {
       setGroupDescription({ id: groupId, description: data.object2.description });
     }

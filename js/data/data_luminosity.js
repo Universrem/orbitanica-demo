@@ -38,51 +38,63 @@ function getCatKey(rec) {
   return low(rec?.category_id ?? rec?.category_en ?? rec?.category ?? '');
 }
 
-// конвертація світності → Вт через централізований конвертер
-function toWattsViaConverter(value, unit) {
+// конвертація світності → базова одиниця режиму (у нас це L☉) через централізований конвертер
+function toBaseViaConverter(value, unit) {
   const v = Number(value);
   if (!Number.isFinite(v)) return NaN;
-  const u = (unit && String(unit)) || getBaseUnit('luminosity') || 'W';
+  const u = (unit && String(unit)) || getBaseUnit('luminosity') || 'L☉';
   try {
-    // convertToBase для 'luminosity' повертає значення в ВАТАХ
+    // convertToBase для 'luminosity' повертає значення в базовій одиниці (L☉)
     return convertToBase(v, u, 'luminosity');
   } catch {
     return NaN;
   }
 }
 
-// Прочитати світність у Вт з офіційного чи юзерського запису
-function readLuminosityWatts(source) {
-  const baseU = getBaseUnit('luminosity') || 'W';
+// Прочитати "як є" (саме те, що записано в бібліотеці/UGC) — для показу в інфопанелі
+function readLuminosityRaw(source) {
+  const baseU = getBaseUnit('luminosity') || 'L☉';
 
-  // 1) офіційний формат univers: { luminosity: { value, unit } }
+  // 1) univers/нормалізована бібліотека: { luminosity: { value, unit } }
   if (source?.luminosity && typeof source.luminosity === 'object') {
-    const rawUnit = String(source.luminosity.unit || baseU).trim();
-    const vw = toWattsViaConverter(source.luminosity.value, rawUnit);
-    if (Number.isFinite(vw)) return { valueReal: vw, unit: baseU };
+    const v = Number(source.luminosity.value);
+    const u = String(source.luminosity.unit || baseU).trim();
+    return { valueRaw: v, unitRaw: u || baseU };
   }
 
-  // 2) юзерський через модалку: attrs.luminosity { value, unit }
+  // 2) юзерський (старий формат модалки): attrs.luminosity { value, unit }
   if (source?.attrs?.luminosity && typeof source.attrs.luminosity === 'object') {
-    const rawUnit = String(source.attrs.luminosity.unit || source.unit || baseU).trim();
-    const vw = toWattsViaConverter(source.attrs.luminosity.value, rawUnit);
-    if (Number.isFinite(vw)) return { valueReal: vw, unit: baseU };
+    const v = Number(source.attrs.luminosity.value);
+    const u = String(source.attrs.luminosity.unit || source.unit || baseU).trim();
+    return { valueRaw: v, unitRaw: u || baseU };
   }
 
-  // 3) можливі плоскі поля (сумісність)
+  // 3) плоскі поля (сумісність)
   if (source && typeof source === 'object') {
-    const rawUnit = String(
+    const v = Number(source.luminosityValue ?? source.value ?? source.luminosity);
+    const u = String(
       (source.luminosityUnit ?? source.unit ?? (source.luminosity && source.luminosity.unit) ?? baseU)
     ).trim();
-    const vw = toWattsViaConverter(
-      source.luminosityValue ?? source.value ?? source.luminosity,
-      rawUnit
-    );
-    if (Number.isFinite(vw)) return { valueReal: vw, unit: baseU };
+    return { valueRaw: v, unitRaw: u || baseU };
   }
 
-  return { valueReal: NaN, unit: baseU };
+  return { valueRaw: NaN, unitRaw: baseU };
 }
+
+// Прочитати і базове (для розрахунку), і "як є" (для показу)
+function readLuminosityBaseAndRaw(source) {
+  const baseU = getBaseUnit('luminosity') || 'L☉';
+  const raw = readLuminosityRaw(source);
+
+  const valueBase = toBaseViaConverter(raw.valueRaw, raw.unitRaw || baseU);
+  return {
+    valueBase,
+    unitBase: baseU,
+    valueRaw: raw.valueRaw,
+    unitRaw: raw.unitRaw || baseU
+  };
+}
+
 
 // Діаметр базового кола О1 (м)
 function readBaselineDiameterMeters(scope) {
@@ -309,9 +321,10 @@ export function getLuminosityData(scope) {
   const cat2  = obj2 ? pickLang(obj2, 'category', lang)    : catO2;
   const desc2 = obj2 ? pickLang(obj2, 'description', lang) : '';
 
-  // значення у Вт
-  const { valueReal: l1w, unit: u1 } = readLuminosityWatts(obj1);
-  const { valueReal: l2w, unit: u2 } = readLuminosityWatts(obj2);
+
+    const r1 = readLuminosityBaseAndRaw(obj1);
+  const r2 = readLuminosityBaseAndRaw(obj2);
+
 
   // стандартний пакет
   return {
@@ -321,8 +334,14 @@ export function getLuminosityData(scope) {
       category: cat1,
       description: desc1,
       kind: 'value',
-      valueReal: Number.isFinite(l1w) ? l1w : NaN, // у Вт
-      unit: u1 || getBaseUnit('luminosity'),
+            // для розрахунку (в базовій одиниці, L☉)
+      valueReal: Number.isFinite(r1.valueBase) ? r1.valueBase : NaN,
+      unit: r1.unitBase || getBaseUnit('luminosity'),
+
+      // для показу в інфопанелі (як записано в бібліотеці: W/kW/.../L☉)
+      valueDisplay: Number.isFinite(r1.valueRaw) ? r1.valueRaw : NaN,
+      unitDisplay: r1.unitRaw || r1.unitBase,
+
       diameterScaled: baselineDiameterMeters,      // базовий діаметр О1 (м)
       color: undefined,
       libIndex: off1?.libIndex ?? -1,
@@ -333,8 +352,12 @@ export function getLuminosityData(scope) {
       category: cat2,
       description: desc2,
       kind: 'value',
-      valueReal: Number.isFinite(l2w) ? l2w : NaN, // у Вт
-      unit: u2 || getBaseUnit('luminosity'),
+            valueReal: Number.isFinite(r2.valueBase) ? r2.valueBase : NaN,
+      unit: r2.unitBase || getBaseUnit('luminosity'),
+
+      valueDisplay: Number.isFinite(r2.valueRaw) ? r2.valueRaw : NaN,
+      unitDisplay: r2.unitRaw || r2.unitBase,
+
       color: undefined,
       libIndex: off2?.libIndex ?? -1,
       userId: obj2?.id || obj2?._id || undefined

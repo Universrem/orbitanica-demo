@@ -420,77 +420,77 @@
     "luminosity": { "value": 40, "unit": "W" },
     "distance_to_earth": null
   },
-  {
-    "category_en": "Electricity",
-    "category_ua": "Електроенергія",
-    "category_es": "Electricidad",
+{
+  "category_en": "Electricity",
+  "category_ua": "Електроенергія",
+  "category_es": "Electricidad",
 
-    "name_en": "World Use 2024",
-    "name_ua": "Світ спожив 2024",
-    "name_es": "Uso Mundo 2024",
+  "name_en": "World Power 2024",
+  "name_ua": "Світова потужн. 2024",
+  "name_es": "Potencia mundial 2024",
 
-    "description_en": "All electricity used by the world in 2024. 3.52 terawatts or 3.52 trillion watts.",
-    "description_ua": "Уся електроенергія, яку весь світ споживав у 2024 році. 3,52 теравата або 3,52 трильйона ват.",
-    "description_es": "Toda la electricidad consumida por el mundo en 2024. 3,52 teravatios o 3,52 billones de vatios.",
+  "description_en": "In 2024, the world consumed electricity on average at a continuous power level of 3.52 terawatts, or 3.52 trillion watts. This is equivalent to about 88 billion 40 W light bulbs switched on at the same time.",
+  "description_ua": "У 2024 році світ споживав електрику в середньому на рівні безперервної потужності 3,52 ТВт або 3,52 трильйона ват. Це еквівалентно приблизно 88 мільярдам лампочок по 40 Вт, увімкнених одночасно.",
+  "description_es": "En 2024, el mundo consumió electricidad en promedio a un nivel de potencia continua de 3,52 teravatios, o 3,52 billones de vatios. Esto equivale a aproximadamente 88 mil millones de bombillas de 40 W encendidas al mismo tiempo.",
 
-    "diameter": null,
-    "mass": null,
-    "luminosity": { "value": 3.52, "unit": "TW" },
-    "distance_to_earth": null
-  },
-  {
-    "category_en": "Electricity",
-    "category_ua": "Електроенергія",
-    "category_es": "Electricidad",
+  "diameter": null,
+  "mass": null,
+  "luminosity": { "value": 3.52, "unit": "TW" },
+  "distance_to_earth": null
+},
+{
+  "category_en": "Electricity",
+  "category_ua": "Електроенергія",
+  "category_es": "Electricidad",
 
-    "name_en": "Green 2024",
-    "name_ua": "Зелена 2024",
-    "name_es": "Verde 2024",
+  "name_en": "Green Power 2024",
+  "name_ua": "Зелена потужн. 2024",
+  "name_es": "Potencia verde 2024",
 
-    "description_en": "Renewable electricity generated in 2024. 1.13 terawatts or 1.13 trillion watts.",
-    "description_ua": "Згенерована зелена електроенергія у 2024 році. 1,13 теравата або 1,13 трильйона ват.",
-    "description_es": "Electricidad renovable generada en 2024. 1,13 teravatios o 1,13 billones de vatios.",
+  "description_en": "In 2024, renewable electricity was generated on average at a continuous power level of 1.13 terawatts, or 1.13 trillion watts. This is equivalent to about 28 billion 40 W light bulbs switched on at the same time.",
+  "description_ua": "У 2024 році “зелена” електроенергія вироблялась в середньому на рівні безперервної потужності 1,13 ТВт або 1,13 трильйона ват. Це еквівалентно приблизно 28 мільярдам лампочок по 40 Вт, увімкнених одночасно.",
+  "description_es": "En 2024, la electricidad renovable se generó en promedio a un nivel de potencia continua de 1,13 teravatios, o 1,13 billones de vatios. Esto equivale a aproximadamente 28 mil millones de bombillas de 40 W encendidas al mismo tiempo.",
 
-    "diameter": null,
-    "mass": null,
-    "luminosity": { "value": 1.13, "unit": "TW" },
-    "distance_to_earth": null
-  },
-  {
-    "category_en": "Electricity",
-    "category_ua": "Електроенергія",
-    "category_es": "Electricidad",
+  "diameter": null,
+  "mass": null,
+  "luminosity": { "value": 1.13, "unit": "TW" },
+  "distance_to_earth": null
+},
+{
+  "category_en": "Electricity",
+  "category_ua": "Електроенергія",
+  "category_es": "Electricidad",
 
-    "name_en": "Green 2020",
-    "name_ua": "Зелена 2020",
-    "name_es": "Verde 2020",
+  "name_en": "Green Power 2020",
+  "name_ua": "Зелена потужн. 2020",
+  "name_es": "Potencia verde 2020",
 
-    "description_en": "Renewable electricity generated in 2020. 0.85 terawatts or 0.85 trillion watts.",
-    "description_ua": "Згенерована зелена електроенергія у 2020 році. 0,85 теравата або 0,85 трильйона ват.",
-    "description_es": "Electricidad renovable generada en 2020. 0,85 teravatios o 0,85 billones de vatios.",
+  "description_en": "In 2020, renewable electricity was generated on average at a continuous power level of 0.85 terawatts, or 0.85 trillion watts. This is equivalent to about 21 billion 40 W light bulbs switched on at the same time.",
+  "description_ua": "У 2020 році “зелена” електроенергія вироблялась в середньому на рівні безперервної потужності 0,85 ТВт або 0,85 трильйона ват. Це еквівалентно приблизно 21 мільярду лампочок по 40 Вт, увімкнених одночасно.",
+  "description_es": "En 2020, la electricidad renovable se generó en promedio a un nivel de potencia continua de 0,85 teravatios, o 0,85 billones de vatios. Esto equivale a aproximadamente 21 mil millones de bombillas de 40 W encendidas al mismo tiempo.",
 
-    "diameter": null,
-    "mass": null,
-    "luminosity": { "value": 0.85, "unit": "TW" },
-    "distance_to_earth": null
-  },
-  {
-    "category_en": "Electricity",
-    "category_ua": "Електроенергія",
-    "category_es": "Electricidad",
+  "diameter": null,
+  "mass": null,
+  "luminosity": { "value": 0.85, "unit": "TW" },
+  "distance_to_earth": null
+},
+{
+  "category_en": "Electricity",
+  "category_ua": "Електроенергія",
+  "category_es": "Electricidad",
 
-    "name_en": "Green 2025",
-    "name_ua": "Зелена 2025",
-    "name_es": "Verde 2025",
+  "name_en": "Green Power 2025",
+  "name_ua": "Зелена потужн. 2025",
+  "name_es": "Potencia verde 2025",
 
-    "description_en": "Expected renewable electricity in 2025. 1.15 terawatts or 1.15 trillion watts.",
-    "description_ua": "Згенерована зелена електроенергія у 2025 році. Очікувано 1,15 теравата або 1,15 трильйона ват.",
-    "description_es": "Electricidad renovable esperada en 2025. 1,15 teravatios o 1,15 billones de vatios.",
+  "description_en": "In 2025, renewable electricity is expected to be generated on average at a continuous power level of 1.15 terawatts, or 1.15 trillion watts. This is equivalent to about 29 billion 40 W light bulbs switched on at the same time.",
+  "description_ua": "У 2025 році очікується, що “зелена” електроенергія вироблятиметься в середньому на рівні безперервної потужності 1,15 ТВт або 1,15 трильйона ват. Це еквівалентно приблизно 29 мільярдам лампочок по 40 Вт, увімкнених одночасно.",
+  "description_es": "En 2025, se espera que la electricidad renovable se genere en promedio a un nivel de potencia continua de 1,15 teravatios, o 1,15 billones de vatios. Esto equivale a aproximadamente 29 mil millones de bombillas de 40 W encendidas al mismo tiempo.",
 
-    "diameter": null,
-    "mass": null,
-    "luminosity": { "value": 1.15, "unit": "TW" },
-    "distance_to_earth": null
-  }
+  "diameter": null,
+  "mass": null,
+  "luminosity": { "value": 1.15, "unit": "TW" },
+  "distance_to_earth": null
+}
 
 ]

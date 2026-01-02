@@ -191,7 +191,25 @@ function formatPeopleUnit(value) {
 }
 
 const UNIT_KEY = { mm: 'unit.mm', cm: 'unit.cm', m: 'unit.m', km: 'unit.km' };
-const fmtUnit = code => (UNIT_KEY[code] ? t(UNIT_KEY[code]) : (code || ''));
+
+function fmtUnit(code) {
+  const c = String(code || '').trim();
+  if (!c) return '';
+
+  // базові (як було)
+  if (UNIT_KEY[c]) return t(UNIT_KEY[c]);
+
+  // універсальний варіант: шукаємо "unit.<ЮНІТ>" у translations.json
+  const key = `unit.${c}`;
+  const tr = t(key);
+
+  // якщо переклад знайдено — t() поверне не сам ключ
+  if (tr && tr !== key) return tr;
+
+  // фолбек: показуємо як є
+  return c;
+}
+
 // Формат "реального" значення з урахуванням одиниці.
 // Тут вирішуємо, як саме писати людей, метри тощо.
 function fmtRealValue(value, unitCode) {
