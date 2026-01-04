@@ -984,5 +984,111 @@
     "description_ua": "За оцінками демографів, за всю історію людства народилося близько 117 млрд людей. У 2022 році живі ~8 млрд — лише ~7% від усіх. Отже, померлих приблизно у 14 разів більше, ніж живих.",
     "description_es": "Se estima que han nacido ~117 mil millones de personas. En 2022, ~8 mil millones vivos eran ~7% del total; por eso, los fallecidos superan a los vivos en ~14×.",
     "population": { "value": 117000000000, "unit": "people" }
-  }
+  },
+  {
+  "category_en": "Oil",
+  "category_ua": "Нафта",
+  "category_es": "Petróleo",
+
+  "name_en": "1 oil barrel",
+  "name_ua": "1 барель",
+  "name_es": "1 barril",
+
+  "description_en": "One oil barrel equals 159 liters. This volume forms a cube with a side of 54 cm. The base area of this cube is 0.2944 m².",
+  "description_ua": "Один барель нафти дорівнює 159 літрам. Цей об’єм утворює куб зі стороною 54 см. Площа основи такого куба становить 0,2944 м².",
+  "description_es": "Un barril de petróleo equivale a 159 litros. Este volumen forma un cubo con un lado de 54 cm. El área de la base de este cubo es de 0,2944 m².",
+
+  "area": { "value": 1, "unit": "barrel" }
+},
+  {
+    "category_en": "Oil",
+    "category_ua": "Нафта",
+    "category_es": "Petróleo",
+
+    "name_en": "Venezuela oil",
+    "name_ua": "Нафта Венесуели",
+    "name_es": "Petróleo Vzla",
+
+    "description_en": "Proven oil reserves. Source: OPEC, BP. Data as of 2023.",
+    "description_ua": "Доведені запаси нафти. Джерело: OPEC, BP. Дані станом на 2023 рік.",
+    "description_es": "Reservas probadas de petróleo. Fuente: OPEC, BP. Datos de 2023.",
+
+    "area": { "value": 303000000000, "unit": "barrel" }
+  },
+  {
+    "category_en": "Oil",
+    "category_ua": "Нафта",
+    "category_es": "Petróleo",
+
+    "name_en": "Texas oil",
+    "name_ua": "Нафта Техасу",
+    "name_es": "Petróleo Texas",
+
+    "description_en": "Proven oil reserves of Texas. Source: U.S. EIA. Data as of 2023.",
+    "description_ua": "Доведені запаси нафти штату Техас. Джерело: EIA США. Дані станом на 2023 рік.",
+    "description_es": "Reservas probadas de petróleo de Texas. Fuente: EIA de EE. UU. Datos de 2023.",
+
+    "area": { "value": 20173000000, "unit": "barrel" }
+  },
+  {
+    "category_en": "Oil",
+    "category_ua": "Нафта",
+    "category_es": "Petróleo",
+
+    "name_en": "Iran oil",
+    "name_ua": "Нафта Ірану",
+    "name_es": "Petróleo Irán",
+
+    "description_en": "Proven oil reserves. Source: OPEC, BP. Data as of 2023.",
+    "description_ua": "Доведені запаси нафти. Джерело: OPEC, BP. Дані станом на 2023 рік.",
+    "description_es": "Reservas probadas de petróleo. Fuente: OPEC, BP. Datos de 2023.",
+
+    "area": { "value": 209000000000, "unit": "barrel" }
+  },
+  {
+    "category_en": "Oil",
+    "category_ua": "Нафта",
+    "category_es": "Petróleo",
+
+    "name_en": "Russia oil",
+    "name_ua": "Нафта Росії",
+    "name_es": "Petróleo Rusia",
+
+    "description_en": "Proven oil reserves. Source: BP, OPEC. Data as of 2023.",
+    "description_ua": "Доведені запаси нафти. Джерело: BP, OPEC. Дані станом на 2023 рік.",
+    "description_es": "Reservas probadas de petróleo. Fuente: BP, OPEC. Datos de 2023.",
+
+    "area": { "value": 80000000000, "unit": "barrel" }
+  },
+  {
+    "category_en": "Oil",
+    "category_ua": "Нафта",
+    "category_es": "Petróleo",
+
+    "name_en": "World oil",
+    "name_ua": "Нафта світу",
+    "name_es": "Petróleo mundo",
+
+    "description_en": "Total proven oil reserves worldwide. Source: BP, OPEC. Data as of 2023.",
+    "description_ua": "Сукупні доведені запаси нафти у світі. Джерело: BP, OPEC. Дані станом на 2023 рік.",
+    "description_es": "Reservas probadas totales de petróleo en el mundo. Fuente: BP, OPEC. Datos de 2023.",
+
+    "area": { "value": 1700000000000, "unit": "barrel" }
+  },
+  {
+  "category_en": "Oil",
+  "category_ua": "Нафта",
+  "category_es": "Petróleo",
+
+  "name_en": "USA oil",
+  "name_ua": "Нафта США",
+  "name_es": "Petróleo EE.UU.",
+
+  "description_en": "Proven oil reserves of the United States. Source: U.S. EIA. Data as of 2023.",
+  "description_ua": "Доведені запаси нафти США. Джерело: EIA США. Дані станом на 2023 рік.",
+  "description_es": "Reservas probadas de petróleo de Estados Unidos. Fuente: EIA de EE. UU. Datos de 2023.",
+
+  "area": { "value": 46000000000, "unit": "barrel" }
+}
+
 ]

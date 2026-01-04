@@ -1275,6 +1275,11 @@
   "en": "1 square meter - 1.1284 m",
   "es": "1 metro cuadrado - 1.1284 m"
 },
+"o1_example_oil_barrel_1": {
+  "ua": "1 барель, висота шару 54 см",
+  "en": "1 barrel, layer height 54 cm",
+  "es": "1 barril, altura de capa 54 cm"
+},
 "o1_example_one_step": {
   "ua": "Середня довжина кроку дорослої людини - 0,70 м",
   "en": "Average step length of an adult - 0.70 m",

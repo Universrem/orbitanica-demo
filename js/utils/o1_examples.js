@@ -94,7 +94,8 @@ export const O1_EXAMPLES_GEO_POPULATION = [
   { key: 'pop_area_comfort_1_1', value_m: 1.183 }, // Комфортне розміщення — d≈1,18345405 м (S≈1,1 м²/люд)
 ];
 export const O1_EXAMPLES_GEO_AREA = [
-  { key: 'area_1_m2',      value_m: 1.1283791671 },  // 1 м² - 1,13 м
+  { key: 'area_1_m2',           value_m: 1.1283791671 }, // 1 м² — 1,13 м
+  { key: 'oil_barrel_1',  value_m: 0.6077 }        // 1 барель, висота шару 54 см
 ];
 
 export const O1_EXAMPLES_GEO_OBJECTS = [
