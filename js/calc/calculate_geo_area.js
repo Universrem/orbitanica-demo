@@ -1,4 +1,4 @@
-// full/js/calc/calculate_geo_area.js
+// js/calc/calculate_geo_area.js
 'use strict';
 
 /**
@@ -26,7 +26,7 @@ let __idSeq = 1;
 /** Внутрішній baseline */
 let __baseline = {
   valueReal: NaN,           // S1 (реальна площа)
-  unit: 'km²',
+  unit: 'km2',
   circleDiameterMeters: 0,  // D1 (діаметр базового кола)
   color: undefined
 };
@@ -45,12 +45,12 @@ function circleAreaByD(d) {
  * Встановити базову величину (О1) і обчислити масштаб площі.
  * @returns {{ currentScaleArea: number }}
  */
-export function setGeoAreaBaseline({ valueReal, unit = 'km²', circleDiameterMeters = 0, color } = {}) {
+export function setGeoAreaBaseline({ valueReal, unit = 'km2', circleDiameterMeters = 0, color } = {}) {
   const s1 = Number(valueReal);
   const d1 = Number(circleDiameterMeters);
 
   __baseline.valueReal = Number.isFinite(s1) && s1 > 0 ? s1 : NaN;
-  __baseline.unit = unit || 'km²';
+  __baseline.unit = unit || 'km2';
   __baseline.circleDiameterMeters = Number.isFinite(d1) && d1 >= 0 ? d1 : 0;
   __baseline.color = color;
 
@@ -66,7 +66,7 @@ export function setGeoAreaBaseline({ valueReal, unit = 'km²', circleDiameterMet
  * Повертає геодезичний радіус у метрах для рендера.
  * @returns {{ id:number, scaledRadiusMeters:number, tooLarge:boolean, requiredBaselineMeters:number }}
  */
-export function addGeoAreaCircle({ valueReal, unit = 'km²', color } = {}) {
+export function addGeoAreaCircle({ valueReal, unit = 'km2', color } = {}) {
   const s2 = Number(valueReal);
   const s1 = __baseline.valueReal;
   const d1 = __baseline.circleDiameterMeters;
@@ -98,7 +98,7 @@ export function addGeoAreaCircle({ valueReal, unit = 'km²', color } = {}) {
 }
 
 export function resetGeoAreaScale() {
-  __baseline = { valueReal: NaN, unit: 'km²', circleDiameterMeters: 0, color: undefined };
+  __baseline = { valueReal: NaN, unit: 'km2', circleDiameterMeters: 0, color: undefined };
   __currentScaleArea = 0;
 }
 

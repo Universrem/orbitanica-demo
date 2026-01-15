@@ -145,15 +145,21 @@ export function onGeoAreaCalculate({ scope }) {
   const color1 = getColorForKey('geo_area:baseline');
   const color2 = getColorForKey(`geo_area:o2:${++geoAreaResultSeq}`);
 
-  // 2) Baseline у калькуляторі
+    // 2) Baseline у калькуляторі
   const baselineDiameter = Number(data?.object1?.diameterScaled) || 0; // м
-  const a1 = Number(data?.object1?.valueReal);                         // реальна площа О1
-  const u1 = data?.object1?.unit || 'km²';
+
+  // Реальні (для інфо)
+  const a1 = Number(data?.object1?.valueReal);
+  const u1 = data?.object1?.unit;
+
+  // Базові (для розрахунку)
+  const a1Base = Number(data?.object1?.valueBase);
+  const u1Base = data?.object1?.unitBase;
 
   resetGeoAreaScale();
   setGeoAreaBaseline({
-    valueReal: a1,
-    unit: u1,
+    valueReal: a1Base,
+    unit: u1Base,
     circleDiameterMeters: baselineDiameter,
     color: color1
   });
@@ -170,7 +176,9 @@ export function onGeoAreaCalculate({ scope }) {
   }
 
   // 2b) Інфопанель: baseline
-  const o1RealOk = Number.isFinite(a1) && a1 > 0;
+  const o1RealOk  = Number.isFinite(a1)     && a1 > 0;
+  const o1BaseOk  = Number.isFinite(a1Base) && a1Base > 0;
+
   if (!__isRepaint) {
     addGroup({
       id: 'geo_area_o1',
@@ -193,7 +201,7 @@ export function onGeoAreaCalculate({ scope }) {
   }
 
   // ——— START SESSION  ———
-  const baselineValid = o1RealOk && (baselineDiameter > 0);
+    const baselineValid = o1BaseOk && (baselineDiameter > 0);
   if (baselineValid && scope) {
     // LOCK O1 UI
     const o1Group = scope.querySelector('.object1-group');
@@ -220,10 +228,18 @@ export function onGeoAreaCalculate({ scope }) {
     })();
   }
 
-  // 3) О2 через калькулятор
+    // 3) О2 через калькулятор
+
+  // Реальні (для інфо)
   const a2 = Number(data?.object2?.valueReal);
-  const u2 = data?.object2?.unit || 'km²';
-  const res = addGeoAreaCircle({ valueReal: a2, unit: u2, color: color2 });
+  const u2 = data?.object2?.unit;
+
+  // Базові (для розрахунку)
+  const a2Base = Number(data?.object2?.valueBase);
+  const u2Base = data?.object2?.unitBase;
+
+  const res = addGeoAreaCircle({ valueReal: a2Base, unit: u2Base, color: color2 });
+
 
   // 3a) Коло О2
   if (res && Number(res.scaledRadiusMeters) > 0) {
@@ -235,7 +251,8 @@ export function onGeoAreaCalculate({ scope }) {
   }
 
   // 3b) Інфопанель для О2
-  const o2RealOk = Number.isFinite(a2) && a2 > 0;
+    const o2RealOk = Number.isFinite(a2)     && a2 > 0;
+  const o2BaseOk = Number.isFinite(a2Base) && a2Base > 0;
   const scaledDiameterMeters = res && Number(res.scaledRadiusMeters) > 0
     ? 2 * Number(res.scaledRadiusMeters)
     : 0;
@@ -277,8 +294,9 @@ export function onGeoAreaCalculate({ scope }) {
   console.log(
     '[mode:geo:area] D1=%sm; A1=%s%s; A2=%s%s → D2=%sm',
     baselineDiameter,
-    o1RealOk ? a1.toLocaleString() : '—', o1RealOk ? u1 : '',
-    o2RealOk ? a2.toLocaleString() : '—', o2RealOk ? u2 : '',
+        o1RealOk ? a1.toLocaleString() : '—', o1RealOk ? (u1 || '') : '',
+    o2RealOk ? a2.toLocaleString() : '—', o2RealOk ? (u2 || '') : '',
+
     scaledDiameterMeters
   );
 }

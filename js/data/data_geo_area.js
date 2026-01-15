@@ -15,6 +15,7 @@
 import { getCurrentLang } from '../i18n.js';
 import { getGeoLibrary } from './geo_lib.js';
 import { getStore } from '../userObjects/api.js';
+import { convertToBase, getBaseUnit } from '../utils/unit_converter.js';
 
 // ─────────────────────────────────────────────────────────────
 // Утіліти
@@ -279,6 +280,19 @@ export function getGeoAreaData(scope) {
   const { valueReal: v1, unit: u1 } = readAreaValueUnit(obj1);
   const { valueReal: v2, unit: u2 } = readAreaValueUnit(obj2);
 
+    // значення для розрахунку (в базовій мірі режиму)
+  const baseUnit = getBaseUnit('geo_area'); // очікуємо "m2" з base_units.json
+
+  let v1Base = NaN;
+  if (Number.isFinite(v1) && u1 && baseUnit) {
+    try { v1Base = convertToBase(v1, u1, 'geo_area'); } catch (e) { console.error(e); }
+  }
+
+  let v2Base = NaN;
+  if (Number.isFinite(v2) && u2 && baseUnit) {
+    try { v2Base = convertToBase(v2, u2, 'geo_area'); } catch (e) { console.error(e); }
+  }
+
   // стандартний пакет
   return {
     modeId: 'geo_area',
@@ -289,6 +303,8 @@ export function getGeoAreaData(scope) {
       kind: 'area',
       valueReal: Number.isFinite(v1) ? v1 : NaN,
       unit: u1,                           // без дефолтів
+      valueBase: Number.isFinite(v1Base) ? v1Base : NaN,
+      unitBase: baseUnit || undefined,
       diameterScaled: baselineDiameterMeters,
       color: undefined,
       libIndex: off1?.libIndex ?? -1,
@@ -301,6 +317,8 @@ export function getGeoAreaData(scope) {
       kind: 'area',
       valueReal: Number.isFinite(v2) ? v2 : NaN,
       unit: u2,                           // без дефолтів
+      valueBase: Number.isFinite(v2Base) ? v2Base : NaN,
+      unitBase: baseUnit || undefined,
       color: undefined,
       libIndex: off2?.libIndex ?? -1,
       userId: obj2?.id || obj2?._id || undefined

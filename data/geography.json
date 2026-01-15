@@ -10,7 +10,7 @@
     "description_en": "The largest country in the world by land area, spanning Eastern Europe and northern Asia.",
     "description_ua": "Найбільша за площею країна світу, розташована в Східній Європі та Північній Азії.",
     "description_es": "El país más grande del mundo por área terrestre, que se extiende por Europa del Este y el norte de Asia.",
-    "area": { "value": 17098242, "unit": "km²" }
+    "area": { "value": 17098242, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -22,7 +22,7 @@
     "description_en": "The second-largest country in the world, known for its vast wilderness and cold climate.",
     "description_ua": "Друга за площею країна світу, відома своєю величезною природою і холодним кліматом.",
     "description_es": "El segundo país más grande del mundo, conocido por su vasta naturaleza y clima frío.",
-    "area": { "value": 9984670, "unit": "km²" }
+    "area": { "value": 9984670, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -34,7 +34,7 @@
     "description_en": "The most populous country and the third largest by area, located in East Asia.",
     "description_ua": "Найнаселеніша країна та третя за площею, розташована в Східній Азії.",
     "description_es": "El país más poblado y el tercero más grande por área, ubicado en Asia Oriental.",
-    "area": { "value": 9706961, "unit": "km²" }
+    "area": { "value": 9706961, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -46,7 +46,7 @@
     "description_en": "A federal republic located primarily in North America, with diverse geography and climate.",
     "description_ua": "Федеративна республіка в Північній Америці з різноманітною географією та кліматом.",
     "description_es": "Una república federal ubicada principalmente en América del Norte, con geografía y clima diversos.",
-    "area": { "value": 9372610, "unit": "km²" }
+    "area": { "value": 9372610, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -58,7 +58,7 @@
     "description_en": "The largest country in South America, home to the Amazon rainforest.",
     "description_ua": "Найбільша країна Південної Америки, де розташований тропічний ліс Амазонії.",
     "description_es": "El país más grande de América del Sur, hogar de la selva amazónica.",
-    "area": { "value": 8515770, "unit": "km²" }
+    "area": { "value": 8515770, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -70,7 +70,7 @@
     "description_en": "The world's smallest continent and largest island, known for its unique wildlife.",
     "description_ua": "Найменший континент і найбільший острів, відомий унікальною природою.",
     "description_es": "El continente más pequeño y la isla más grande del mundo, conocida por su vida silvestre única.",
-    "area": { "value": 7692024, "unit": "km²" }
+    "area": { "value": 7692024, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -82,7 +82,7 @@
     "description_en": "The second-most populous country, located in South Asia with a rich cultural history.",
     "description_ua": "Друга за населенням країна у Південній Азії з багатою історією.",
     "description_es": "El segundo país más poblado, ubicado en el sur de Asia con una rica historia cultural.",
-    "area": { "value": 3287263, "unit": "km²" }
+    "area": { "value": 3287263, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -94,7 +94,7 @@
     "description_en": "The second-largest country in South America, known for its diverse landscapes.",
     "description_ua": "Друга за площею країна Південної Америки з різноманітними ландшафтами.",
     "description_es": "El segundo país más grande de América del Sur, conocido por sus diversos paisajes.",
-    "area": { "value": 2780400, "unit": "km²" }
+    "area": { "value": 2780400, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -106,7 +106,7 @@
     "description_en": "The world's largest landlocked country, located in Central Asia.",
     "description_ua": "Найбільша за площею країна без виходу до моря, розташована в Середній Азії.",
     "description_es": "El país sin litoral más grande del mundo, ubicado en Asia Central.",
-    "area": { "value": 2724900, "unit": "km²" }
+    "area": { "value": 2724900, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -118,7 +118,7 @@
     "description_en": "The largest country in Africa, located in the Maghreb region.",
     "description_ua": "Найбільша за площею країна в Африці, розташована в регіоні Магрибу.",
     "description_es": "El país más grande de África, ubicado en la región del Magreb.",
-    "area": { "value": 2381741, "unit": "km²" }
+    "area": { "value": 2381741, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -130,7 +130,7 @@
     "description_en": "The second-largest country in Africa, with vast rainforests.",
     "description_ua": "Друга за площею країна в Африці з величезними тропічними лісами.",
     "description_es": "El segundo país más grande de África, con vastas selvas tropicales.",
-    "area": { "value": 2344858, "unit": "km²" }
+    "area": { "value": 2344858, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -142,7 +142,7 @@
     "description_en": "The largest country in the Middle East, known for its oil reserves.",
     "description_ua": "Найбільша країна Близького Сходу, відома запасами нафти.",
     "description_es": "El país más grande de Medio Oriente, conocido por sus reservas de petróleo.",
-    "area": { "value": 2149690, "unit": "km²" }
+    "area": { "value": 2149690, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -154,7 +154,7 @@
     "description_en": "A country between the U.S. and Central America, with rich cultural heritage.",
     "description_ua": "Країна між США та Центральною Америкою з багатою спадщиною.",
     "description_es": "Un país entre EE. UU. y Centroamérica, con rico patrimonio cultural.",
-    "area": { "value": 1964375, "unit": "km²" }
+    "area": { "value": 1964375, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -166,7 +166,7 @@
     "description_en": "The world's largest archipelago country, located in Southeast Asia.",
     "description_ua": "Найбільша острівна країна світу, розташована в Південно-Східній Азії.",
     "description_es": "El país archipiélago más grande del mundo, ubicado en el sudeste asiático.",
-    "area": { "value": 1904569, "unit": "km²" }
+    "area": { "value": 1904569, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -178,7 +178,7 @@
     "description_en": "The third-largest country in Africa, located in Northeast Africa.",
     "description_ua": "Третя за площею країна в Африці, розташована на північному сході.",
     "description_es": "El tercer país más grande de África, ubicado en el noreste de África.",
-    "area": { "value": 1861484, "unit": "km²" }
+    "area": { "value": 1861484, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -190,7 +190,7 @@
     "description_en": "A country in North Africa, with mostly desert landscape.",
     "description_ua": "Країна в Північній Африці з переважно пустельними ландшафтами.",
     "description_es": "Un país en el norte de África, con paisajes mayormente desérticos.",
-    "area": { "value": 1759540, "unit": "km²" }
+    "area": { "value": 1759540, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -202,7 +202,7 @@
     "description_en": "A country in Western Asia, with a rich historical and cultural heritage.",
     "description_ua": "Країна в Західній Азії з багатою історією та культурою.",
     "description_es": "Un país en Asia Occidental, con un rico patrimonio histórico y cultural.",
-    "area": { "value": 1648195, "unit": "km²" }
+    "area": { "value": 1648195, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -214,7 +214,7 @@
     "description_en": "A landlocked country in East Asia, known for its vast steppes.",
     "description_ua": "Країна без виходу до моря в Східній Азії, відома степами.",
     "description_es": "Un país sin litoral en Asia Oriental, conocido por sus estepas.",
-    "area": { "value": 1564110, "unit": "km²" }
+    "area": { "value": 1564110, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -226,7 +226,7 @@
     "description_en": "A country in South America, home to the Inca ruins of Machu Picchu.",
     "description_ua": "Країна в Південній Америці, де знаходяться руїни Мачу-Пікчу.",
     "description_es": "Un país en América del Sur, hogar de las ruinas incas de Machu Picchu.",
-    "area": { "value": 1285216, "unit": "km²" }
+    "area": { "value": 1285216, "unit": "km2" }
   },
   {
   "category_en": "Countries",
@@ -238,7 +238,7 @@
     "description_en": "A landlocked country in North-Central Africa.",
     "description_ua": "Країна без виходу до моря в центрі Північної Африки.",
     "description_es": "Un país sin litoral en África centro-septentrional.",
-    "area": { "value": 1284000, "unit": "km²" }
+    "area": { "value": 1284000, "unit": "km2" }
   },
   {
     "category_en": "Population",
@@ -298,7 +298,7 @@
     "description_en": "Total land area of Earth excluding bodies of water.",
     "description_ua": "Загальна площа суходолу Землі без урахування водних об'єктів.",
     "description_es": "Área terrestre total de la Tierra excluyendo cuerpos de agua.",
-    "area": { "value": 150000000, "unit": "km²" }
+    "area": { "value": 150000000, "unit": "km2" }
   },
   {
     "category_en": "Area",
@@ -310,7 +310,7 @@
     "description_en": "Total geographical area of the continent of Europe.",
     "description_ua": "Загальна географічна площа континенту Європа.",
     "description_es": "Área geográfica total del continente europeo.",
-    "area": { "value": 10180000, "unit": "km²" }
+    "area": { "value": 10180000, "unit": "km2" }
   },
   {
     "category_en": "Area",
@@ -322,7 +322,7 @@
     "description_en": "Total surface area of Earth's oceans and inland waters.",
     "description_ua": "Загальна площа океанів та внутрішніх вод Землі.",
     "description_es": "Área total de océanos y aguas interiores de la Tierra.",
-    "area": { "value": 360000000, "unit": "km²" }
+    "area": { "value": 360000000, "unit": "km2" }
   },
   {
   "category_en": "Recommended baseline object",
@@ -334,7 +334,7 @@
   "description_ua": "Один квадратний метр — це площа квадрата зі стороною один метр. Коло діаметром 1,1284 м має точно таку саму площу.",
   "description_en": "One square meter is the area of a square with a side of one meter. A circle with a diameter of 1.1284 m has exactly the same area.",
   "description_es": "Un metro cuadrado es el área de un cuadrado de un metro de lado. Un círculo con un diámetro de 1,1284 m tiene exactamente la misma área.",
-  "area": { "value": 0.000001, "unit": "km²" }
+  "area": { "value": 1, "unit": "m2" }
 },
   {
     "category_en": "Objects",
@@ -986,9 +986,9 @@
     "population": { "value": 117000000000, "unit": "people" }
   },
   {
-  "category_en": "Oil",
-  "category_ua": "Нафта",
-  "category_es": "Petróleo",
+  "category_en": "Recommended baseline object",
+  "category_ua": "Рекомендований базовий об’єкт",
+  "category_es": "Objeto base recomendado",
 
   "name_en": "1 oil barrel",
   "name_ua": "1 барель",
@@ -1089,6 +1089,68 @@
   "description_es": "Reservas probadas de petróleo de Estados Unidos. Fuente: EIA de EE. UU. Datos de 2023.",
 
   "area": { "value": 46000000000, "unit": "barrel" }
+},
+{
+  "category_en": "Forests",
+  "category_ua": "Ліси",
+  "category_es": "Bosques",
+
+  "name_en": "All forests",
+  "name_ua": "Усі ліси",
+  "name_es": "Todos los bosques",
+
+  "description_en": "Total global forest area according to the FAO Global Forest Resources Assessment 2025.",
+"description_ua": "Загальна площа лісів у світі за оцінкою FAO (Global Forest Resources Assessment 2025).",
+"description_es": "Superficie total de los bosques a nivel mundial según la Evaluación de los Recursos Forestales Mundiales de la FAO 2025.",
+
+  "area": { "value": 4140000000, "unit": "ha" }
+},
+{
+  "category_en": "Forests",
+  "category_ua": "Ліси",
+  "category_es": "Bosques",
+
+  "name_en": "Cover gain/year",
+  "name_ua": "Приріст покриву/рік",
+  "name_es": "Ganancia cobertura",
+
+  "description_en": "Average annual gain of tree cover worldwide during 2000–2020. Gain includes both natural regrowth and human-made tree planting where tree cover was previously absent. The indicator does not distinguish between natural forests and plantations.",
+  "description_ua": "Середній річний приріст деревного покриву у світі за період 2000–2020 років. Приріст включає як природне відновлення, так і штучні насадження людьми на територіях, де раніше не було деревного покриву. Показник не розрізняє природні ліси та плантації.",
+  "description_es": "Aumento anual promedio de la cobertura arbórea a nivel mundial durante 2000–2020. El aumento incluye tanto la regeneración natural como las plantaciones humanas en áreas donde antes no había cobertura arbórea. El indicador no distingue entre bosques naturales y plantaciones.",
+
+  "area": { "value": 6500000, "unit": "ha" }
+},
+{
+  "category_en": "Forests",
+  "category_ua": "Ліси",
+  "category_es": "Bosques",
+
+  "name_en": "Cover loss/year",
+  "name_ua": "Втрати покриву/рік",
+  "name_es": "Pérdida cobertura/año",
+
+  "description_en": "Average annual loss of tree cover worldwide during 2000–2020. Loss means complete removal of tree cover in a given area due to logging, fires, agricultural expansion, storms, or other disturbances. Causes are not separated; this is a total loss indicator.",
+  "description_ua": "Середні річні втрати деревного покриву у світі за період 2000–2020 років. Втрата означає повне зникнення деревного покриву на ділянці внаслідок вирубки, пожеж, розширення сільського господарства, штормів або інших впливів. Причини не розділяються — це сумарний показник.",
+  "description_es": "Pérdida anual promedio de cobertura arbórea a nivel mundial durante 2000–2020. La pérdida significa la eliminación completa de la cobertura de árboles debido a tala, incendios, expansión agrícola, tormentas u otras perturbaciones. Las causas no se diferencian; es un indicador total.",
+
+  "area": { "value": 11500000, "unit": "ha" }
+},
+{
+  "category_en": "Forests",
+  "category_ua": "Ліси",
+  "category_es": "Bosques",
+
+  "name_en": "Losses 2000–2020",
+  "name_ua": "Втрати 2000–2020",
+  "name_es": "Pérdidas 2000–2020",
+
+  "description_en": "Total global loss of tree cover during the period 2000–2020. Loss refers to areas where tree cover completely disappeared due to logging, fires, agricultural expansion, infrastructure development, storms, or other disturbances. The indicator shows the total area of land that lost tree cover, regardless of any regrowth elsewhere.",
+"description_ua": "Сумарні глобальні втрати деревного покриву за період 2000–2020 років. Втрата означає території, де деревний покрив повністю зник через вирубку, пожежі, розширення сільського господарства, будівництво, шторми або інші впливи. Показник показує загальну площу земель, які втратили деревний покрив, незалежно від відновлення в інших місцях.",
+"description_es": "Pérdida total de la cobertura arbórea a nivel mundial durante el período 2000–2020. La pérdida se refiere a áreas donde la cobertura arbórea desapareció por completo debido a tala, incendios, expansión agrícola, desarrollo de infraestructuras, tormentas u otras perturbaciones. El indicador muestra la superficie total de tierra que perdió cobertura arbórea, independientemente de la regeneración en otros lugares.",
+  "area": { "value": 100000000, "unit": "ha" }
 }
+
+
+
 
 ]

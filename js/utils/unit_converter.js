@@ -1,4 +1,4 @@
-// full/js/utils/unit_converter.js
+// js/utils/unit_converter.js
 
 let baseUnitsData = {};
 
