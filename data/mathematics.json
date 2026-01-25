@@ -450,6 +450,18 @@
   "category_en": "Lotteries",
   "category_ua": "Лотереї",
   "category_es": "Loterías",
+  "name_en": "Powerball",
+  "name_ua": "Powerball",
+  "name_es": "Powerball",
+  "description_en": "Powerball is a major U.S. multi-state lottery. To win the jackpot, you must match five numbers from 1 to 69 and one Powerball number from 1 to 26. Jackpot odds per ticket: 1 in 292,201,338. Biggest jackpot: $2.04 billion (Nov 7, 2022, California).",
+  "description_ua": "Powerball — одна з найвідоміших лотерей США. Для джекпоту потрібно вгадати п’ять чисел від 1 до 69 та одне число Powerball від 1 до 26. Шанс джекпоту з одного квитка: 1 із 292 201 338. Найбільший джекпот: $2,04 млрд (7 листопада 2022, Каліфорнія).",
+  "description_es": "Powerball es una de las loterías más conocidas de EE. UU. Para ganar el jackpot, debes acertar cinco números del 1 al 69 y un número Powerball del 1 al 26. Probabilidad de jackpot por boleto: 1 entre 292.201.338. Mayor jackpot: 2,04 mil millones de USD (7 de noviembre de 2022, California).",
+  "quantity": { "value": 292201338, "unit": "unit" }
+},
+{
+  "category_en": "Lotteries",
+  "category_ua": "Лотереї",
+  "category_es": "Loterías",
   "name_en": "EuroMillions",
   "name_ua": "EuroMillions",
   "name_es": "EuroMillions",
