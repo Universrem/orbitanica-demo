@@ -22,7 +22,7 @@ const ZOOM_HOLD_MIN_STEP_M = 2.0; // мінімум метрів за кадр, 
 
 
 // Нижня межа, щоб не "пірнати" в землю
-const MIN_ALTITUDE_M = 120;
+const MIN_ALTITUDE_M = 10;
 
 // Крок: частка від поточної висоти, але не менше мінімуму
 const ZOOM_STEP_FRACTION = 0.10;
