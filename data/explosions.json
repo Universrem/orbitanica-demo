@@ -1,0 +1,38 @@
+[
+{
+  "category_en": "Recommended baseline object",
+  "category_ua": "Рекомендований базовий об’єкт",
+  "category_es": "Objeto base recomendado",
+  "name_en": "1 kg TNT",
+  "name_ua": "1 кг тротилу",
+  "name_es": "1 kg de TNT",
+  "description_ua": "Вибух 1 кг тротилу дає коротку, але сильну ударну хвилю. Поруч можливі механічні пошкодження: вибиті вікна, тріщини, пошкоджені двері та легкі конструкції. Тепловий вплив, пожежі та радіація тут не є основним фактором.",
+  "description_en": "A 1 kg TNT explosion produces a brief but strong blast wave. Nearby, it can cause mechanical damage such as shattered windows, cracks, damaged doors, and light structures. Thermal effects, fires, and radiation are not the primary factor here.",
+  "description_es": "Una explosión de 1 kg de TNT produce una onda de choque breve pero fuerte. Cerca puede causar daños mecánicos como ventanas rotas, grietas, puertas dañadas y estructuras ligeras. Los efectos térmicos, los incendios y la radiación no son el factor principal aquí.",
+  "explosions": { "value": 1, "unit": "kgt" }
+},
+{
+  "category_en": "Atomic bombs",
+  "category_ua": "Атомні бомби",
+  "category_es": "Bombas atómicas",
+  "name_en": "Tsar Bomba bomb",
+  "name_ua": "Бомба «Цар-бомба»",
+  "name_es": "Bomba Tsar Bomba",
+  "description_ua": "Найпотужніший вибух, здійснений людиною: випробування СРСР у 1961 році. У межах цього кола показані механічні руйнування від ударної хвилі: 0–10% — повне знищення; 10–25% — дуже сильні; 25–45% — сильні; 45–70% — середні; 70–100% — легкі пошкодження. Тепловий спалах і пожежі могли спричинити наслідки за межами цього кола.",
+  "description_en": "The most powerful human-made explosion: a 1961 Soviet nuclear test. This circle shows mechanical blast damage from the shockwave: 0–10% total destruction; 10–25% very severe; 25–45% severe; 45–70% moderate; 70–100% light damage. Thermal flash and fires could cause effects beyond this circle.",
+  "description_es": "La explosión más potente realizada por el ser humano: una prueba nuclear soviética de 1961. Este círculo muestra daños mecánicos por la onda de choque: 0–10% destrucción total; 10–25% muy graves; 25–45% graves; 45–70% moderados; 70–100% leves. El destello térmico y los incendios pudieron causar efectos más allá de este círculo.",
+  "explosions": { "value": 50, "unit": "Mtt" }
+},
+{
+  "category_en": "Atomic bombs",
+  "category_ua": "Атомні бомби",
+  "category_es": "Bombas atómicas",
+  "name_en": "Little Boy bomb",
+  "name_ua": "Бомба «Літл Бой»",
+  "name_es": "Bomba Little Boy",
+  "description_ua": "Атомна бомба, скинута на Хіросіму (Японія) 6 серпня 1945 року. У межах цього кола показані механічні руйнування від ударної хвилі: 0–10% — повне знищення; 10–25% — дуже сильні; 25–45% — сильні; 45–70% — середні; 70–100% — легкі пошкодження. Тепловий спалах і пожежі могли спричинити наслідки за межами цього кола.",
+  "description_en": "An atomic bomb dropped on Hiroshima, Japan, on August 6, 1945. This circle shows mechanical blast damage from the shockwave: 0–10% total destruction; 10–25% very severe; 25–45% severe; 45–70% moderate; 70–100% light damage. Thermal flash and fires could cause effects beyond this circle.",
+  "description_es": "Bomba atómica lanzada sobre Hiroshima, Japón, el 6 de agosto de 1945. Este círculo muestra daños mecánicos por la onda de choque: 0–10% destrucción total; 10–25% muy graves; 25–45% graves; 45–70% moderados; 70–100% leves. El destello térmico y los incendios pudieron causar efectos más allá de este círculo.",
+  "explosions": { "value": 15, "unit": "ktt" }
+}
+]

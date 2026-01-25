@@ -308,7 +308,10 @@ summary {
 #left-panel > details#geo_area > summary,
 #left-panel > details#geo_objects > summary,
 #left-panel > details#money > summary,
-#left-panel > details#math > summary {
+#left-panel > details#math > summary,
+#left-panel > details#explosions > summary,
+#left-panel > details#sounds > summary,
+#left-panel > details#earthquakes > summary {
   padding-left: 52px;
   text-align: left;
   font-size: 1rem;   /* на щабель менше за сімейства */
@@ -323,7 +326,10 @@ summary {
 #left-panel > details#geo_area > summary,
 #left-panel > details#geo_objects > summary,
 #left-panel > details#money > summary,
-#left-panel > details#math > summary {
+#left-panel > details#math > summary,
+#left-panel > details#explosions > summary,
+#left-panel > details#sounds > summary,
+#left-panel > details#earthquakes > summary {
   transform-origin: left center;
   transition: transform .12s ease, color .2s ease;
 }
@@ -337,7 +343,10 @@ summary {
 #left-panel > details#geo_area > summary:hover,
 #left-panel > details#geo_objects > summary:hover,
 #left-panel > details#money > summary:hover,
-#left-panel > details#math > summary:hover {
+#left-panel > details#math > summary:hover,
+#left-panel > details#explosions > summary:hover,
+#left-panel > details#sounds > summary:hover,
+#left-panel > details#earthquakes > summary:hover {
   transform: scale(1.1); /* легке наближення, без стрибків макета */
 }
 
@@ -351,7 +360,10 @@ summary {
 #left-panel > details#geo_area > summary::before,
 #left-panel > details#geo_objects > summary::before,
 #left-panel > details#money > summary::before,
-#left-panel > details#math > summary::before {
+#left-panel > details#math > summary::before,
+#left-panel > details#explosions > summary::before,
+#left-panel > details#sounds > summary::before,
+#left-panel > details#earthquakes > summary::before {
   content: none;
 }
 
@@ -665,6 +677,18 @@ input::placeholder {
 
 #left-panel .panel-family-math::before {
   background-image: url("../res/icons/power.png");
+}
+
+#left-panel .panel-family-explosions::before {
+  background-image: url("../res/icons/explosion.png");
+}
+
+#left-panel .panel-family-sounds::before {
+  background-image: url("../res/icons/volume.png");
+}
+
+#left-panel .panel-family-earthquakes::before {
+  background-image: url("../res/icons/earthquake.png");
 }
 
 #left-panel .sector-block {

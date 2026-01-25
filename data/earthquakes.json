@@ -1,0 +1,112 @@
+[
+  {
+    "category_en": "Recommended baseline object",
+    "category_ua": "Рекомендований базовий об’єкт",
+    "category_es": "Objeto base recomendado",
+    "name_en": "Mw 1.0",
+    "name_ua": "Mw 1.0",
+    "name_es": "Mw 1.0",
+    "description_ua": "Магнітуда Mw — це оцінка енергії землетрусу. Значення 1.0 — дуже слабкий землетрус, який зазвичай відчувається лише поруч з епіцентром або взагалі не помічається.",
+    "description_en": "Mw (moment magnitude) estimates the energy of an earthquake. A value of 1.0 is a very weak quake, usually felt only very close to the epicenter or not noticed at all.",
+    "description_es": "Mw (magnitud de momento) estima la energía de un terremoto. Un valor de 1.0 es un sismo muy débil, normalmente perceptible solo muy cerca del epicentro o que pasa desapercibido.",
+    "earthquakes": { "value": 1.0, "unit": "Mw" }
+  },
+
+  {
+    "category_en": "Earthquakes",
+    "category_ua": "Землетруси",
+    "category_es": "Terremotos",
+    "name_en": "Mw 3.0",
+    "name_ua": "Mw 3.0",
+    "name_es": "Mw 3.0",
+    "description_ua": "Слабкий землетрус. Часто відчувається людьми поблизу, але зазвичай не спричиняє помітних пошкоджень.",
+    "description_en": "A weak earthquake. Often felt nearby, but usually causes no noticeable damage.",
+    "description_es": "Un terremoto débil. A menudo se siente cerca, pero normalmente no causa daños apreciables.",
+    "earthquakes": { "value": 3.0, "unit": "Mw" }
+  },
+  {
+    "category_en": "Earthquakes",
+    "category_ua": "Землетруси",
+    "category_es": "Terremotos",
+    "name_en": "Mw 5.0",
+    "name_ua": "Mw 5.0",
+    "name_es": "Mw 5.0",
+    "description_ua": "Помірний землетрус. Може спричиняти локальні пошкодження, особливо у старих або слабких будівлях.",
+    "description_en": "A moderate earthquake. It can cause localized damage, especially to older or weaker buildings.",
+    "description_es": "Un terremoto moderado. Puede causar daños localizados, especialmente en edificios antiguos o vulnerables.",
+    "earthquakes": { "value": 5.0, "unit": "Mw" }
+  },
+  {
+    "category_en": "Earthquakes",
+    "category_ua": "Землетруси",
+    "category_es": "Terremotos",
+    "name_en": "Mw 7.0",
+    "name_ua": "Mw 7.0",
+    "name_es": "Mw 7.0",
+    "description_ua": "Сильний землетрус. Здатний спричиняти серйозні руйнування, особливо поблизу епіцентру.",
+    "description_en": "A strong earthquake. It can cause severe damage, especially near the epicenter.",
+    "description_es": "Un terremoto fuerte. Puede causar daños graves, especialmente cerca del epicentro.",
+    "earthquakes": { "value": 7.0, "unit": "Mw" }
+  },
+  {
+    "category_en": "Earthquakes",
+    "category_ua": "Землетруси",
+    "category_es": "Terremotos",
+    "name_en": "Mw 9.0",
+    "name_ua": "Mw 9.0",
+    "name_es": "Mw 9.0",
+    "description_ua": "Надпотужний землетрус. Такі події рідкісні й можуть викликати катастрофічні наслідки на великих територіях.",
+    "description_en": "A mega-earthquake. Such events are rare and can produce catastrophic impacts across large regions.",
+    "description_es": "Un megaterremoto. Estos eventos son raros y pueden provocar impactos catastróficos en grandes regiones.",
+    "earthquakes": { "value": 9.0, "unit": "Mw" }
+  },
+  {
+    "category_en": "Famous earthquakes",
+    "category_ua": "Відомі землетруси",
+    "category_es": "Terremotos famosos",
+    "name_en": "Chile 1960",
+    "name_ua": "Чилі 1960",
+    "name_es": "Chile 1960",
+    "description_ua": "22 травня 1960 року. Найпотужніший зафіксований землетрус. Стався біля узбережжя Чилі та спричинив цунамі.",
+    "description_en": "May 22, 1960. The strongest recorded earthquake. It struck off the coast of Chile and generated a tsunami.",
+    "description_es": "22 de mayo de 1960. El terremoto más fuerte registrado. Ocurrió frente a la costa de Chile y generó un tsunami.",
+    "earthquakes": { "value": 9.5, "unit": "Mw" }
+  },
+  {
+    "category_en": "Famous earthquakes",
+    "category_ua": "Відомі землетруси",
+    "category_es": "Terremotos famosos",
+    "name_en": "Alaska 1964",
+    "name_ua": "Аляска 1964",
+    "name_es": "Alaska 1964",
+    "description_ua": "27 березня 1964 року. Один із найсильніших землетрусів в історії. Стався в районі Аляски та спричинив цунамі.",
+    "description_en": "March 27, 1964. One of the strongest earthquakes in history. It occurred in Alaska and generated a tsunami.",
+    "description_es": "27 de marzo de 1964. Uno de los terremotos más fuertes de la historia. Ocurrió en Alaska y generó un tsunami.",
+    "earthquakes": { "value": 9.2, "unit": "Mw" }
+  },
+  {
+    "category_en": "Famous earthquakes",
+    "category_ua": "Відомі землетруси",
+    "category_es": "Terremotos famosos",
+    "name_en": "Sumatra 2004",
+    "name_ua": "Суматра 2004",
+    "name_es": "Sumatra 2004",
+    "description_ua": "26 грудня 2004 року. Дуже потужний землетрус біля Суматри, який спричинив руйнівне цунамі в Індійському океані.",
+    "description_en": "December 26, 2004. A very powerful quake off Sumatra that triggered a devastating Indian Ocean tsunami.",
+    "description_es": "26 de diciembre de 2004. Un sismo muy potente frente a Sumatra que provocó un devastador tsunami en el océano Índico.",
+    "earthquakes": { "value": 9.1, "unit": "Mw" }
+  },
+  {
+    "category_en": "Famous earthquakes",
+    "category_ua": "Відомі землетруси",
+    "category_es": "Terremotos famosos",
+    "name_en": "Japan 2011",
+    "name_ua": "Японія 2011",
+    "name_es": "Japón 2011",
+    "description_ua": "11 березня 2011 року. Потужний землетрус біля східного узбережжя Японії, який спричинив велике цунамі.",
+    "description_en": "March 11, 2011. A major earthquake off Japan’s east coast that generated a large tsunami.",
+    "description_es": "11 de marzo de 2011. Un gran terremoto frente a la costa este de Japón que generó un gran tsunami.",
+    "earthquakes": { "value": 9.1, "unit": "Mw" }
+  }
+
+]

@@ -1,0 +1,125 @@
+[
+  {
+    "category_en": "Recommended baseline object",
+    "category_ua": "Рекомендований базовий об’єкт",
+    "category_es": "Objeto base recomendado",
+    "name_en": "1 decibel",
+    "name_ua": "1 децибел",
+    "name_es": "1 decibelio",
+    "description_ua": "Децибел — це одиниця рівня звуку, яка рахується за шкалою відносних значень. 1 дБ — це дуже мала зміна гучності: на практиці людське вухо майже не сприймає різницю в 1 дБ, але це зручний крок для порівнянь і розрахунків. Важливо: децибели залежать від відстані до джерела.",
+"description_en": "A decibel is a unit for sound level measured on a relative (logarithmic) scale. 1 dB is a very small change in loudness: in practice, people barely notice a 1 dB difference, but it is a convenient step for comparisons and calculations. Important: decibels depend on distance from the source.",
+"description_es": "El decibelio es una unidad del nivel de sonido medida en una escala relativa (logarítmica). 1 dB es un cambio muy pequeño de sonoridad: en la práctica, la gente apenas nota una diferencia de 1 dB, pero es un paso conveniente para comparaciones y cálculos. Importante: los decibelios dependen de la distancia a la fuente.",
+    "sounds": { "value": 1, "unit": "dB" }
+  },
+
+  {
+    "category_en": "Home",
+    "category_ua": "Побут",
+    "category_es": "Hogar",
+    "name_en": "Conversation nearby",
+    "name_ua": "Розмова поруч",
+    "name_es": "Conversación cerca",
+    "description_ua": "Звичайна розмова на близькій відстані. У реальності рівень залежить від гучності голосу та приміщення.",
+    "description_en": "A normal conversation at close distance. In practice, the level depends on voice loudness and the environment.",
+    "description_es": "Una conversación normal a corta distancia. En la práctica, el nivel depende del volumen de la voz y del entorno.",
+    "sounds": { "value": 60, "unit": "dB" }
+  },
+  {
+    "category_en": "Home",
+    "category_ua": "Побут",
+    "category_es": "Hogar",
+    "name_en": "Vacuum cleaner",
+    "name_ua": "Пилосос",
+    "name_es": "Aspiradora",
+    "description_ua": "Побутовий пилосос зазвичай створює шум помітно вище за розмову. Рівень залежить від моделі та режиму роботи.",
+    "description_en": "A household vacuum cleaner is typically noticeably louder than conversation. The level depends on the model and operating mode.",
+    "description_es": "Una aspiradora doméstica suele ser claramente más ruidosa que una conversación. El nivel depende del modelo y del modo de uso.",
+    "sounds": { "value": 75, "unit": "dB" }
+  },
+  {
+    "category_en": "Home",
+    "category_ua": "Побут",
+    "category_es": "Hogar",
+    "name_en": "Hair dryer / blender",
+    "name_ua": "Фен / блендер",
+    "name_es": "Secador / batidora",
+    "description_ua": "Гучні побутові прилади на короткій відстані. Реальний рівень залежить від потужності та конструкції.",
+    "description_en": "Loud household appliances at short distance. Actual level depends on power and design.",
+    "description_es": "Electrodomésticos ruidosos a corta distancia. El nivel real depende de la potencia y del diseño.",
+    "sounds": { "value": 85, "unit": "dB" }
+  },
+
+  {
+    "category_en": "City & transport",
+    "category_ua": "Місто і транспорт",
+    "category_es": "Ciudad y transporte",
+    "name_en": "Busy traffic",
+    "name_ua": "Жвавий трафік",
+    "name_es": "Tráfico intenso",
+    "description_ua": "Шум жвавого міського руху. Рівень залежить від кількості транспорту, швидкості та відстані до дороги.",
+    "description_en": "Noise from busy urban traffic. Level depends on traffic volume, speed, and distance to the road.",
+    "description_es": "Ruido del tráfico urbano intenso. El nivel depende del volumen, la velocidad y la distancia a la vía.",
+    "sounds": { "value": 85, "unit": "dB" }
+  },
+  {
+    "category_en": "City & transport",
+    "category_ua": "Місто і транспорт",
+    "category_es": "Ciudad y transporte",
+    "name_en": "Motorcycle nearby",
+    "name_ua": "Мотоцикл поруч",
+    "name_es": "Motocicleta cerca",
+    "description_ua": "Мотоцикл на близькій відстані може бути дуже гучним. Реальний рівень залежить від вихлопу та режиму руху.",
+    "description_en": "A motorcycle at close distance can be very loud. Actual level depends on exhaust and riding conditions.",
+    "description_es": "Una motocicleta a corta distancia puede ser muy ruidosa. El nivel real depende del escape y de las condiciones de conducción.",
+    "sounds": { "value": 95, "unit": "dB" }
+  },
+  {
+    "category_en": "City & transport",
+    "category_ua": "Місто і транспорт",
+    "category_es": "Ciudad y transporte",
+    "name_en": "Siren",
+"name_ua": "Сирена",
+"name_es": "Sirena",
+    "description_ua": "Сирени спеціального транспорту на короткій відстані. У реальності рівень залежить від напрямку, забудови та відстані.",
+    "description_en": "Emergency vehicle sirens at close distance. In practice, the level depends on direction, buildings, and distance.",
+    "description_es": "Sirenas de vehículos de emergencia a corta distancia. En la práctica, el nivel depende de la dirección, los edificios y la distancia.",
+    "sounds": { "value": 115, "unit": "dB" }
+  },
+
+  {
+    "category_en": "Concerts & extreme",
+    "category_ua": "Концерти та екстрим",
+    "category_es": "Conciertos y extremo",
+    "name_en": "Concert / club",
+    "name_ua": "Концерт/клуб",
+    "name_es": "Concierto / club",
+    "description_ua": "Гучна музика в приміщенні. Рівень залежить від місця в залі та налаштувань звуку.",
+    "description_en": "Loud indoor music. The level depends on where you stand and the sound system settings.",
+    "description_es": "Música fuerte en interiores. El nivel depende del lugar y de la configuración del sistema de sonido.",
+    "sounds": { "value": 108, "unit": "dB" }
+  },
+  {
+    "category_en": "Concerts & extreme",
+    "category_ua": "Концерти та екстрим",
+    "category_es": "Conciertos y extremo",
+    "name_en": "Rock concert",
+"name_ua": "Рок-концерт",
+"name_es": "Concierto rock",
+    "description_ua": "Дуже високий рівень біля колонок. Тривалий вплив може бути шкідливим для слуху.",
+    "description_en": "Very high level near speakers. Prolonged exposure can be harmful to hearing.",
+    "description_es": "Nivel muy alto cerca de los altavoces. La exposición prolongada puede ser perjudicial para la audición.",
+    "sounds": { "value": 120, "unit": "dB" }
+  },
+  {
+    "category_en": "Concerts & extreme",
+    "category_ua": "Концерти та екстрим",
+    "category_es": "Conciertos y extremo",
+"name_en": "Jet takeoff",
+"name_ua": "Зліт реактивного",
+"name_es": "Despegue jet",
+    "description_ua": "Один із найгучніших поширених джерел звуку. Рівень сильно залежить від відстані та напрямку.",
+    "description_en": "One of the loudest common sound sources. Level strongly depends on distance and direction.",
+    "description_es": "Una de las fuentes de sonido comunes más ruidosas. El nivel depende mucho de la distancia y la dirección.",
+    "sounds": { "value": 135, "unit": "dB" }
+  }
+]

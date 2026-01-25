@@ -433,7 +433,31 @@
     "description_ua": "Натуральний логарифм числа 10.",
     "description_es": "Logaritmo natural de 10.",
     "quantity": { "value": 2.302585092994046, "unit": "unit" }
-  }
+  },
+  {
+  "category_en": "Lotteries",
+  "category_ua": "Лотереї",
+  "category_es": "Loterías",
+  "name_en": "One chance",
+  "name_ua": "Один шанс",
+  "name_es": "Una oportunidad",
+  "description_en": "One ticket — one chance in a lottery draw.",
+  "description_ua": "Один квиток — один шанс у розіграші лотереї.",
+  "description_es": "Un boleto: una oportunidad en el sorteo de la lotería.",
+  "quantity": { "value": 1, "unit": "unit" }
+},
+{
+  "category_en": "Lotteries",
+  "category_ua": "Лотереї",
+  "category_es": "Loterías",
+  "name_en": "EuroMillions",
+  "name_ua": "EuroMillions",
+  "name_es": "EuroMillions",
+  "description_en": "EuroMillions is a major pan-European lottery. To win the jackpot, you must match five numbers from 1 to 50 and two Lucky Star numbers from 1 to 12. Jackpot odds per ticket: 1 in 139,838,160. Biggest jackpot: €250,000,000 (the current jackpot cap; reached and won multiple times).",
+  "description_ua": "EuroMillions — одна з найвідоміших європейських лотерей. Для джекпоту потрібно вгадати п’ять чисел від 1 до 50 та два числа Lucky Star від 1 до 12. Шанс джекпоту з одного квитка: 1 із 139 838 160. Найбільший джекпот: 250 000 000 € (поточний ліміт джекпоту; досягався і вигравався кілька разів).",
+  "description_es": "EuroMillions es una gran lotería paneuropea. Para ganar el jackpot, debes acertar cinco números del 1 al 50 y dos números Lucky Star del 1 al 12. Probabilidad de jackpot por boleto: 1 entre 139.838.160. Mayor jackpot: 250.000.000 € (el tope actual; alcanzado y ganado varias veces).",
+  "quantity": { "value": 139838160, "unit": "unit" }
+}
 
 
 ]

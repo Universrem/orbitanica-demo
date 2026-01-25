@@ -542,6 +542,38 @@
     "en": "Geography",
     "es": "Geografía"
   },
+    "panel_title_explosions": {
+    "ua": "Вибухи",
+    "en": "Explosions",
+    "es": "Explosiones"
+  },
+  "panel_title_explosions_main": {
+    "ua": "Потужність, зони",
+    "en": "Power, zones",
+    "es": "Potencia, zonas"
+  },
+
+  "panel_title_sounds": {
+    "ua": "Звуки",
+    "en": "Sounds",
+    "es": "Sonidos"
+  },
+  "panel_title_sounds_main": {
+    "ua": "Гучність",
+    "en": "Loudness",
+    "es": "Volumen"
+  },
+
+  "panel_title_earthquakes": {
+    "ua": "Землетруси",
+    "en": "Earthquakes",
+    "es": "Terremotos"
+  },
+  "panel_title_earthquakes_main": {
+    "ua": "Магнітуда, зони",
+    "en": "Magnitude, zones",
+    "es": "Magnitud, zonas"
+  },
   "panel_title_other": {
     "ua": "Інше",
     "en": "Other",
@@ -1270,7 +1302,40 @@
   "unit.nmi":     { "ua": "мор. миля",          "en": "nautical mile",           "es": "milla náutica" },
 
   "unit.year":    { "ua": "рік",                "en": "year",                    "es": "año" },
-"o1_example_area_1_m2": {
+"unit.tnt": { "ua": "кг тротилу", "en": "kg TNT", "es": "kg de TNT" },
+"unit.barrel": { "ua": "барель", "en": "barrel", "es": "barril" },
+"unit.kgt": {
+  "ua": "кг (тротил)",
+  "en": "kg (TNT)",
+  "es": "kg (TNT)"
+},
+"unit.tt": {
+  "ua": "т (тротил)",
+  "en": "t (TNT)",
+  "es": "t (TNT)"
+},
+"unit.ktt": {
+  "ua": "кт (кілотон тротилу)",
+  "en": "kt (kiloton TNT)",
+  "es": "kt (kilotón de TNT)"
+},
+"unit.Mtt": {
+  "ua": "Мт (мегатон тротилу)",
+  "en": "Mt (megaton TNT)",
+  "es": "Mt (megatón de TNT)"
+},
+"unit.dB": {
+  "ua": "дБ (децибел)",
+  "en": "dB (decibel)",
+  "es": "dB (decibelio)"
+},
+"unit.Mw": {
+  "ua": "Mw (магнітуда моменту)",
+  "en": "Mw (moment magnitude)",
+  "es": "Mw (magnitud de momento)"
+},
+
+  "o1_example_area_1_m2": {
   "ua": "1 квадратний метр - 1,1284 м",
   "en": "1 square meter - 1.1284 m",
   "es": "1 metro cuadrado - 1.1284 m"
@@ -1279,6 +1344,11 @@
   "ua": "1 барель, висота шару 54 см",
   "en": "1 barrel, layer height 54 cm",
   "es": "1 barril, altura de capa 54 cm"
+},
+"o1_example_tnt_1kg": {
+  "ua": "1 кг тротилу, ударна хвиля, діаметр 8 м",
+  "en": "1 kg TNT, blast wave, 8 m diameter",
+  "es": "1 kg de TNT, onda de choque, diámetro 8 m"
 },
 "o1_example_one_step": {
   "ua": "Середня довжина кроку дорослої людини - 0,70 м",

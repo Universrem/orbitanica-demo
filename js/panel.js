@@ -408,6 +408,105 @@ export function initLeftPanel(t) {
         }
       ]
     },
+    
+    // ===== Вибухи =====
+    { type: 'note', i18nKey: 'panel_title_explosions', text: t('panel_title_explosions'), className: 'panel-section-title panel-family panel-family-explosions' },
+
+    {
+      id: 'explosions',
+      titleKey: 'panel_title_explosions_main', // Потужність, зони
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',   text: t('note_select_first_object') },
+            { type: 'select', id: 'explCategoryObject1', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'explObject1',         placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'explCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',  text: t('note_select_second_object') },
+            { type: 'select', id: 'explCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'explObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',              text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    },
+
+    // ===== Звуки =====
+    { type: 'note', i18nKey: 'panel_title_sounds', text: t('panel_title_sounds'), className: 'panel-section-title panel-family panel-family-sounds' },
+
+    {
+      id: 'sounds',
+      titleKey: 'panel_title_sounds_main', // Гучність
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',    text: t('note_select_first_object') },
+            { type: 'select', id: 'soundCategoryObject1', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'soundObject1',         placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'soundCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',               text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',   text: t('note_select_second_object') },
+            { type: 'select', id: 'soundCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'soundObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',               text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    },
+
+    // ===== Землетруси =====
+    { type: 'note', i18nKey: 'panel_title_earthquakes', text: t('panel_title_earthquakes'), className: 'panel-section-title panel-family panel-family-earthquakes' },
+
+    {
+      id: 'earthquakes',
+      titleKey: 'panel_title_earthquakes_main', // Магнітуда, зони
+      fields: [
+        {
+          type: 'group', className: 'sector-block object1-group', children: [
+            { type: 'text',   id: 'selectFirstObject',    text: t('note_select_first_object') },
+            { type: 'select', id: 'quakeCategoryObject1', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'quakeObject1',         placeholder: t('panel_placeholder_object1') },
+            { type: 'input',  id: 'quakeCircleObject1',   placeholder: t('panel_placeholder_input_diameter') },
+            { type: 'button', id: 'create',               text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block object2-group', children: [
+            { type: 'text',   id: 'selectSecondObject',   text: t('note_select_second_object') },
+            { type: 'select', id: 'quakeCategoryObject2', placeholder: t('panel_placeholder_category') },
+            { type: 'select', id: 'quakeObject2',         placeholder: t('panel_placeholder_object2') },
+            { type: 'button', id: 'create',               text: t('panel_button_create') },
+          ]
+        },
+        {
+          type: 'group', className: 'sector-block', children: [
+            { type: 'button', id: 'calculate', text: t('panel_button_calculate') },
+            { type: 'button', id: 'reset',     text: t('panel_button_reset') }
+          ]
+        }
+      ]
+    },
 
     // ===== Математика =====
     { type: 'note', i18nKey: 'panel_title_math', text: t('panel_title_math'), className: 'panel-section-title panel-family panel-family-math' },
@@ -651,4 +750,8 @@ export function initLeftPanel(t) {
   getMode('geo_area')?.initBlock?.();
   getMode('geo_population')?.initBlock?.();
   getMode('geo_objects')?.initBlock?.();
+  getMode('explosions')?.initBlock?.();
+  getMode('sounds')?.initBlock?.();
+  getMode('earthquakes')?.initBlock?.();
+
 }

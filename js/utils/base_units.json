@@ -80,7 +80,6 @@
       "pyeong": 3.305785,
       "mu": 666.6666667,
       "barrel": 1
-
     }
   },
   "population": {
@@ -122,5 +121,28 @@
     "base": "year", 
     "units": { 
       "year": 1 } 
+  },
+  "explosions": {
+    "base": "tnt",
+    "units": {
+      "kgt": 1,
+      "tt": 1000,
+      "ktt": 1000000,
+      "Mtt": 1000000000
+    }
+  },
+
+  "sounds": {
+    "base": "dB",
+    "units": {
+      "dB": 1
+    }
+  },
+
+  "earthquakes": {
+    "base": "Mw",
+    "units": {
+      "Mw": 1
+    }
   }
 }
